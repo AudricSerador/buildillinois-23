@@ -1,0 +1,60 @@
+{
+    "diningHalls": [
+        {
+            "hallName": "Ikenberry Dining Center (Ike)",
+            "onClick": "javascript:javascript:NetNutrition.UI.unitsSelectUnit(1);",
+            "diningFacilities": [
+                {
+                    "facilityName": "Baked Expectations",
+                    "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(1);",
+                    "mealDates": [
+                        {
+                            "date": "Friday, October 27, 2023",
+                            "breakfast": [],
+                            "lunch": [],
+                            "dinner": [],
+                            "lightLunch": []
+                        },
+                        {
+                            "date": "Saturday, October 28, 2023",
+                            "breakfast": [],
+                            "lunch": [],
+                            "dinner": [],
+                            "lightLunch": []
+                        }
+                    ]
+                },
+                {
+                    "facilityName": "Don's Chophouse",
+                    "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(2);",
+                    "mealDates": [
+                        {
+                            "date": "Friday, October 27, 2023",
+                            "breakfast": [],
+                            "lunch": [
+                                {
+                                    "foodName": "Halal Herb Grilled Chicken Breast",
+                                    "foodType": "Entree",
+                                    "servingSize": "Piece (108g)",
+                                    "nutritionFacts": {
+                                        "Calories": "130",
+                                        "totalFat": "6g",
+                                        "cholesterol": "60mg",
+                                        "sodium": "540mg",
+                                        "potassium": "7mg",
+                                        "totalCarbohydrates": "0g",
+                                        "fiber": "0g",
+                                        "sugars": "0g",
+                                        "protein": "21g"
+                                    }
+                                }
+                            ],
+                            "dinner": [],
+                            "lightLunch": []
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

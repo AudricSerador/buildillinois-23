@@ -1,0 +1,24 @@
+{
+    "proteins": [
+        {
+            "foodName": "Halal Herb Grilled Chicken Breast",
+            "diningHall": "Ikenberry Dining Center (IKE)",
+            "diningFacility": "Don's Chophouse",
+            "mealType": "Lunch",
+            "foodType": "Entree",
+            "dateServed": "Friday, October 27, 2023",
+            "nutritionFacts": {
+                "Calories": "130",
+                "totalFat": "6g",
+                "cholesterol": "60mg",
+                "sodium": "540mg",
+                "potassium": "7mg",
+                "totalCarbohydrates": "0g",
+                "fiber": "0g",
+                "sugars": "0g",
+                "protein": "21g"
+            }
+        }
+    ],
+    "sugars": []
+}
