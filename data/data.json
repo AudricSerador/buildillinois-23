@@ -1,0 +1,1179 @@
+{
+    "diningHalls": [
+       {
+          "hallName": "Ikenberry Dining Center (Ike)",
+          "onClick": "javascript:NetNutrition.UI.sideBarSelectUnit(1);",
+          "diningFacilities": [
+             {
+                "facilityName": "Baked Expectations",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(2);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Don's Chophouse",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(3);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Euclid Street Deli",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(4);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Gregory Drive Diner",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(5);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Penne Lane",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(6);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Prairie Fire",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(7);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Soytainly",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(8);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Inclusive Solutions Kitchen at Ikenberry",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(9);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Build Your Own",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(10);",
+                "mealDates": []
+             }
+          ]
+       },
+       {
+          "hallName": "Illinois Street Dining Center (ISR)",
+          "onClick": "javascript:NetNutrition.UI.sideBarSelectUnit(11);",
+          "diningFacilities": [
+             {
+                "facilityName": "Fusion 48",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(12);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Inclusive Solutions Kitchen at ISR",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(13);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Grains & Greens",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(14);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Grillworks",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(15);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Latitude",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(16);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Saporito Pasta",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(17);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Saporito Pizza",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(18);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Rise & Dine",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(19);",
+                "mealDates": [
+                   {
+                      "date": "Sunday, November 5, 2023",
+                      "breakfast": [],
+                      "lunch": [
+                         {
+                            "foodName": "Caesar Salad",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109763312);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: 1 Cup (51g)",
+                               "calories": "120",
+                               "caloriesFat": "81",
+                               "totalFat": "9",
+                               "saturatedFat": "2",
+                               "transFat": " NA",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "10",
+                               "sodium": "340",
+                               "potassium": "53",
+                               "totalCarbohydrates": "6",
+                               "fiber": "0",
+                               "sugars": "1",
+                               "protein": "3"
+                            }
+                         },
+                         {
+                            "foodName": "Thai Tofu Pizza",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109763345);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Slice (115g)",
+                               "calories": "230",
+                               "caloriesFat": "90",
+                               "totalFat": "10",
+                               "saturatedFat": "3",
+                               "transFat": " NA",
+                               "polyFat": "1",
+                               "monoFat": " NA",
+                               "cholesterol": "5",
+                               "sodium": "440",
+                               "potassium": "54",
+                               "totalCarbohydrates": "28",
+                               "fiber": "2",
+                               "sugars": "4",
+                               "protein": "9"
+                            }
+                         },
+                         {
+                            "foodName": "Pepperoni Pizza",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109763321);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: 1/12 Slice (110g)",
+                               "calories": "290",
+                               "caloriesFat": "135",
+                               "totalFat": "15",
+                               "saturatedFat": "7",
+                               "transFat": "0",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "30",
+                               "sodium": "880",
+                               "potassium": "65",
+                               "totalCarbohydrates": "26",
+                               "fiber": "1",
+                               "sugars": "3",
+                               "protein": "14"
+                            }
+                         },
+                         {
+                            "foodName": "Three Cheese Pizza",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109763307);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Slice (96g)",
+                               "calories": "220",
+                               "caloriesFat": "81",
+                               "totalFat": "9",
+                               "saturatedFat": "5",
+                               "transFat": " NA",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "20",
+                               "sodium": "580",
+                               "potassium": "67",
+                               "totalCarbohydrates": "27",
+                               "fiber": "1",
+                               "sugars": "3",
+                               "protein": "11"
+                            }
+                         }
+                      ],
+                      "dinner": [
+                         {
+                            "foodName": "Caesar Salad",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109763313);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: 1 Cup (51g)",
+                               "calories": "120",
+                               "caloriesFat": "81",
+                               "totalFat": "9",
+                               "saturatedFat": "2",
+                               "transFat": " NA",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "10",
+                               "sodium": "340",
+                               "potassium": "53",
+                               "totalCarbohydrates": "6",
+                               "fiber": "0",
+                               "sugars": "1",
+                               "protein": "3"
+                            }
+                         },
+                         {
+                            "foodName": "Thai Tofu Pizza",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109763344);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Slice (115g)",
+                               "calories": "230",
+                               "caloriesFat": "90",
+                               "totalFat": "10",
+                               "saturatedFat": "3",
+                               "transFat": " NA",
+                               "polyFat": "1",
+                               "monoFat": " NA",
+                               "cholesterol": "5",
+                               "sodium": "440",
+                               "potassium": "54",
+                               "totalCarbohydrates": "28",
+                               "fiber": "2",
+                               "sugars": "4",
+                               "protein": "9"
+                            }
+                         },
+                         {
+                            "foodName": "Pepperoni Pizza",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109763322);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: 1/12 Slice (110g)",
+                               "calories": "290",
+                               "caloriesFat": "135",
+                               "totalFat": "15",
+                               "saturatedFat": "7",
+                               "transFat": "0",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "30",
+                               "sodium": "880",
+                               "potassium": "65",
+                               "totalCarbohydrates": "26",
+                               "fiber": "1",
+                               "sugars": "3",
+                               "protein": "14"
+                            }
+                         },
+                         {
+                            "foodName": "Three Cheese Pizza",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109763306);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Slice (96g)",
+                               "calories": "220",
+                               "caloriesFat": "81",
+                               "totalFat": "9",
+                               "saturatedFat": "5",
+                               "transFat": " NA",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "20",
+                               "sodium": "580",
+                               "potassium": "67",
+                               "totalCarbohydrates": "27",
+                               "fiber": "1",
+                               "sugars": "3",
+                               "protein": "11"
+                            }
+                         },
+                         {
+                            "foodName": "Cheese Manicotti with Marinara Sauce",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109763309);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: 2 Each (291g)",
+                               "calories": "340",
+                               "caloriesFat": "72",
+                               "totalFat": "8",
+                               "saturatedFat": "3",
+                               "transFat": "0",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "70",
+                               "sodium": "1000",
+                               "potassium": " NA",
+                               "totalCarbohydrates": "56",
+                               "fiber": "6",
+                               "sugars": "10",
+                               "protein": "13"
+                            }
+                         }
+                      ],
+                      "lightLunch": []
+                   }
+                ]
+             },
+             {
+                "facilityName": "Cafe a la Crumb",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(20);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Build Your Own",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(21);",
+                "mealDates": []
+             }
+          ]
+       },
+       {
+          "hallName": "Pennsylvania Avenue Dining Hall (PAR)",
+          "onClick": "javascript:NetNutrition.UI.sideBarSelectUnit(22);",
+          "diningFacilities": [
+             {
+                "facilityName": "Abbondante Grill",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(23);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Abbondante Pizza & Pasta",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(24);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Arugula's Salad Bar",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(25);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "La Avenida",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(26);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Provolone Soup, Sandwich & Dessert Station",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(27);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Build Your Own",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(28);",
+                "mealDates": []
+             }
+          ]
+       },
+       {
+          "hallName": "Lincoln Avenue Dining Hall (LAR)",
+          "onClick": "javascript:NetNutrition.UI.sideBarSelectUnit(29);",
+          "diningFacilities": [
+             {
+                "facilityName": "LAR Daily Menu",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(30);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "Build Your Own",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(31);",
+                "mealDates": []
+             }
+          ]
+       },
+       {
+          "hallName": "Field of Greens",
+          "onClick": "javascript:NetNutrition.UI.sideBarSelectUnit(32);",
+          "diningFacilities": [
+             {
+                "facilityName": "None",
+                "onClick": "None",
+                "mealDates": []
+             }
+          ]
+       },
+       {
+          "hallName": "Kosher Kitchen",
+          "onClick": "javascript:NetNutrition.UI.sideBarSelectUnit(33);",
+          "diningFacilities": [
+             {
+                "facilityName": "None",
+                "onClick": "None",
+                "mealDates": []
+             }
+          ]
+       },
+       {
+          "hallName": "TerraByte",
+          "onClick": "javascript:NetNutrition.UI.sideBarSelectUnit(34);",
+          "diningFacilities": [
+             {
+                "facilityName": "None",
+                "onClick": "None",
+                "mealDates": []
+             }
+          ]
+       },
+       {
+          "hallName": "InfiniTEA",
+          "onClick": "javascript:NetNutrition.UI.sideBarSelectUnit(35);",
+          "diningFacilities": [
+             {
+                "facilityName": "None",
+                "onClick": "None",
+                "mealDates": []
+             }
+          ]
+       },
+       {
+          "hallName": "Urbana South Market",
+          "onClick": "javascript:NetNutrition.UI.sideBarSelectUnit(36);",
+          "diningFacilities": [
+             {
+                "facilityName": "None",
+                "onClick": "None",
+                "mealDates": []
+             }
+          ]
+       },
+       {
+          "hallName": "57 North",
+          "onClick": "javascript:NetNutrition.UI.sideBarSelectUnit(37);",
+          "diningFacilities": [
+             {
+                "facilityName": "None",
+                "onClick": "None",
+                "mealDates": []
+             }
+          ]
+       },
+       {
+          "hallName": "Caffeinator",
+          "onClick": "javascript:NetNutrition.UI.sideBarSelectUnit(38);",
+          "diningFacilities": [
+             {
+                "facilityName": "None",
+                "onClick": "None",
+                "mealDates": [
+                   {
+                      "date": "Sunday, November 5, 2023",
+                      "breakfast": [],
+                      "lunch": [],
+                      "dinner": [],
+                      "lightLunch": [],
+                      "A la Carte--APP DISPLAY": [
+                         {
+                            "foodName": "Cheese Quesadilla",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247838);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Each (335g)",
+                               "calories": "43",
+                               "caloriesFat": "17",
+                               "totalFat": " NA",
+                               "saturatedFat": " NA",
+                               "transFat": " NA",
+                               "polyFat": "95",
+                               "monoFat": "1540",
+                               "cholesterol": " NA",
+                               "sodium": "60",
+                               "potassium": "4",
+                               "totalCarbohydrates": "8",
+                               "fiber": "22",
+                               "sugars": "0g",
+                               "protein": "0g"
+                            }
+                         },
+                         {
+                            "foodName": "7-inch Supreme Pizza",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247850);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Pizza (369g)",
+                               "calories": "690",
+                               "caloriesFat": "288",
+                               "totalFat": "32",
+                               "saturatedFat": "13",
+                               "transFat": " NA",
+                               "polyFat": "15",
+                               "monoFat": " NA",
+                               "cholesterol": "65",
+                               "sodium": "1810",
+                               "potassium": "498",
+                               "totalCarbohydrates": "73",
+                               "fiber": "4",
+                               "sugars": "12",
+                               "protein": "31"
+                            }
+                         },
+                         {
+                            "foodName": "Jumbo Soft Pretzel",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247812);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Each (162g)",
+                               "calories": "390",
+                               "caloriesFat": "23",
+                               "totalFat": "25",
+                               "saturatedFat": "0",
+                               "transFat": "0",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "0",
+                               "sodium": "340",
+                               "potassium": " NA",
+                               "totalCarbohydrates": "86",
+                               "fiber": "2",
+                               "sugars": "2",
+                               "protein": "14"
+                            }
+                         },
+                         {
+                            "foodName": "Boneless Chicken Wings",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247826);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: 6oz w/ Sauce (293g)",
+                               "calories": "560",
+                               "caloriesFat": "360",
+                               "totalFat": "40",
+                               "saturatedFat": "6",
+                               "transFat": "0",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "50",
+                               "sodium": "1550",
+                               "potassium": " NA",
+                               "totalCarbohydrates": "32",
+                               "fiber": "1",
+                               "sugars": "6",
+                               "protein": "22"
+                            }
+                         },
+                         {
+                            "foodName": "Fried Mozzarella Cheese Sticks",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247835);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: 4 Sticks (187g)",
+                               "calories": "410",
+                               "caloriesFat": "198",
+                               "totalFat": "22",
+                               "saturatedFat": "9",
+                               "transFat": "0",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "40",
+                               "sodium": "1230",
+                               "potassium": " NA",
+                               "totalCarbohydrates": "34",
+                               "fiber": "1",
+                               "sugars": " NA",
+                               "protein": "18"
+                            }
+                         },
+                         {
+                            "foodName": "Halal Grilled Chicken Sandwich",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247823);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (325g)",
+                               "calories": "390",
+                               "caloriesFat": "189",
+                               "totalFat": "21",
+                               "saturatedFat": "3",
+                               "transFat": " NA",
+                               "polyFat": "05",
+                               "monoFat": "15",
+                               "cholesterol": "65",
+                               "sodium": "470",
+                               "potassium": "154",
+                               "totalCarbohydrates": "28",
+                               "fiber": "2",
+                               "sugars": "6",
+                               "protein": "26"
+                            }
+                         },
+                         {
+                            "foodName": "Crinkle Fries",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247833);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: 1 Box (152g)",
+                               "calories": "18",
+                               "caloriesFat": "35",
+                               "totalFat": " NA",
+                               "saturatedFat": " NA",
+                               "transFat": " NA",
+                               "polyFat": " NA",
+                               "monoFat": "40",
+                               "cholesterol": " NA",
+                               "sodium": "35",
+                               "potassium": "3",
+                               "totalCarbohydrates": "2",
+                               "fiber": "3",
+                               "sugars": "0g",
+                               "protein": "0g"
+                            }
+                         },
+                         {
+                            "foodName": "Tater Tots",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247837);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: 1 Box (152g)",
+                               "calories": "23",
+                               "caloriesFat": "35",
+                               "totalFat": " NA",
+                               "saturatedFat": " NA",
+                               "transFat": " NA",
+                               "polyFat": " NA",
+                               "monoFat": "610",
+                               "cholesterol": " NA",
+                               "sodium": "32",
+                               "potassium": "4",
+                               "totalCarbohydrates": " NA",
+                               "fiber": "4",
+                               "sugars": "0g",
+                               "protein": "0g"
+                            }
+                         },
+                         {
+                            "foodName": "Cheese Sauce",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247849);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: 2 Ounce (58g)",
+                               "calories": "60",
+                               "caloriesFat": "41",
+                               "totalFat": "45",
+                               "saturatedFat": "25",
+                               "transFat": "0",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "0",
+                               "sodium": "510",
+                               "potassium": " NA",
+                               "totalCarbohydrates": "5",
+                               "fiber": "0",
+                               "sugars": "1",
+                               "protein": "0"
+                            }
+                         },
+                         {
+                            "foodName": "7-inch Veggie Lover's Pizza",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247851);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Pizza (340g)",
+                               "calories": "580",
+                               "caloriesFat": "198",
+                               "totalFat": "22",
+                               "saturatedFat": "9",
+                               "transFat": " NA",
+                               "polyFat": "15",
+                               "monoFat": " NA",
+                               "cholesterol": "40",
+                               "sodium": "1420",
+                               "potassium": "498",
+                               "totalCarbohydrates": "73",
+                               "fiber": "4",
+                               "sugars": "11",
+                               "protein": "26"
+                            }
+                         },
+                         {
+                            "foodName": "7-inch Cheese Pizza",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247825);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Pizza (255g)",
+                               "calories": "22",
+                               "caloriesFat": "9",
+                               "totalFat": " NA",
+                               "saturatedFat": "15",
+                               "transFat": " NA",
+                               "polyFat": "40",
+                               "monoFat": "1410",
+                               "cholesterol": "391",
+                               "sodium": "70",
+                               "potassium": "3",
+                               "totalCarbohydrates": "10",
+                               "fiber": "25",
+                               "sugars": "0g",
+                               "protein": "0g"
+                            }
+                         },
+                         {
+                            "foodName": "7-inch Pepperoni Pizza",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247846);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Pizza (313g)",
+                               "calories": "28",
+                               "caloriesFat": "12",
+                               "totalFat": " NA",
+                               "saturatedFat": "15",
+                               "transFat": " NA",
+                               "polyFat": "55",
+                               "monoFat": "1670",
+                               "cholesterol": "391",
+                               "sodium": "70",
+                               "potassium": "3",
+                               "totalCarbohydrates": "10",
+                               "fiber": "28",
+                               "sugars": "0g",
+                               "protein": "0g"
+                            }
+                         },
+                         {
+                            "foodName": "All-Beef Hot Dog",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247832);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Hot Dog (178g)",
+                               "calories": "500",
+                               "caloriesFat": "252",
+                               "totalFat": "28",
+                               "saturatedFat": "10",
+                               "transFat": "1",
+                               "polyFat": "3",
+                               "monoFat": "14",
+                               "cholesterol": "65",
+                               "sodium": "1250",
+                               "potassium": "135",
+                               "totalCarbohydrates": "43",
+                               "fiber": "1",
+                               "sugars": "6",
+                               "protein": "18"
+                            }
+                         },
+                         {
+                            "foodName": "Hamburger",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247829);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (269g)",
+                               "calories": "350",
+                               "caloriesFat": "171",
+                               "totalFat": "19",
+                               "saturatedFat": "45",
+                               "transFat": " NA",
+                               "polyFat": "05",
+                               "monoFat": "15",
+                               "cholesterol": "45",
+                               "sodium": "280",
+                               "potassium": "173",
+                               "totalCarbohydrates": "29",
+                               "fiber": "2",
+                               "sugars": "6",
+                               "protein": "18"
+                            }
+                         },
+                         {
+                            "foodName": "Cheeseburger",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247828);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (294g)",
+                               "calories": "490",
+                               "caloriesFat": "288",
+                               "totalFat": "32",
+                               "saturatedFat": "9",
+                               "transFat": " NA",
+                               "polyFat": "05",
+                               "monoFat": "15",
+                               "cholesterol": "70",
+                               "sodium": "620",
+                               "potassium": "53",
+                               "totalCarbohydrates": "30",
+                               "fiber": "2",
+                               "sugars": "7",
+                               "protein": "21"
+                            }
+                         },
+                         {
+                            "foodName": "Double Cheeseburger",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247830);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (352g)",
+                               "calories": "610",
+                               "caloriesFat": "333",
+                               "totalFat": "37",
+                               "saturatedFat": "15",
+                               "transFat": "1",
+                               "polyFat": "05",
+                               "monoFat": "15",
+                               "cholesterol": "125",
+                               "sodium": "850",
+                               "potassium": "173",
+                               "totalCarbohydrates": "31",
+                               "fiber": "2",
+                               "sugars": "8",
+                               "protein": "35"
+                            }
+                         },
+                         {
+                            "foodName": "Spicy Crispy Chicken Sandwich",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247839);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (276g)",
+                               "calories": "460",
+                               "caloriesFat": "234",
+                               "totalFat": "26",
+                               "saturatedFat": "7",
+                               "transFat": " NA",
+                               "polyFat": "05",
+                               "monoFat": "15",
+                               "cholesterol": "50",
+                               "sodium": "1160",
+                               "potassium": "54",
+                               "totalCarbohydrates": "40",
+                               "fiber": "1",
+                               "sugars": "5",
+                               "protein": "24"
+                            }
+                         },
+                         {
+                            "foodName": "Crispy Buffalo Chicken Sandwich",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247821);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (257g)",
+                               "calories": "430",
+                               "caloriesFat": "189",
+                               "totalFat": "21",
+                               "saturatedFat": "35",
+                               "transFat": " NA",
+                               "polyFat": "05",
+                               "monoFat": "15",
+                               "cholesterol": "45",
+                               "sodium": "1270",
+                               "potassium": "154",
+                               "totalCarbohydrates": "43",
+                               "fiber": "3",
+                               "sugars": "6",
+                               "protein": "24"
+                            }
+                         },
+                         {
+                            "foodName": "Black Bean Burger",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247827);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Each (343g)",
+                               "calories": "390",
+                               "caloriesFat": "135",
+                               "totalFat": "15",
+                               "saturatedFat": "25",
+                               "transFat": " NA",
+                               "polyFat": "05",
+                               "monoFat": "15",
+                               "cholesterol": "5",
+                               "sodium": "690",
+                               "potassium": "173",
+                               "totalCarbohydrates": "55",
+                               "fiber": "11",
+                               "sugars": "9",
+                               "protein": "21"
+                            }
+                         },
+                         {
+                            "foodName": "Made to Order Wrap Station",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247820);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Wrap (239g)",
+                               "calories": "160",
+                               "caloriesFat": "63",
+                               "totalFat": "7",
+                               "saturatedFat": "1",
+                               "transFat": " NA",
+                               "polyFat": "05",
+                               "monoFat": " NA",
+                               "cholesterol": "0",
+                               "sodium": "870",
+                               "potassium": "145",
+                               "totalCarbohydrates": "20",
+                               "fiber": "3",
+                               "sugars": "6",
+                               "protein": "4"
+                            }
+                         },
+                         {
+                            "foodName": "Double Hamburger",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247831);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (314g)",
+                               "calories": "470",
+                               "caloriesFat": "243",
+                               "totalFat": "27",
+                               "saturatedFat": "8",
+                               "transFat": "1",
+                               "polyFat": "05",
+                               "monoFat": "15",
+                               "cholesterol": "85",
+                               "sodium": "310",
+                               "potassium": "173",
+                               "totalCarbohydrates": "29",
+                               "fiber": "2",
+                               "sugars": "6",
+                               "protein": "29"
+                            }
+                         },
+                         {
+                            "foodName": "Sausage Egg & Cheese Croissant",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247842);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (185g)",
+                               "calories": "580",
+                               "caloriesFat": "315",
+                               "totalFat": "35",
+                               "saturatedFat": "17",
+                               "transFat": "05",
+                               "polyFat": "15",
+                               "monoFat": "6",
+                               "cholesterol": "185",
+                               "sodium": "1220",
+                               "potassium": "154",
+                               "totalCarbohydrates": "38",
+                               "fiber": "1",
+                               "sugars": "6",
+                               "protein": "20"
+                            }
+                         },
+                         {
+                            "foodName": "Grilled Cheese Sandwich",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247834);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (133g)",
+                               "calories": "430",
+                               "caloriesFat": "189",
+                               "totalFat": "21",
+                               "saturatedFat": "10",
+                               "transFat": " NA",
+                               "polyFat": "1",
+                               "monoFat": "1",
+                               "cholesterol": "55",
+                               "sodium": "1140",
+                               "potassium": "88",
+                               "totalCarbohydrates": "40",
+                               "fiber": "2",
+                               "sugars": "3",
+                               "protein": "14"
+                            }
+                         },
+                         {
+                            "foodName": "7-inch Sausage Pizzza",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247845);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Pizza (313g)",
+                               "calories": "26",
+                               "caloriesFat": "11",
+                               "totalFat": " NA",
+                               "saturatedFat": "15",
+                               "transFat": " NA",
+                               "polyFat": "50",
+                               "monoFat": "1560",
+                               "cholesterol": "391",
+                               "sodium": "71",
+                               "potassium": "3",
+                               "totalCarbohydrates": "11",
+                               "fiber": "27",
+                               "sugars": "0g",
+                               "protein": "0g"
+                            }
+                         },
+                         {
+                            "foodName": "Gourmet Grilled Cheese Sandwich",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247852);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (141g)",
+                               "calories": "570",
+                               "caloriesFat": "405",
+                               "totalFat": "45",
+                               "saturatedFat": "15",
+                               "transFat": " NA",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "75",
+                               "sodium": "950",
+                               "potassium": "43",
+                               "totalCarbohydrates": "21",
+                               "fiber": "1",
+                               "sugars": "1",
+                               "protein": "20"
+                            }
+                         },
+                         {
+                            "foodName": "Chicken Carnita Quesadilla",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247840);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Each (432g)",
+                               "calories": "830",
+                               "caloriesFat": "405",
+                               "totalFat": "45",
+                               "saturatedFat": "18",
+                               "transFat": "0",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "185",
+                               "sodium": "2080",
+                               "potassium": " NA",
+                               "totalCarbohydrates": "64",
+                               "fiber": "4",
+                               "sugars": "10",
+                               "protein": "41"
+                            }
+                         },
+                         {
+                            "foodName": "Egg & Cheese Bagel Sandwich",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247836);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (171g)",
+                               "calories": "440",
+                               "caloriesFat": "99",
+                               "totalFat": "11",
+                               "saturatedFat": "45",
+                               "transFat": "0",
+                               "polyFat": " NA",
+                               "monoFat": "1",
+                               "cholesterol": "115",
+                               "sodium": "960",
+                               "potassium": " NA",
+                               "totalCarbohydrates": "64",
+                               "fiber": "2",
+                               "sugars": "10",
+                               "protein": "17"
+                            }
+                         },
+                         {
+                            "foodName": "Bacon, Egg, Cheese Bagel Sandwich",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247841);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (182g)",
+                               "calories": "560",
+                               "caloriesFat": "180",
+                               "totalFat": "20",
+                               "saturatedFat": "8",
+                               "transFat": "0",
+                               "polyFat": " NA",
+                               "monoFat": "1",
+                               "cholesterol": "140",
+                               "sodium": "1450",
+                               "potassium": " NA",
+                               "totalCarbohydrates": "64",
+                               "fiber": "2",
+                               "sugars": "10",
+                               "protein": "25"
+                            }
+                         },
+                         {
+                            "foodName": "Sausage Egg & Cheese Bagel Sandwich",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247844);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (210g)",
+                               "calories": "600",
+                               "caloriesFat": "216",
+                               "totalFat": "24",
+                               "saturatedFat": "9",
+                               "transFat": " NA",
+                               "polyFat": "15",
+                               "monoFat": "7",
+                               "cholesterol": "150",
+                               "sodium": "1510",
+                               "potassium": "154",
+                               "totalCarbohydrates": "65",
+                               "fiber": "2",
+                               "sugars": "10",
+                               "protein": "25"
+                            }
+                         },
+                         {
+                            "foodName": "Bacon Egg & Cheese Croissant",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247843);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (150g)",
+                               "calories": "500",
+                               "caloriesFat": "252",
+                               "totalFat": "28",
+                               "saturatedFat": "14",
+                               "transFat": "05",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "165",
+                               "sodium": "990",
+                               "potassium": " NA",
+                               "totalCarbohydrates": "38",
+                               "fiber": "1",
+                               "sugars": "6",
+                               "protein": "17"
+                            }
+                         },
+                         {
+                            "foodName": "Egg & Cheese Croissant",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247848);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Each (142g)",
+                               "calories": "420",
+                               "caloriesFat": "198",
+                               "totalFat": "22",
+                               "saturatedFat": "12",
+                               "transFat": "05",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "150",
+                               "sodium": "670",
+                               "potassium": " NA",
+                               "totalCarbohydrates": "38",
+                               "fiber": "1",
+                               "sugars": "6",
+                               "protein": "12"
+                            }
+                         },
+                         {
+                            "foodName": "Egg & Cheese on English Muffin",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247822);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (131g)",
+                               "calories": "300",
+                               "caloriesFat": "99",
+                               "totalFat": "11",
+                               "saturatedFat": "45",
+                               "transFat": "0",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "115",
+                               "sodium": "770",
+                               "potassium": " NA",
+                               "totalCarbohydrates": "33",
+                               "fiber": "2",
+                               "sugars": "2",
+                               "protein": "12"
+                            }
+                         },
+                         {
+                            "foodName": "Bacon Egg & Cheese English Muffin",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247824);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (142g)",
+                               "calories": "420",
+                               "caloriesFat": "180",
+                               "totalFat": "20",
+                               "saturatedFat": "8",
+                               "transFat": "0",
+                               "polyFat": " NA",
+                               "monoFat": " NA",
+                               "cholesterol": "140",
+                               "sodium": "1260",
+                               "potassium": " NA",
+                               "totalCarbohydrates": "33",
+                               "fiber": "2",
+                               "sugars": "2",
+                               "protein": "20"
+                            }
+                         },
+                         {
+                            "foodName": "Sausage Egg & Cheese Muffin",
+                            "onClick": "javascript:NetNutrition.UI.getItemNutritionLabel(109247847);",
+                            "nutritionFacts": {
+                               "servingSize": "Serving Size: Sandwich (174g)",
+                               "calories": "450",
+                               "caloriesFat": "216",
+                               "totalFat": "24",
+                               "saturatedFat": "9",
+                               "transFat": " NA",
+                               "polyFat": "15",
+                               "monoFat": "6",
+                               "cholesterol": "150",
+                               "sodium": "1320",
+                               "potassium": "154",
+                               "totalCarbohydrates": "34",
+                               "fiber": "2",
+                               "sugars": "2",
+                               "protein": "21"
+                            }
+                         }
+                      ]
+                   }
+                ]
+             }
+          ]
+       },
+       {
+          "hallName": "Everybody Eats",
+          "onClick": "javascript:NetNutrition.UI.sideBarSelectUnit(39);",
+          "diningFacilities": [
+             {
+                "facilityName": "Ike Everybody Eats Menu",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(40);",
+                "mealDates": []
+             },
+             {
+                "facilityName": "ISR Everybody Eats Menu",
+                "onClick": "javascript:NetNutrition.UI.childUnitsSelectUnit(41);",
+                "mealDates": []
+             }
+          ]
+       }
+    ]
+ }

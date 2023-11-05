@@ -2,11 +2,11 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import time
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
+import json
 
-WAIT_TIME_SECONDS = 1
+WAIT_TIME_SECONDS = 2
 
 class DiningWebScraper:
     def __init__(self) -> None:
@@ -18,6 +18,11 @@ class DiningWebScraper:
     def __del__(self):
         self.driver.quit()
     
+    def readToJSON(self):
+        with open('data/data.json', 'w') as json_file:
+            json.dump(self.data, json_file, indent=3)
+        print("Dining data successfully convertered to JSON.")
+    
     def resetDiningPage(self):
         home = self.driver.find_element(By.XPATH, "//a[@href='']")
         home.click()
@@ -25,6 +30,7 @@ class DiningWebScraper:
     def returnToPreviousPage(self):
         prev = self.driver.find_element()
         prev.click()
+        
         
     # Must be in page context of foodData (foodType dropdowns expanded on page)
     def getNutritionData(self, on_click):
