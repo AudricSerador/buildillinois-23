@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_PRISMA_URL") // uses connection pooling
+  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection
+}
+
+model FoodInfo {
+  id               String      @default(cuid()) @id
+  name             String
+  diningHall       String
+  diningFacility   String
+  mealType         String
+  dateServed       String      // Assuming date is stored as a string for simplicity
+  servingSize      String
+  ingredients      String
+  allergens        String
+  calories         Int
+  caloriesFat      Int
+  totalFat         Int
+  saturatedFat     Int
+  transFat         Int
+  polyFat          Int
+  monoFat          Int
+  cholesterol      Int
+  sodium           Int
+  potassium        Int
+  totalCarbohydrates Int
+  fiber            Int
+  sugars           Int
+  protein          Int
+}
+
+// You might want to add more specific validations or relationships based on your use case.
