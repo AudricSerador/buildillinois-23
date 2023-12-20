@@ -6,7 +6,7 @@ import prisma from '../../lib/prisma';
 
 export const getStaticProps: GetStaticProps = async () => {
     const food = await prisma.foodInfo.findMany({
-        where: { dateServed: "Thursday, December 14, 2023" },
+        where: { dateServed: "Tuesday, December 12, 2023" },
     });
     return {
         props: { food },

@@ -7,7 +7,7 @@ import json
 driver = webdriver.Chrome()
 driver.get('https://eatsmart.housing.illinois.edu/NetNutrition/46')
 food_data = []
-DATE_TO_SCRAPE = 'Thursday, December 14, 2023' # THIS SPECIFIC FORMAT
+DATE_TO_SCRAPE = 'Tuesday, December 12, 2023' # THIS SPECIFIC FORMAT
 
 def back_to_food_list():
     dropdown = WebDriverWait(driver, 10).until(
@@ -35,20 +35,20 @@ def scrape_nutrition_facts(food_id):
                 "servingSize": "N/A",
                 "ingredients": "N/A",
                 "allergens": "N/A",
-                "calories": "0",
-                "caloriesFat": "0",
-                "totalFat": "0g",
-                "saturatedFat": "0g",
-                "transFat": "0g",
-                "polyFat": "0g",
-                "monoFat": "0g",
-                "cholesterol": "0mg",
-                "sodium": "0mg",
-                "potassium": "0mg",
-                "totalCarbohydrates": "0g",
-                "fiber": "0g",
-                "sugars": "0g",
-                "protein": "0g"
+                "calories": 0,
+                "caloriesFat": 0,
+                "totalFat": 0,
+                "saturatedFat": 0,
+                "transFat": 0,
+                "polyFat": 0,
+                "monoFat": 0,
+                "cholesterol": 0,
+                "sodium": 0,
+                "potassium": 0,
+                "totalCarbohydrates": 0,
+                "fiber": 0,
+                "sugars": 0,
+                "protein": 0
             }
     
     driver.execute_script(f'javascript:NetNutrition.UI.getItemNutritionLabel({food_id});')
@@ -67,7 +67,6 @@ def scrape_nutrition_facts(food_id):
         data['allergens'] = "N/A"
     
     nutrition_data = nutrition_modal.find_elements(By.XPATH, './/span[@class="cbo_nn_SecondaryNutrient" or @class="cbo_nn_LabelPrimaryDetailIncomplete"]')
-    # Define the order of keys to match the order of nutrition_data
     keys = [
         "calories", "caloriesFat", "totalFat", "saturatedFat", "transFat",
         "polyFat", "monoFat", "cholesterol", "sodium", "potassium",
@@ -75,14 +74,17 @@ def scrape_nutrition_facts(food_id):
     ]
     for key, nutrition in zip(keys, nutrition_data):
         text = nutrition.text
-        if 'mg' in text or 'g' in text:
+        if text.strip().isdigit():
+            data[key] = int(text)
+        elif 'mg' in text or 'g' in text:
             value = ''.join(filter(str.isdigit, text))
-            data[key] = value
+            data[key] = int(value) if value else 0
         else:
-            data[key] = text
+            data[key] = 0
     driver.execute_script('javascript:NetNutrition.UI.closeNutritionDetailPanel(true);')
 
     return data
+
 
 def get_dining_hall_name(facility_name):
     if facility_name in ["Baked Expectations", "Don's Chophouse", "Euclid Street Deli", "Gregory Drive Diner", "Penne Lane", "Prairie Fire", "Soytainly", "Inclusive Solutions Kitchen at Ikenberry", "Build Your Own (Ike)"]:

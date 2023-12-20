@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,28 +10,26 @@ datasource db {
 
 model FoodInfo {
   id               String      @default(cuid()) @id
-  name             String
-  diningHall       String
-  diningFacility   String
-  mealType         String
-  dateServed       String      // Assuming date is stored as a string for simplicity
-  servingSize      String
-  ingredients      String
-  allergens        String
-  calories         Int
-  caloriesFat      Int
-  totalFat         Int
-  saturatedFat     Int
-  transFat         Int
-  polyFat          Int
-  monoFat          Int
-  cholesterol      Int
-  sodium           Int
-  potassium        Int
-  totalCarbohydrates Int
-  fiber            Int
-  sugars           Int
-  protein          Int
+  name             String      @default("")
+  diningHall       String      @default("")
+  diningFacility   String      @default("")
+  mealType         String      @default("")
+  dateServed       String      @default("")
+  servingSize      String      @default("")
+  ingredients      String      @default("")
+  allergens        String      @default("")
+  calories         Int         @default(0)
+  caloriesFat      Int         @default(0)
+  totalFat         Int         @default(0)
+  saturatedFat     Int         @default(0)
+  transFat         Int         @default(0)
+  polyFat          Int         @default(0)
+  monoFat          Int         @default(0)
+  cholesterol      Int         @default(0)
+  sodium           Int         @default(0)
+  potassium        Int         @default(0)
+  totalCarbohydrates Int       @default(0)
+  fiber            Int         @default(0)
+  sugars           Int         @default(0)
+  protein          Int         @default(0)
 }
-
-// You might want to add more specific validations or relationships based on your use case.
