@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar } from '../components/navbar';
 import type { InferGetStaticPropsType, GetStaticProps } from 'next'
+import FoodListDisplay from '../components/food_item_display';
 import prisma from '../../lib/prisma';
 
 
@@ -14,16 +15,29 @@ export const getStaticProps: GetStaticProps = async () => {
     };
 };
 
+
 export default function Home({ food }: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
+    const [displayedFood, setDisplayedFood] = useState(food.slice(0, 25));
+    const [loadMoreCount, setLoadMoreCount] = useState(1);
+
+    useEffect(() => {
+        setDisplayedFood(food.slice(0, 25 * loadMoreCount));
+    }, [loadMoreCount]);
+
     return (
         <div>
             <Navbar />
             <p className="text-4xl text-center">Serving Today</p>
             <ul>
-                {food.map((food_item: any) => (
-                <li key={food_item.id}>Food name: {food_item.name} Protein: {food_item.protein}</li>
+                {displayedFood.map((foodItem: any) => (
+                    <FoodListDisplay foodData={foodItem} />
                 ))}
             </ul>
+            {displayedFood.length < food.length && (
+                <button onClick={() => setLoadMoreCount(loadMoreCount + 1)}>
+                    Load More
+                </button>
+            )}
         </div>
     );
 }
