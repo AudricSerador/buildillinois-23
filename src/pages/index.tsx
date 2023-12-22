@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from '../components/navbar';
 import type { InferGetStaticPropsType, GetStaticProps } from 'next'
-import FoodListDisplay from '../components/food_item_display';
+import { FoodItemDisplay } from '../components/food_item_display';
 import prisma from '../../lib/prisma';
 
 
@@ -25,16 +25,19 @@ export default function Home({ food }: InferGetStaticPropsType<typeof getStaticP
     }, [loadMoreCount]);
 
     return (
-        <div>
-            <Navbar />
+        <div className="px-8">
             <p className="text-4xl text-center">Serving Today</p>
             <ul>
                 {displayedFood.map((foodItem: any) => (
-                    <FoodListDisplay foodData={foodItem} />
+                    <FoodItemDisplay foodItem={foodItem} />
                 ))}
-            </ul>
+            </ul>   
             {displayedFood.length < food.length && (
-                <button onClick={() => setLoadMoreCount(loadMoreCount + 1)}>
+                <button 
+                    onClick={() => setLoadMoreCount(loadMoreCount + 1)}
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
+                    >
                     Load More
                 </button>
             )}
