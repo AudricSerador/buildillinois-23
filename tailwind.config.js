@@ -8,7 +8,12 @@ module.exports = {
     extend: {
       fontFamily: {
         'custom': ['Source Sans Pro', ...defaultTheme.fontFamily.sans],
-        'custom-bold': ['Source Sans Pro Bold', ...defaultTheme.fontFamily.sans],
+        'custombold': ['Source Sans Pro Bold', ...defaultTheme.fontFamily.sans],
+        'customlight': ['Source Sans Pro Light', ...defaultTheme.fontFamily.sans],
+      },
+      colors: {
+        'uiucblue': '#13294B',
+        'uiucorange': '#FF5F05',
       },
     },
   },

@@ -17,14 +17,16 @@ export const getStaticProps: GetStaticProps = async () => {
 export default function Home({ food }: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
     const [displayedFood, setDisplayedFood] = useState(food.slice(0, 25));
     const [loadMoreCount, setLoadMoreCount] = useState(1);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         setDisplayedFood(food.slice(0, 25 * loadMoreCount));
+        setIsLoading(false);
     }, [loadMoreCount]);
 
     return (
         <div className="px-32 mt-4">
-            <p className="text-4xl font-custom-bold">Serving Today</p>
+            <p className="text-4xl font-custombold">Serving Today</p>
             <div style={{ paddingBottom: '1rem', borderBottom: '4px solid black', marginBottom: '1rem' }}></div>
             <ul>
                 {displayedFood.map((foodItem: any) => (
