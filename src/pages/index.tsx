@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Navbar } from '../components/navbar';
 import type { InferGetStaticPropsType, GetStaticProps } from 'next'
 import { FoodItemDisplay } from '../components/food_item_display';
 import prisma from '../../lib/prisma';
@@ -15,7 +14,6 @@ export const getStaticProps: GetStaticProps = async () => {
     };
 };
 
-
 export default function Home({ food }: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
     const [displayedFood, setDisplayedFood] = useState(food.slice(0, 25));
     const [loadMoreCount, setLoadMoreCount] = useState(1);
@@ -25,11 +23,12 @@ export default function Home({ food }: InferGetStaticPropsType<typeof getStaticP
     }, [loadMoreCount]);
 
     return (
-        <div className="px-8">
-            <p className="text-4xl text-center">Serving Today</p>
+        <div className="px-32 mt-4">
+            <p className="text-4xl font-custom-bold">Serving Today</p>
+            <div style={{ paddingBottom: '1rem', borderBottom: '4px solid black', marginBottom: '1rem' }}></div>
             <ul>
                 {displayedFood.map((foodItem: any) => (
-                    <FoodItemDisplay foodItem={foodItem} />
+                    <FoodItemDisplay key={foodItem.id} foodItem={foodItem} />
                 ))}
             </ul>   
             {displayedFood.length < food.length && (
