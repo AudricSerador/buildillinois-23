@@ -10,7 +10,7 @@ export const FoodItemDisplay: React.FC<FoodItemDisplayProps> = ({ foodItem }) =>
       <li className="border p-4 rounded-md mb-4 font-custom">
         <p className="font-bold text-lg">{foodItem.name}</p>
         <p className="text-sm text-gray-500">
-          <p className="font-bold">{foodItem.diningHall}</p>
+          <span className="font-bold">{foodItem.diningHall}</span><br />
           Serving Size: {foodItem.servingSize}
           <span className="text-gray-500"> | </span>
           {foodItem.calories} Cal
