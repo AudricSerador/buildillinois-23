@@ -7,7 +7,7 @@ import json
 driver = webdriver.Chrome()
 driver.get('https://eatsmart.housing.illinois.edu/NetNutrition/46')
 food_data = []
-DATE_TO_SCRAPE = 'Tuesday, December 12, 2023' # THIS SPECIFIC FORMAT
+DATE_TO_SCRAPE = 'Tuesday, December 13, 2023' # THIS SPECIFIC FORMAT
 
 def back_to_food_list():
     dropdown = WebDriverWait(driver, 10).until(
@@ -91,9 +91,9 @@ def get_dining_hall_name(facility_name):
         return 'Ikenberry Dining Center (Ike)'
     elif facility_name in ["Fusion 48", "Inclusive Solutions Kitchen at ISR", "Build Your Own (ISR)", "Grains & Greens", "Grillworks", "Latitude", "Saporito Pasta", "Saporito Pizza", "Rise & Dine", "Cafe a la Crumb"]:
         return 'Illinois Street Dining Center (ISR)'
-    elif facility_name in ["Abbondante Grill", "Abbondante Pizza & Pasta", "Arugula's Salad Bar", "La Avenida", "Provolone Soup, Sandwich & Dessert Station", "Build Your Own (PAR)"]:
+    elif facility_name in ["Sky Garden", "Abbondante Grill", "Abbondante Pizza & Pasta", "Arugula's Salad Bar", "La Avenida", "Provolone Soup, Sandwich & Dessert Station", "Build Your Own (PAR)"]:
         return 'Pennsylvania Avenue Dining Hall (PAR)'
-    elif facility_name == ["LAR Daily Menu", "Build Your Own (LAR)"]:
+    elif facility_name == ["LAR Daily Menu", "Build Your Own (LAR)", "Kosher Kitchen", "Field of Greens"]:
         return 'Lincoln Avenue Dining Hall (LAR)'
     else:
         return facility_name
