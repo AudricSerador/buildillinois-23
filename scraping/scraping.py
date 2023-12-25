@@ -28,10 +28,7 @@ def back_to_food_list():
 def scrape_nutrition_facts(food_id):
     data =  {   
                 "name": "N/A",
-                "diningHall": "N/A",
-                "diningFacility": "N/A",
-                "mealType": "N/A",
-                "dateServed": "N/A",
+                "mealDetails": [],
                 "servingSize": "N/A",
                 "ingredients": "N/A",
                 "allergens": "N/A",
@@ -106,10 +103,22 @@ def get_food_nutrition(title, info):
     for food_id in food_ids:
         parsed_id = food_id.split('_')[-1]
         data_to_add = scrape_nutrition_facts(parsed_id)
-        data_to_add['diningFacility'] = title
-        data_to_add['diningHall'] = get_dining_hall_name(title)
-        data_to_add['dateServed'], data_to_add['mealType'] = [part.strip() for part in info.split('-', 1)] if '-' in info else (None, None)
-        food_data.append(data_to_add)
+        
+        meal_details = {}
+        meal_details['diningFacility'] = title
+        meal_details['diningHall'] = get_dining_hall_name(title)
+        meal_details['dateServed'], meal_details['mealType'] = [part.strip() for part in info.split('-', 1)] if '-' in info else (None, None)
+        dupe = False
+        
+        for food in food_data:
+            if data_to_add['name'] == food['name']:
+                food['mealDetails'].append(meal_details)
+                dupe = True
+                break
+            
+        if not dupe:
+            data_to_add['mealDetails'].append(meal_details)
+            food_data.append(data_to_add)
 
 
 ### GET RESTAURANT DATA ###

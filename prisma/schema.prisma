@@ -11,10 +11,7 @@ datasource db {
 model FoodInfo {
   id               String      @default(cuid()) @id
   name             String      @default("")
-  diningHall       String      @default("")
-  diningFacility   String      @default("")
-  mealType         String      @default("")
-  dateServed       String      @default("")
+  mealEntries      mealDetails[] 
   servingSize      String      @default("")
   ingredients      String      @default("")
   allergens        String      @default("")
@@ -32,4 +29,13 @@ model FoodInfo {
   fiber            Int         @default(0)
   sugars           Int         @default(0)
   protein          Int         @default(0)
+}
+
+model mealDetails {
+  diningHall    String   @default("")
+  diningFacility String  @default("")
+  mealType      String   @default("")
+  dateServed    String   @default("")
+  food          Food     @relation(fields: [foodId], references: [id])
+  foodId        Int
 }
