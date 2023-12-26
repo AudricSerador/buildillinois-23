@@ -32,10 +32,11 @@ model FoodInfo {
 }
 
 model mealDetails {
-  diningHall    String   @default("")
-  diningFacility String  @default("")
-  mealType      String   @default("")
-  dateServed    String   @default("")
-  food          Food     @relation(fields: [foodId], references: [id])
-  foodId        Int
+  id             Int      @id @default(autoincrement())
+  diningHall     String   @default("")
+  diningFacility String   @default("")
+  mealType       String   @default("")
+  dateServed     String   @default("")
+  food           FoodInfo @relation(fields: [foodId], references: [id])
+  foodId         String
 }

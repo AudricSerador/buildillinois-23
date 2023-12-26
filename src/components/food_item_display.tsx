@@ -10,7 +10,12 @@ export const FoodItemDisplay: React.FC<FoodItemDisplayProps> = ({ foodItem }) =>
       <li className="border p-4 rounded-md mb-4 font-custom">
         <p className="font-bold text-lg">{foodItem.name}</p>
         <p className="text-sm text-gray-500">
-          <span className="font-bold">{foodItem.diningHall}</span><br />
+          <span className="font-bold text-md">
+            Serving on {foodItem.mealEntries.length} occasions:&nbsp;
+            {
+              [...new Set(foodItem.mealEntries.map((entry: any) => entry.mealType))].join(', ')
+            }
+          </span><br />          
           Serving Size: {foodItem.servingSize}
           <span className="text-gray-500"> | </span>
           {foodItem.calories} Cal

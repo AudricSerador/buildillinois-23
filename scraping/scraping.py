@@ -3,11 +3,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import json
+import time
+
+start_time = time.time()
 
 driver = webdriver.Chrome()
 driver.get('https://eatsmart.housing.illinois.edu/NetNutrition/46')
 food_data = []
-DATE_TO_SCRAPE = 'Tuesday, December 13, 2023' # THIS SPECIFIC FORMAT
+DATE_TO_SCRAPE = 'Tuesday, January 16, 2024' # THIS SPECIFIC FORMAT
 
 def back_to_food_list():
     dropdown = WebDriverWait(driver, 10).until(
@@ -28,7 +31,7 @@ def back_to_food_list():
 def scrape_nutrition_facts(food_id):
     data =  {   
                 "name": "N/A",
-                "mealDetails": [],
+                "mealEntries": [],
                 "servingSize": "N/A",
                 "ingredients": "N/A",
                 "allergens": "N/A",
@@ -108,16 +111,15 @@ def get_food_nutrition(title, info):
         meal_details['diningFacility'] = title
         meal_details['diningHall'] = get_dining_hall_name(title)
         meal_details['dateServed'], meal_details['mealType'] = [part.strip() for part in info.split('-', 1)] if '-' in info else (None, None)
-        dupe = False
         
-        for food in food_data:
-            if data_to_add['name'] == food['name']:
-                food['mealDetails'].append(meal_details)
-                dupe = True
-                break
-            
-        if not dupe:
-            data_to_add['mealDetails'].append(meal_details)
+        existing_food = next((food for food in food_data if food['name'] == data_to_add['name']), None)
+        
+        if existing_food:
+            duplicate_meal = next((meal for meal in existing_food['mealEntries'] if meal == meal_details), None)
+            if not duplicate_meal:
+                existing_food['mealEntries'].append(meal_details)
+        else:
+            data_to_add['mealEntries'].append(meal_details)
             food_data.append(data_to_add)
 
 
@@ -162,14 +164,17 @@ for title, data in restaurant_data.items():
         if date != DATE_TO_SCRAPE:
             continue
         
+        print(f"scraping food data for {title} - {info}")
         driver.execute_script(nav)
         get_food_nutrition(title, info)
 
 ### READ TO JSON ###
-with open('food_data_12_14_2023.json', 'w') as json_file:
-    json.dump(food_data, json_file)
+with open('food_data_1_16_2024.json', 'w') as json_file:
+    json.dump(food_data, json_file, indent=4)
         
-
+end_time = time.time()
+elapsed_time = end_time - start_time
+print(f"Web scraping complete!\nTime taken: {elapsed_time} seconds\nItems scraped: {len(food_data)}")
 
 
 

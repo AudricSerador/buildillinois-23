@@ -6,7 +6,11 @@ import prisma from '../../lib/prisma';
 
 export const getStaticProps: GetStaticProps = async () => {
     const food = await prisma.foodInfo.findMany({
-        where: { dateServed: "Tuesday, December 12, 2023" },
+        include: {
+            mealEntries: {
+                where: { dateServed: "Tuesday, January 16, 2024" },
+            },
+        },
     });
     return {
         props: { food },
@@ -17,11 +21,9 @@ export const getStaticProps: GetStaticProps = async () => {
 export default function Home({ food }: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
     const [displayedFood, setDisplayedFood] = useState(food.slice(0, 25));
     const [loadMoreCount, setLoadMoreCount] = useState(1);
-    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         setDisplayedFood(food.slice(0, 25 * loadMoreCount));
-        setIsLoading(false);
     }, [loadMoreCount]);
 
     return (
