@@ -1,49 +1,36 @@
-import React, { useState, useEffect } from 'react';
-import type { InferGetStaticPropsType, GetStaticProps } from 'next'
-import { FoodItemDisplay } from '../components/food_item_display';
-import prisma from '../../lib/prisma';
+import React from 'react';
+import  Link  from 'next/link';
 
-
-export const getStaticProps: GetStaticProps = async () => {
-    const food = await prisma.foodInfo.findMany({
-        include: {
-            mealEntries: {
-                where: { dateServed: "Tuesday, January 16, 2024" },
-            },
-        },
-    });
-    return {
-        props: { food },
-        revalidate: 10,
-    };
-};
-
-export default function Home({ food }: InferGetStaticPropsType<typeof getStaticProps>): JSX.Element {
-    const [displayedFood, setDisplayedFood] = useState(food.slice(0, 25));
-    const [loadMoreCount, setLoadMoreCount] = useState(1);
-
-    useEffect(() => {
-        setDisplayedFood(food.slice(0, 25 * loadMoreCount));
-    }, [loadMoreCount]);
-
+export default function Home(): JSX.Element {
     return (
-        <div className="px-32 mt-4">
-            <p className="text-4xl font-custombold">Serving Today</p>
-            <div style={{ paddingBottom: '1rem', borderBottom: '4px solid black', marginBottom: '1rem' }}></div>
-            <ul>
-                {displayedFood.map((foodItem: any) => (
-                    <FoodItemDisplay key={foodItem.id} foodItem={foodItem} />
-                ))}
-            </ul>   
-            {displayedFood.length < food.length && (
-                <button 
-                    onClick={() => setLoadMoreCount(loadMoreCount + 1)}
-                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                        style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}
-                    >
-                    Load More
-                </button>
-            )}
-        </div>
+        <>
+            <div className="flex justify-center items-start mt-20 text-center">
+                <p className="text-uiucblue font-custombold text-6xl">
+                    Find your favorite dining 
+                    <br />
+                    hall food in <i>seconds</i>.
+                </p>
+            </div>
+            <div className="mt-4 justify-center items-start text-center">
+                <div className="container mx-auto max-w-2xl">
+                    <p className="font-custom text-xl">
+                        Tired of going to dining halls and finding nothing you like? 
+                        Annoyed at having to check the menus of every dining hall to find something you want to eat? Find food that YOU want to eat with Dining Buddy. Our platform allows you to easily search for your favorite items across all UIUC dining halls and provides you with recommendations based on your dietary preferences.
+                    </p>
+                </div>
+            </div>
+            <div className="flex justify-center mt-8">
+                <a href="#">
+                    <button className="bg-uiucblue text-white font-custombold py-2 px-4 rounded mr-4">
+                        Sign Up
+                    </button>
+                </a>
+                <a href="/allfood">
+                    <button className="bg-uiucblue text-white font-custombold py-2 px-4 rounded">
+                        View All Food
+                    </button>
+                </a>
+            </div>
+        </>
     );
-}
+};
