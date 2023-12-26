@@ -27,7 +27,7 @@ export default function AllFood({ food, foodCount }: InferGetStaticPropsType<typ
 
     useEffect(() => {
         setDisplayedFood(food.slice(0, 25 * loadMoreCount));
-    }, [loadMoreCount]);
+    }, [loadMoreCount, food]);
 
     return (
         <div className="px-32 mt-4">

@@ -1,5 +1,5 @@
 import React from 'react';
-import  Link  from 'next/link';
+import Link from 'next/link';
 
 export default function Home(): JSX.Element {
     return (
@@ -20,16 +20,16 @@ export default function Home(): JSX.Element {
                 </div>
             </div>
             <div className="flex justify-center mt-8">
-                <a href="#">
+                <Link href="#">
                     <button className="bg-uiucblue text-white font-custombold py-2 px-4 rounded mr-4">
                         Sign Up
                     </button>
-                </a>
-                <a href="/allfood">
+                </Link>
+                <Link href="/allfood">
                     <button className="bg-uiucblue text-white font-custombold py-2 px-4 rounded">
                         View All Food
                     </button>
-                </a>
+                </Link>
             </div>
         </>
     );

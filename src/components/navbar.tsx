@@ -1,31 +1,32 @@
+import Link from 'next/link';
+
 export function Navbar(): JSX.Element {
     return (
       <nav className="flex justify-between bg-gray-900 text-white w-screen shadow-lg">
         <div className="px-5 xl:px-12 py-6 flex w-full items-center justify-center">
-          <a className="text-3xl font-bold font-heading text-uiucorange absolute left-5" href="/">
-            {/* <img class="h-9" src="logo.png" alt="logo"> */}
+          <Link href="/" className="text-3xl font-bold font-heading text-uiucorange absolute left-5">
             UIUC Dining Buddy
-          </a>
+          </Link>
           <ul className="hidden md:flex px-4 mx-auto font-semibold font-heading space-x-12">
             <li>
-              <a className="hover:text-uiucorange" href="/">
+              <Link href="/" className="hover:text-uiucorange">
                 Home
-              </a>
+              </Link>
             </li>
             <li>
-              <a className="hover:text-uiucorange" href="/allfood">
+              <Link href="/allfood" className="hover:text-uiucorange">
                 All Food
-              </a>
+              </Link>
             </li>
             <li>
-              <a className="hover:text-uiucorange" href="#">
+              <Link href="/" className="hover:text-uiucorange">
                 My Favorites
-              </a>
+              </Link>
             </li>
             <li>
-              <a className="hover:text-uiucorange" href="#">
+              <Link href="/" className="hover:text-uiucorange">
                 Dining Halls
-              </a>
+              </Link>
             </li>
           </ul>
         </div>
