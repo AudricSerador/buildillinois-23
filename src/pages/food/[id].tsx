@@ -29,7 +29,7 @@ export default function FoodItemPage({ foodItem }: { foodItem: any }) {
   }
 
   return (
-    <div className="px-32 mt-4 bg-white shadow-md rounded-lg p-6">
+    <div className="px-4 sm:px-8 md:px-16 lg:px-32 mt-4 bg-white shadow-md rounded-lg p-6">
       <h1 className="text-4xl font-custombold mb-4">{foodItem.name || 'Loading...'}</h1>
       <div className="grid grid-cols-2 gap-4">
         <div>
