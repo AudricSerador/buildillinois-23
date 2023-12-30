@@ -11,6 +11,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const sortOrder = context.query.sortOrder as string;
   const diningHall = context.query.diningHall as string;
   const mealType = context.query.mealType as string;
+  const searchTerm = context.query.searchTerm as string;
 
   const food = await prisma.foodInfo.findMany({
     skip: pageNumber * pageSize,
@@ -31,6 +32,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
               mealType: { in: mealType === 'A la Carte' ? ['A la Carte--APP DISPLAY', 'A la Carte--POS FEED'] : [mealType] },
             },
           },
+        } : {},
+        searchTerm && searchTerm !== 'undefined' ? {
+          name: { contains: searchTerm, mode: 'insensitive'},
         } : {},
       ],
     },
@@ -56,6 +60,9 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
             },
           },
         } : {},
+        searchTerm && searchTerm !== 'undefined' ? {
+          name: { contains: searchTerm, mode: 'insensitive'},
+        } : {},
       ],
     },
   });
@@ -77,13 +84,14 @@ export default function AllFood({ food, foodCount }: InferGetServerSidePropsType
   const [sortOrder, setSortOrder] = useState(router.query.sortOrder as string);
   const [diningHall, setDiningHall] = useState(router.query.diningHall as string);
   const [mealType, setMealType] = useState(router.query.mealType as string);
+  const [searchTerm, setSearchTerm] = useState(router.query.searchTerm as string);
 
   const handlePageChange = (page: number) => {
-    router.push(`/allfood?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${mealType}`);
+    router.push(`/allfood?page=${page}&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${mealType}&searchTerm=${searchTerm}`);
   };
   
   const handleFilterChange = () => {
-    router.push(`/allfood?page=1&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${mealType}`);
+    router.push(`/allfood?page=1&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${mealType}&searchTerm=${searchTerm}`);
   };
   
   const totalPages = Math.ceil(foodCount / pageSize);
@@ -94,6 +102,13 @@ export default function AllFood({ food, foodCount }: InferGetServerSidePropsType
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-32 mt-4">
       <div className="flex space-x-4">
+        <input 
+          type="text" 
+          className="block appearance-none w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" 
+          value={searchTerm} 
+          onChange={(e) => setSearchTerm(e.target.value)} 
+          placeholder="Search food..."
+        />
         <select className="block appearance-none w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500" value={sortField} onChange={(e) => setSortField(e.target.value)}>
           <option value="">Sort by</option>
           <option value="calories">Calories</option>
