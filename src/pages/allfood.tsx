@@ -11,24 +11,22 @@ export default function AllFood(): JSX.Element {
     : 1;
   const [sortField, setSortField] = useState(router.query.sortField as string);
   const [sortOrder, setSortOrder] = useState(router.query.sortOrder as string);
-  const [diningHall, setDiningHall] = useState(
-    router.query.diningHall as string
-  );
+  const [diningHall, setDiningHall] = useState(router.query.diningHall as string);
   const [mealType, setMealType] = useState(router.query.mealType as string);
-  const [searchTerm, setSearchTerm] = useState(
-    router.query.searchTerm as string
-  );
+  const [searchTerm, setSearchTerm] = useState(router.query.searchTerm as string);
+  const [dateServed, setDateServed] = useState(router.query.dateServed as string);
   const [isLoading, setIsLoading] = useState(false);
   const [food, setFood] = useState([]);
   const [foodCount, setFoodCount] = useState(0);
+  const [dates, setDates] = useState<string[]>([]);
   const [error, setError] = useState(null);
-
+  
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
         const res = await fetch(
-          `/api/get_data?page=${pageNumber}&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${mealType}&searchTerm=${searchTerm}`
+          `/api/get_data?page=${pageNumber}&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${mealType}&searchTerm=${searchTerm}&dateServed=${dateServed}`
         );
         if (!res.ok) {
           throw Error(res.statusText);
@@ -36,15 +34,16 @@ export default function AllFood(): JSX.Element {
         const data = await res.json();
         setFood(data.food);
         setFoodCount(data.foodCount);
+        setDates(data.dates);
         setIsLoading(false);
       } catch (error) {
         setError(error as null);
         setIsLoading(false);
       }
     };
-
+  
     fetchData();
-  }, [pageNumber, sortField, sortOrder, diningHall, mealType, searchTerm]);
+  }, [pageNumber, sortField, sortOrder, diningHall, mealType, searchTerm, dateServed]);
 
   const handlePageChange = (newPageNumber: number) => {
     router.push({
@@ -131,6 +130,18 @@ export default function AllFood(): JSX.Element {
           <option value="Ice Cream">Ice Cream</option>
           <option value="Beverages">Beverages</option>
           <option value="Condiments">Condiments</option>
+        </select>
+        <select
+          className="block appearance-none w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          value={dateServed}
+          onChange={(e) => setDateServed(e.target.value)}
+        >
+          <option value="">Filter by date served</option>
+          {dates.map((date, index) => (
+            <option key={index} value={date}>
+              {date}
+            </option>
+          ))}
         </select>
       </div>
 

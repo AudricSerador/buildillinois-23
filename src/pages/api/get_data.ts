@@ -14,6 +14,7 @@ export default async function handler(
   const diningHall = req.query.diningHall as string;
   const mealType = req.query.mealType as string;
   const searchTerm = req.query.searchTerm as string;
+  const dateServed = req.query.dateServed as string;
 
   const food = await prisma.foodInfo.findMany({
     skip: pageNumber * pageSize,
@@ -52,6 +53,15 @@ export default async function handler(
               name: { contains: searchTerm, mode: "insensitive" },
             }
           : {},
+        dateServed && dateServed !== "undefined"
+          ? {
+              mealEntries: {
+                some: {
+                  dateServed: { equals: dateServed },
+                },
+              },
+            }
+          : {},
       ],
     },
     include: {
@@ -88,13 +98,20 @@ export default async function handler(
               name: { contains: searchTerm, mode: "insensitive" },
             }
           : {},
+        dateServed && dateServed !== "undefined"
+          ? {
+              mealEntries: {
+                some: {
+                  dateServed: { equals: dateServed },
+                },
+              },
+            }
+          : {},
       ],
     },
   });
 
-  const diningHalls = await prisma.mealDetails.groupBy({
-    by: ["diningHall"],
-  });
+  const dates = (await prisma.$queryRaw<{ dateServed: string }[]>`SELECT DISTINCT "dateServed" FROM "mealDetails";`).map(date => date.dateServed);
 
-  res.status(200).json({ food, foodCount, diningHalls });
+  res.status(200).json({ food, foodCount, dates });
 }

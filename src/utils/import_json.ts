@@ -11,35 +11,23 @@ async function importJSONToDatabase(foodData: any[]) {
       });
 
       if (existingFood) {
-        await prisma.foodInfo.update({
-          where: { id: existingFood.id },
-          data: {
-            mealEntries: {
-              create: food.mealEntries.map((entry: any) => ({
-                diningHall: entry.diningHall,
-                diningFacility: entry.diningFacility,
-                mealType: entry.mealType,
-                dateServed: entry.dateServed,
-                foodId: existingFood.id,
-              })),
+        for (const entry of food.mealEntries) {
+          await prisma.mealDetails.create({
+            data: {
+              diningHall: entry.diningHall,
+              diningFacility: entry.diningFacility,
+              mealType: entry.mealType,
+              dateServed: entry.dateServed,
+              foodId: existingFood.id,
             },
-          },
-        });
+          });
+        }
         console.log(`Updated FoodInfo with ID: ${existingFood.id}`);
       } else {
-        await prisma.foodInfo.create({
+        const newFood = await prisma.foodInfo.create({
           data: {
             id: uuidv4(),
             name: food.name,
-            mealEntries: {
-              create: food.mealEntries.map((entry: any) => ({
-                diningHall: entry.diningHall,
-                diningFacility: entry.diningFacility,
-                mealType: entry.mealType,
-                dateServed: entry.dateServed,
-                foodId: food.id,
-              })),
-            },
             servingSize: food.servingSize,
             ingredients: food.ingredients,
             allergens: food.allergens,
@@ -59,13 +47,26 @@ async function importJSONToDatabase(foodData: any[]) {
             protein: food.protein,
           },
         });
-        console.log(`Created FoodInfo with ID: ${food.id}`);
+        console.log(`Created FoodInfo with ID: ${newFood.id}`);
+
+        for (const entry of food.mealEntries) {
+          await prisma.mealDetails.create({
+            data: {
+              diningHall: entry.diningHall,
+              diningFacility: entry.diningFacility,
+              mealType: entry.mealType,
+              dateServed: entry.dateServed,
+              foodId: newFood.id,
+            },
+          });
+        }
       }
     }
   } catch (error) {
     console.error("Error appending data to the database:", error);
     throw error;
   } finally {
+    console.log("Upload successful. Closing database connection...");
     await prisma.$disconnect();
   }
 }
