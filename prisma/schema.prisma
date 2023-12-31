@@ -10,7 +10,7 @@ datasource db {
 
 model FoodInfo {
   id               String      @default(cuid()) @id
-  name             String      @default("")
+  name             String      @default("") @unique
   mealEntries      mealDetails[] 
   servingSize      String      @default("")
   ingredients      String      @default("")

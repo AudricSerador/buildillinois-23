@@ -1,10 +1,12 @@
 import Link from "next/link";
 
 interface FoodItemDisplayProps {
-    foodItem: any; 
-  }
-  
-export const FoodItemDisplay: React.FC<FoodItemDisplayProps> = ({ foodItem }) => {
+  foodItem: any;
+}
+
+export const FoodItemDisplay: React.FC<FoodItemDisplayProps> = ({
+  foodItem,
+}) => {
   return (
     <Link href={`/food/${foodItem.id}`}>
       <li className="border p-4 rounded-md mb-4 font-custom">
@@ -12,10 +14,13 @@ export const FoodItemDisplay: React.FC<FoodItemDisplayProps> = ({ foodItem }) =>
         <p className="text-sm text-gray-500">
           <span className="font-bold text-md">
             Serving on {foodItem.mealEntries.length} occasions:&nbsp;
-            {
-              [...new Set(foodItem.mealEntries.map((entry: any) => entry.mealType))].join(', ')
-            }
-          </span><br />          
+            {[
+              ...new Set(
+                foodItem.mealEntries.map((entry: any) => entry.mealType)
+              ),
+            ].join(", ")}
+          </span>
+          <br />
           Serving Size: {foodItem.servingSize}
           <span className="text-gray-500"> | </span>
           {foodItem.calories} Cal
