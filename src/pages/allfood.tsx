@@ -66,16 +66,10 @@ export default function AllFood(): JSX.Element {
 
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-32 mt-4">
-      <div className="flex space-x-4">
-        <input
-          type="text"
-          className="block appearance-none w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Search food..."
-        />
+      <p className="text-4xl font-custombold mt-4 mb-4">Filters</p>
+      <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
         <select
-          className="block appearance-none w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          className="block w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           value={sortField}
           onChange={(e) => setSortField(e.target.value)}
         >
@@ -86,20 +80,22 @@ export default function AllFood(): JSX.Element {
           <option value="totalFat">Total Fats</option>
           <option value="sugars">Sugars</option>
         </select>
+        {sortField && (
+          <select
+            className="block w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(e.target.value)}
+          >
+            <option value="asc">Low to High</option>
+            <option value="desc">High to Low</option>
+          </select>
+        )}
         <select
-          className="block appearance-none w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
-        >
-          <option value="asc">Low to High</option>
-          <option value="desc">High to Low</option>
-        </select>
-        <select
-          className="block appearance-none w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          className="block w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           value={diningHall}
           onChange={(e) => setDiningHall(e.target.value)}
         >
-          <option value="">Filter by dining hall</option>
+          <option value="">All Dining Halls</option>
           <option value="Ikenberry Dining Center (Ike)">
             Ikenberry Dining Center (Ike)
           </option>
@@ -114,11 +110,11 @@ export default function AllFood(): JSX.Element {
           <option value="57 North">57 North (Ike)</option>
         </select>
         <select
-          className="block appearance-none w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          className="block w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           value={mealType}
           onChange={(e) => setMealType(e.target.value)}
         >
-          <option value="">Filter by meal type</option>
+          <option value="">All Meal Types</option>
           <option value="Breakfast">Breakfast</option>
           <option value="Lunch">Lunch</option>
           <option value="Dinner">Dinner</option>
@@ -132,11 +128,11 @@ export default function AllFood(): JSX.Element {
           <option value="Condiments">Condiments</option>
         </select>
         <select
-          className="block appearance-none w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          className="block w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           value={dateServed}
           onChange={(e) => setDateServed(e.target.value)}
         >
-          <option value="">Filter by date served</option>
+          <option value="">All Dates</option>
           {dates.map((date, index) => (
             <option key={index} value={date}>
               {date}
@@ -145,7 +141,16 @@ export default function AllFood(): JSX.Element {
         </select>
       </div>
 
-      <p className="text-4xl font-custombold mt-4">All Food ({foodCount})</p>
+      <div className="flex justify-between items-center">
+        <p className="text-4xl font-custombold mt-4">All Food ({foodCount})</p>
+        <input
+          type="text"
+          className="w-48 md:w-64 lg:w-96 xl:w-128 sm:w-auto ml-auto mt-4 block bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          placeholder="Search food..."
+        />
+      </div>
       <div
         style={{
           paddingBottom: "1rem",
