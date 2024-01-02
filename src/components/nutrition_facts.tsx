@@ -41,7 +41,7 @@ function calculatePercentage(
 
 const NutritionFacts: React.FC<NutritionFactsProps> = ({ foodItem }) => {
   return (
-    <section className="font-custom text-base leading-normal max-w-xs p-1 border border-black inline-block">
+    <section className="font-custom text-base leading-normal max-w-xs p-1 border border-black h-auto">
       <header>
         <h1 className="text-4xl font-custombold leading-relaxed text-normal">
           Nutrition Facts
@@ -58,6 +58,7 @@ const NutritionFacts: React.FC<NutritionFactsProps> = ({ foodItem }) => {
         <li className="flex flex-wrap justify-between px-1 border-t border-solid">
           <span>Amount per serving</span>
         </li>
+        <div className="border-t border-gray-500"></div>
         <li className="flex flex-wrap justify-between px-1 border-t border-solid">
           <span className="flex justify-between w-full">
             <span className="font-bold">Calories</span> &nbsp;
@@ -156,9 +157,12 @@ const NutritionFacts: React.FC<NutritionFactsProps> = ({ foodItem }) => {
       </ul>
       <div className="border-t-4 border-black"></div>
       <footer className="text-sm mt-2">
-        * The % Daily Value (DV) tells you how much a nutrient in a serving of
-        food contributes to a daily diet. 2,000 calories a day is used for
-        general nutrition advice.
+        <span className="block ml-4 text-indent-4">
+          <span className="inline-block -ml-2">*</span>
+          The % Daily Value (DV) tells you how much a nutrient in a serving of
+          food contributes to a daily diet. 2,000 calories a day is used for
+          general nutrition advice.
+        </span>
       </footer>
     </section>
   );

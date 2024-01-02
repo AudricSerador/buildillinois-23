@@ -32,7 +32,7 @@ export default function FoodItemPage({ foodItem }: { foodItem: any }) {
   return (
     <div className="px-2 sm:px-32 py-6 mt-4 bg-white shadow-md rounded-lg">
       <h1 className="text-4xl font-custombold mb-4">{foodItem.name || 'Loading...'}</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
         <div>
           <h2 className="text-2xl font-custombold mb-2">Meal Details</h2>
           <p className="mb-4">

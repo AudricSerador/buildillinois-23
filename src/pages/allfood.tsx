@@ -9,12 +9,12 @@ export default function AllFood(): JSX.Element {
   const pageNumber = router.query.page
     ? parseInt(router.query.page as string)
     : 1;
-  const [sortField, setSortField] = useState(router.query.sortField as string);
-  const [sortOrder, setSortOrder] = useState(router.query.sortOrder as string);
-  const [diningHall, setDiningHall] = useState(router.query.diningHall as string);
-  const [mealType, setMealType] = useState(router.query.mealType as string);
-  const [searchTerm, setSearchTerm] = useState(router.query.searchTerm as string);
-  const [dateServed, setDateServed] = useState(router.query.dateServed as string);
+    const [sortField, setSortField] = useState(typeof window !== 'undefined' ? localStorage.getItem('sortField') || '' : '');
+    const [sortOrder, setSortOrder] = useState(typeof window !== 'undefined' ? localStorage.getItem('sortOrder') || '' : '');
+    const [diningHall, setDiningHall] = useState(typeof window !== 'undefined' ? localStorage.getItem('diningHall') || '' : '');
+    const [mealType, setMealType] = useState(typeof window !== 'undefined' ? localStorage.getItem('mealType') || '' : '');
+    const [searchTerm, setSearchTerm] = useState(typeof window !== 'undefined' ? localStorage.getItem('searchTerm') || '' : '');
+    const [dateServed, setDateServed] = useState(typeof window !== 'undefined' ? localStorage.getItem('dateServed') || '' : '');
   const [isLoading, setIsLoading] = useState(false);
   const [food, setFood] = useState([]);
   const [foodCount, setFoodCount] = useState(0);
@@ -43,6 +43,13 @@ export default function AllFood(): JSX.Element {
     };
   
     fetchData();
+
+    localStorage.setItem('sortField', sortField);
+    localStorage.setItem('sortOrder', sortOrder);
+    localStorage.setItem('diningHall', diningHall);
+    localStorage.setItem('mealType', mealType);
+    localStorage.setItem('searchTerm', searchTerm);
+    localStorage.setItem('dateServed', dateServed);
   }, [pageNumber, sortField, sortOrder, diningHall, mealType, searchTerm, dateServed]);
 
   const handlePageChange = (newPageNumber: number) => {
