@@ -29,6 +29,8 @@ model FoodInfo {
   fiber            Int         @default(0)
   sugars           Int         @default(0)
   protein          Int         @default(0)
+  calciumDV        Int         @default(0)
+  ironDV           Int         @default(0)
 }
 
 model mealDetails {

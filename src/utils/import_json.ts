@@ -45,6 +45,8 @@ async function importJSONToDatabase(foodData: any[]) {
             fiber: food.fiber,
             sugars: food.sugars,
             protein: food.protein,
+            calciumDV: food.calciumDV,
+            ironDV: food.ironDV,
           },
         });
         console.log(`Created FoodInfo with ID: ${newFood.id}`);

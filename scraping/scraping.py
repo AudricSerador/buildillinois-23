@@ -10,7 +10,7 @@ start_time = time.time()
 driver = webdriver.Chrome()
 driver.get('https://eatsmart.housing.illinois.edu/NetNutrition/46')
 food_data = []
-DATE_TO_SCRAPE = 'Tuesday, January 16, 2024' # THIS SPECIFIC FORMAT
+DATE_TO_SCRAPE = 'Monday, January 15, 2024' # THIS SPECIFIC FORMAT
 
 def back_to_food_list():
     dropdown = WebDriverWait(driver, 10).until(
@@ -25,6 +25,7 @@ def back_to_food_list():
     element = WebDriverWait(driver, 10).until(
         EC.element_to_be_clickable((By.XPATH, '//a[@class="dropdown-item" and @title="Show All Units"]'))
     )
+    time.sleep(1)
     element.click()
     
 
@@ -48,7 +49,9 @@ def scrape_nutrition_facts(food_id):
                 "totalCarbohydrates": 0,
                 "fiber": 0,
                 "sugars": 0,
-                "protein": 0
+                "protein": 0,
+                "calciumDV": 0,
+                "ironDV": 0,
             }
     
     driver.execute_script(f'javascript:NetNutrition.UI.getItemNutritionLabel({food_id});')
@@ -81,6 +84,17 @@ def scrape_nutrition_facts(food_id):
             data[key] = int(value) if value else 0
         else:
             data[key] = 0
+    
+    secondary_rows = nutrition_modal.find_elements(By.XPATH, './/table[@class="cbo_nn_LabelSecondaryTable"]/tbody/tr')
+    for row in secondary_rows:
+        nutrient_name = row.find_element(By.XPATH, './/td[@class="cbo_nn_SecondaryNutrientLabel"]').text.lower()
+        nutrient_value = row.find_element(By.XPATH, './/td[@class="cbo_nn_SecondaryNutrient" or @class="cbo_nn_SecondaryNutrientIncomplete"]').text
+
+        if nutrient_name in ["calcium", "iron"]:
+            nutrient_value = nutrient_value.replace('%', '').strip()
+            if nutrient_value.isdigit():
+                data[nutrient_name + "DV"] = int(nutrient_value)   
+            
     driver.execute_script('javascript:NetNutrition.UI.closeNutritionDetailPanel(true);')
 
     return data
@@ -169,7 +183,7 @@ for title, data in restaurant_data.items():
         get_food_nutrition(title, info)
 
 ### READ TO JSON ###
-with open('food_data_1_16_2024.json', 'w') as json_file:
+with open('food_data_1_15_2024.json', 'w') as json_file:
     json.dump(food_data, json_file, indent=4)
         
 end_time = time.time()

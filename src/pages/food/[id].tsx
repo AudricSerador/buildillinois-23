@@ -1,6 +1,7 @@
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
 import prisma from '../../../lib/prisma';
+import NutritionFacts from '@/components/nutrition_facts';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const foodItems = await prisma.foodInfo.findMany();
@@ -51,25 +52,7 @@ export default function FoodItemPage({ foodItem }: { foodItem: any }) {
             </div>
           ))}
         </div>
-        <div>
-          <h2 className="text-2xl font-custombold mb-2">Nutritional Information</h2>
-          <p>
-            Calories: <span className="font-custom">{foodItem.calories}</span><br />
-            Calories from Fat: <span className="font-custom">{foodItem.caloriesFat}</span><br />
-            Total Fat: <span className="font-custom">{foodItem.totalFat}g</span><br />
-            Saturated Fat: <span className="font-custom">{foodItem.saturatedFat}g</span><br />
-            Trans Fat: <span className="font-custom">{foodItem.transFat}g</span><br />
-            Polyunsaturated Fat: <span className="font-custom">{foodItem.polyFat}g</span><br />
-            Monounsaturated Fat: <span className="font-custom">{foodItem.monoFat}g</span><br />
-            Cholesterol: <span className="font-custom">{foodItem.cholesterol}mg</span><br />
-            Sodium: <span className="font-custom">{foodItem.sodium}mg</span><br />
-            Potassium: <span className="font-custom">{foodItem.potassium}mg</span><br />
-            Total Carbohydrates: <span className="font-custom">{foodItem.totalCarbohydrates}g</span><br />
-            Dietary Fiber: <span className="font-custom">{foodItem.fiber}g</span><br />
-            Sugars: <span className="font-custom">{foodItem.sugars}g</span><br />
-            Protein: <span className="font-custom">{foodItem.protein}g</span>
-          </p>
-        </div>
+        <NutritionFacts foodItem={foodItem} />
       </div>
     </div>
   );
