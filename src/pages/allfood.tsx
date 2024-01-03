@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FoodItemDisplay } from "../components/food_item_display";
 import { useRouter } from "next/router";
-import LoadingSpinner from '../components/loading_spinner';
+import LoadingSpinner from "../components/loading_spinner";
 
 export default function AllFood(): JSX.Element {
   const router = useRouter();
@@ -9,18 +9,29 @@ export default function AllFood(): JSX.Element {
   const pageNumber = router.query.page
     ? parseInt(router.query.page as string)
     : 1;
-    const [sortField, setSortField] = useState(typeof window !== 'undefined' ? localStorage.getItem('sortField') || '' : '');
-    const [sortOrder, setSortOrder] = useState(typeof window !== 'undefined' ? localStorage.getItem('sortOrder') || '' : '');
-    const [diningHall, setDiningHall] = useState(typeof window !== 'undefined' ? localStorage.getItem('diningHall') || '' : '');
-    const [mealType, setMealType] = useState(typeof window !== 'undefined' ? localStorage.getItem('mealType') || '' : '');
-    const [searchTerm, setSearchTerm] = useState(typeof window !== 'undefined' ? localStorage.getItem('searchTerm') || '' : '');
-    const [dateServed, setDateServed] = useState(typeof window !== 'undefined' ? localStorage.getItem('dateServed') || '' : '');
+  const [sortField, setSortField] = useState("");
+  const [sortOrder, setSortOrder] = useState("");
+  const [diningHall, setDiningHall] = useState("");
+  const [mealType, setMealType] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [dateServed, setDateServed] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [food, setFood] = useState([]);
   const [foodCount, setFoodCount] = useState(0);
   const [dates, setDates] = useState<string[]>([]);
   const [error, setError] = useState(null);
-  
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setSortField(localStorage.getItem("sortField") || "");
+      setSortOrder(localStorage.getItem("sortOrder") || "");
+      setDiningHall(localStorage.getItem("diningHall") || "");
+      setMealType(localStorage.getItem("mealType") || "");
+      setSearchTerm(localStorage.getItem("searchTerm") || "");
+      setDateServed(localStorage.getItem("dateServed") || "");
+    }
+  }, []);
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -41,16 +52,16 @@ export default function AllFood(): JSX.Element {
         setIsLoading(false);
       }
     };
-  
     fetchData();
-
-    localStorage.setItem('sortField', sortField);
-    localStorage.setItem('sortOrder', sortOrder);
-    localStorage.setItem('diningHall', diningHall);
-    localStorage.setItem('mealType', mealType);
-    localStorage.setItem('searchTerm', searchTerm);
-    localStorage.setItem('dateServed', dateServed);
-  }, [pageNumber, sortField, sortOrder, diningHall, mealType, searchTerm, dateServed]);
+  }, [
+    pageNumber,
+    sortField,
+    sortOrder,
+    diningHall,
+    mealType,
+    searchTerm,
+    dateServed,
+  ]);
 
   const handlePageChange = (newPageNumber: number) => {
     router.push({
@@ -67,9 +78,14 @@ export default function AllFood(): JSX.Element {
   };
 
   const totalPages = Math.ceil(foodCount / pageSize);
-
-  const startPage = pageNumber > 2 ? pageNumber - 2 : 1;
-  const endPage = startPage + 4 < totalPages ? startPage + 4 : totalPages;
+  const startPage = Math.min(
+    Math.max(1, pageNumber - 2),
+    Math.max(1, totalPages - 4)
+  );
+  const endPage = Math.max(
+    Math.min(totalPages, pageNumber + 2),
+    Math.min(totalPages, startPage + 4)
+  );
 
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-32 mt-4">
@@ -200,7 +216,7 @@ export default function AllFood(): JSX.Element {
             >
               Back
             </button>
-            {[...Array(endPage + 1 - startPage)].map((e, i) => (
+            {[...Array(Math.max(0, endPage + 1 - startPage))].map((e, i) => (
               <button
                 key={i}
                 onClick={() => handlePageChange(i + startPage)}

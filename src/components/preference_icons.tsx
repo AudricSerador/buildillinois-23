@@ -8,7 +8,7 @@ export const PreferenceIcons: React.FC<PreferenceIconsProps> = ({
     allergens,
 }) => {
     const preferencesList = preferences.split(' ');
-    const allergensList = allergens.split(', ');
+    const allergensList = allergens.toLowerCase().split(', ');
 
     return (
         <div className="flex bg-white">
@@ -25,7 +25,7 @@ export const PreferenceIcons: React.FC<PreferenceIconsProps> = ({
                 )
             ))}
             {allergensList.map(allergen => (
-                allergen.trim() !== '' && allergen !== 'N/A' && (
+                allergen.trim() !== '' && allergen !== 'n/a' && (
                     <div className="mr-2" key={allergen}>
                         <img 
                             src={`/images/icons/${allergen}.svg`} 
