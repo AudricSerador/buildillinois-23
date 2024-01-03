@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PreferenceIcons } from "./preference_icons";
 
 interface FoodItemDisplayProps {
   foodItem: any;
@@ -10,7 +11,13 @@ export const FoodItemDisplay: React.FC<FoodItemDisplayProps> = ({
   return (
     <Link href={`/food/${foodItem.id}`}>
       <li className="border p-4 rounded-md mb-4 font-custom">
-        <p className="font-bold text-lg">{foodItem.name}</p>
+        <div className="flex items-center">
+          <p className="font-bold text-lg mr-2">{foodItem.name}</p>
+          <PreferenceIcons 
+            preferences={foodItem.preferences} 
+            allergens={foodItem.allergens}
+          />
+        </div>
         <p className="text-sm text-gray-500">
           <span className="font-bold text-md">
             Serving on {foodItem.mealEntries.length} occasions:&nbsp;

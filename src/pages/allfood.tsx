@@ -112,6 +112,9 @@ export default function AllFood(): JSX.Element {
           <option value="Pennsylvania Avenue Dining Hall (PAR)">
             Pennsylvania Avenue Dining Hall (PAR)
           </option>
+          <option value="Lincoln Avenue Dining Hall (LAR)">
+            Lincoln Avenue Dining Hall (LAR)
+          </option>
           <option value="TerraByte">TerraByte (ISR)</option>
           <option value="Urbana South Market">Urbana South Market (PAR)</option>
           <option value="57 North">57 North (Ike)</option>

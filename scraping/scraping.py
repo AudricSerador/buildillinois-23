@@ -4,13 +4,19 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import json
 import time
+import re
 
 start_time = time.time()
 
 driver = webdriver.Chrome()
 driver.get('https://eatsmart.housing.illinois.edu/NetNutrition/46')
+
+NON_VEGAN_INGREDIENTS = {'gelatin', 'fish', 'tuna', 'salmon', 'tilapia', 'rennet', 'carmine', 'isenglass', 'fish sauce', 'anchovies', 'suet', 'lard', 'cochineal', 'shellac', 'cysteine', 'tyrosine', 'enzymes', 'collagen', 'bone char', 'whey', 'casein', 'fish oil', 'omega-3', 'confectioner', 'beeswax', 'oleic acid', 'stearic acid', 'vitamin d3', 'lanolin', 'lecithin', 'glycerides', 'glycerin', 'lactic acid', 'squalane', 'squalene', 'tallow', 'glyceryl stearate', 'vitamin a', 'vitamin b12', 'vitamin d2', 'vitamin d3', 'xanthan gum', 'zinc stearate', 'meat', 'poultry', 'chicken', 'beef', 'pork', 'lamb', 'venison', 'rabbit', 'duck', 'goose', 'turkey', 'veal', 'organ meat', 'wild game', 'seafood', 'shellfish', 'clams', 'crab', 'lobster', 'shrimp', 'oysters', 'mussels', 'eggs', 'egg white', 'egg yolk', 'egg albumen', 'mayonnaise', 'aioli', 'milk', 'butter', 'cheese', 'cream', 'yogurt', 'honey'}
+NON_VEGETARIAN_INGREDIENTS = {'gelatin', 'rennet', 'carmine', 'isinglass', 'fish', 'tuna', 'salmon', 'tilapia', 'fish sauce', 'anchovies', 'suet', 'lard', 'cochineal', 'shellac', 'cysteine', 'tyrosine', 'enzymes', 'collagen', 'bone char', 'whey', 'casein', 'fish oil', 'omega-3', 'confectioner', 'beeswax', 'oleic acid', 'stearic acid', 'vitamin d3', 'lanolin', 'lecithin', 'glycerides', 'glycerin', 'lactic acid', 'squalane', 'squalene', 'tallow', 'glyceryl stearate', 'vitamin a', 'vitamin b12', 'vitamin d2', 'vitamin d3', 'xanthan gum', 'zinc stearate', 'meat', 'poultry', 'chicken', 'beef', 'pork', 'lamb', 'venison', 'rabbit', 'duck', 'goose', 'turkey', 'veal', 'organ meat', 'wild game', 'seafood', 'shellfish', 'clams', 'crab', 'lobster', 'shrimp', 'oysters', 'mussels'}
+
+
 food_data = []
-DATE_TO_SCRAPE = 'Monday, January 15, 2024' # THIS SPECIFIC FORMAT
+DATE_TO_SCRAPE = 'Wednesday, January 17, 2024' # THIS SPECIFIC FORMAT
 
 def back_to_food_list():
     dropdown = WebDriverWait(driver, 10).until(
@@ -27,7 +33,29 @@ def back_to_food_list():
     )
     time.sleep(1)
     element.click()
+
+def check_preferences(ingredients, name):
+    preferences = []
     
+    if 'halal' in name.lower():
+        preferences.append('halal')
+    
+    if 'kosher' in name.lower():
+        preferences.append('kosher')
+
+    non_vegan_pattern = re.compile('|'.join(NON_VEGAN_INGREDIENTS))
+    non_vegetarian_pattern = re.compile('|'.join(NON_VEGETARIAN_INGREDIENTS))
+
+    if non_vegan_pattern.search(ingredients.lower()):
+        return ' '.join(preferences)
+
+    preferences.append('vegan')
+    preferences.append('vegetarian')
+
+    if non_vegetarian_pattern.search(ingredients.lower()):
+        preferences.remove('vegetarian')
+
+    return ' '.join(preferences)
 
 def scrape_nutrition_facts(food_id):
     data =  {   
@@ -36,6 +64,7 @@ def scrape_nutrition_facts(food_id):
                 "servingSize": "N/A",
                 "ingredients": "N/A",
                 "allergens": "N/A",
+                "preferences": "N/A",
                 "calories": 0,
                 "caloriesFat": 0,
                 "totalFat": 0,
@@ -60,10 +89,14 @@ def scrape_nutrition_facts(food_id):
     )
     data['name'] = nutrition_modal.find_element(By.XPATH, './/td[@class="cbo_nn_LabelHeader"]').text
     data['servingSize'] = nutrition_modal.find_element(By.XPATH, './/td[@class="cbo_nn_LabelBottomBorderLabel"]').text.replace("Serving Size: ", "")
+    
     try:
         data['ingredients'] = nutrition_modal.find_element(By.XPATH, './/span[@class="cbo_nn_LabelIngredients"]').text
+        data['preferences'] = check_preferences(data['ingredients'], data['name'])
     except:
         data['ingredients'] = "N/A"
+        data['preferences'] = "N/A"
+        
     try:
         data['allergens'] = nutrition_modal.find_element(By.XPATH, './/span[@class="cbo_nn_LabelAllergens"]').text
     except:
@@ -107,7 +140,7 @@ def get_dining_hall_name(facility_name):
         return 'Illinois Street Dining Center (ISR)'
     elif facility_name in ["Sky Garden", "Abbondante Grill", "Abbondante Pizza & Pasta", "Arugula's Salad Bar", "La Avenida", "Provolone Soup, Sandwich & Dessert Station", "Build Your Own (PAR)"]:
         return 'Pennsylvania Avenue Dining Hall (PAR)'
-    elif facility_name == ["LAR Daily Menu", "Build Your Own (LAR)", "Kosher Kitchen", "Field of Greens"]:
+    elif facility_name in ["LAR Daily Menu", "Build Your Own (LAR)", "Kosher Kitchen", "Field of Greens"]:
         return 'Lincoln Avenue Dining Hall (LAR)'
     else:
         return facility_name
@@ -183,7 +216,7 @@ for title, data in restaurant_data.items():
         get_food_nutrition(title, info)
 
 ### READ TO JSON ###
-with open('food_data_1_15_2024.json', 'w') as json_file:
+with open('food_data_1_17_2024.json', 'w') as json_file:
     json.dump(food_data, json_file, indent=4)
         
 end_time = time.time()

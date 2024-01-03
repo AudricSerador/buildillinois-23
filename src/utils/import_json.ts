@@ -31,6 +31,7 @@ async function importJSONToDatabase(foodData: any[]) {
             servingSize: food.servingSize,
             ingredients: food.ingredients,
             allergens: food.allergens,
+            preferences: food.preferences,
             calories: food.calories,
             caloriesFat: food.caloriesFat,
             totalFat: food.totalFat,
