@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
-
 
 const IconLabel: React.FC<{ src: string, label: string }> = ({ src, label }) => (
     <div className="flex items-center mr-4 mb-4">
