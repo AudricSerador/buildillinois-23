@@ -3,6 +3,7 @@ import { FoodItemDisplay } from "../components/allfood/food_item_display";
 import { useRouter } from "next/router";
 import LoadingSpinner from "../components/loading_spinner";
 import { Filters } from "../components/allfood/filters";
+import { IconLegend } from "@/components/icon_legend";
 
 export default function AllFood(): JSX.Element {
   const router = useRouter();
@@ -106,6 +107,7 @@ export default function AllFood(): JSX.Element {
 
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-32 mt-4">
+      <IconLegend />
       <p className="text-4xl font-custombold mt-4 mb-4">Filters</p>
       <div className="flex flex-col sm:flex-row flex-wrap justify-between sm:space-x-4 space-y-4 sm:space-y-0 font-custom">
         <Filters

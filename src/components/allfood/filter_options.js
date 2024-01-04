@@ -1,5 +1,5 @@
 export const sortFields = [
-  { value: "", label: "Sort by" },
+  { value: "", label: "Sort by Nutrient" },
   { value: "calories", label: "Calories" },
   { value: "totalCarbohydrates", label: "Carbohydrates" },
   { value: "protein", label: "Protein" },
@@ -11,30 +11,32 @@ export const sortFields = [
 ];
 
 export const sortOrders = [
+  { value: "", label: "Sort order"},
   { value: "asc", label: "Low to High" },
   { value: "desc", label: "High to Low" },
 ];
 
 export const allergenOptions = [
-  { value: "Gluten", label: "Gluten" },
+  { value: "Milk", label: "Milk" },
+  { value: "Eggs", label: "Eggs" },
   { value: "Peanuts", label: "Peanuts" },
+  { value: "Tree nuts", label: "Tree Nuts" },
+  { value: "Soy", label: "Soy" },
+  { value: "Wheat", label: "Wheat" },
+  { value: "Fish", label: "Fish" },
+  { value: "Shellfish", label: "Shellfish" },
+  { value: "Sesame", label: "Sesame" },
+  { value: "Gluten", label: "Gluten" },
   { value: "Alcohol", label: "Alcohol" },
   { value: "Coconut", label: "Coconut" },
   { value: "Corn", label: "Corn" },
-  { value: "Eggs", label: "Eggs" },
-  { value: "Fish", label: "Fish" },
   { value: "Gelatin", label: "Gelatin" },
-  { value: "Milk", label: "Milk" },
   { value: "Msg", label: "MSG" },
   { value: "Pork", label: "Pork" },
   { value: "Red Dye", label: "Red Dye" },
-  { value: "Sesame", label: "Sesame" },
-  { value: "Shellfish", label: "Shellfish" },
-  { value: "Soy", label: "Soy" },
   { value: "Sulfites", label: "Sulfites" },
-  { value: "Tree nuts", label: "Tree Nuts" },
-  { value: "Wheat", label: "Wheat" },
 ];
+
 
 export const preferenceOptions = [
   { value: "", label: "All Preferences" },
