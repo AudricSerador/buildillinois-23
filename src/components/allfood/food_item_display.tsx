@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PreferenceIcons } from "./preference_icons";
+import { PreferenceIcons } from "../preference_icons";
 
 interface FoodItemDisplayProps {
   foodItem: any;

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { FoodItemDisplay } from "../components/food_item_display";
+import { FoodItemDisplay } from "../components/allfood/food_item_display";
 import { useRouter } from "next/router";
 import LoadingSpinner from "../components/loading_spinner";
+import { Filters } from "../components/allfood/filters";
 
 export default function AllFood(): JSX.Element {
   const router = useRouter();
@@ -15,6 +16,8 @@ export default function AllFood(): JSX.Element {
   const [mealType, setMealType] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [dateServed, setDateServed] = useState("");
+  const [allergens, setAllergens] = useState<string[]>([]);
+  const [preferences, setPreferences] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [food, setFood] = useState([]);
   const [foodCount, setFoodCount] = useState(0);
@@ -29,6 +32,14 @@ export default function AllFood(): JSX.Element {
       setMealType(localStorage.getItem("mealType") || "");
       setSearchTerm(localStorage.getItem("searchTerm") || "");
       setDateServed(localStorage.getItem("dateServed") || "");
+      setPreferences(localStorage.getItem("preferences") || "");
+      
+      const allergensFromLocalStorage = localStorage.getItem("allergens");
+      if (allergensFromLocalStorage) {
+        setAllergens(JSON.parse(allergensFromLocalStorage));
+      } else {
+        setAllergens([]);
+      }
     }
   }, []);
 
@@ -36,8 +47,10 @@ export default function AllFood(): JSX.Element {
     const fetchData = async () => {
       setIsLoading(true);
       try {
+        const allergensString = allergens.join(",");
+
         const res = await fetch(
-          `/api/get_data?page=${pageNumber}&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${mealType}&searchTerm=${searchTerm}&dateServed=${dateServed}`
+          `/api/get_data?page=${pageNumber}&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${mealType}&searchTerm=${searchTerm}&dateServed=${dateServed}&allergens=${allergensString}&preferences=${preferences}`
         );
         if (!res.ok) {
           throw Error(res.statusText);
@@ -61,6 +74,8 @@ export default function AllFood(): JSX.Element {
     mealType,
     searchTerm,
     dateServed,
+    allergens,
+    preferences,
   ]);
 
   const handlePageChange = (newPageNumber: number) => {
@@ -87,84 +102,29 @@ export default function AllFood(): JSX.Element {
     Math.min(totalPages, startPage + 4)
   );
 
+
+
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-32 mt-4">
       <p className="text-4xl font-custombold mt-4 mb-4">Filters</p>
-      <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
-        <select
-          className="block w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-          value={sortField}
-          onChange={(e) => setSortField(e.target.value)}
-        >
-          <option value="">Sort by</option>
-          <option value="calories">Calories</option>
-          <option value="totalCarbohydrates">Carbohydrates</option>
-          <option value="protein">Protein</option>
-          <option value="totalFat">Total Fats</option>
-          <option value="sugars">Sugars</option>
-        </select>
-        {sortField && (
-          <select
-            className="block w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-            value={sortOrder}
-            onChange={(e) => setSortOrder(e.target.value)}
-          >
-            <option value="asc">Low to High</option>
-            <option value="desc">High to Low</option>
-          </select>
-        )}
-        <select
-          className="block w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-          value={diningHall}
-          onChange={(e) => setDiningHall(e.target.value)}
-        >
-          <option value="">All Dining Halls</option>
-          <option value="Ikenberry Dining Center (Ike)">
-            Ikenberry Dining Center (Ike)
-          </option>
-          <option value="Illinois Street Dining Center (ISR)">
-            Illinois Street Dining Center (ISR)
-          </option>
-          <option value="Pennsylvania Avenue Dining Hall (PAR)">
-            Pennsylvania Avenue Dining Hall (PAR)
-          </option>
-          <option value="Lincoln Avenue Dining Hall (LAR)">
-            Lincoln Avenue Dining Hall (LAR)
-          </option>
-          <option value="TerraByte">TerraByte (ISR)</option>
-          <option value="Urbana South Market">Urbana South Market (PAR)</option>
-          <option value="57 North">57 North (Ike)</option>
-        </select>
-        <select
-          className="block w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-          value={mealType}
-          onChange={(e) => setMealType(e.target.value)}
-        >
-          <option value="">All Meal Types</option>
-          <option value="Breakfast">Breakfast</option>
-          <option value="Lunch">Lunch</option>
-          <option value="Dinner">Dinner</option>
-          <option value="A la Carte">A la Carte</option>
-          <option value="Deli & Bagel Bar">Deli & Bagel Bar</option>
-          <option value="Waffle Bar">Waffle Bar</option>
-          <option value="Salad Bar">Salad Bar</option>
-          <option value="Cereal">Cereal</option>
-          <option value="Ice Cream">Ice Cream</option>
-          <option value="Beverages">Beverages</option>
-          <option value="Condiments">Condiments</option>
-        </select>
-        <select
-          className="block w-full bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
-          value={dateServed}
-          onChange={(e) => setDateServed(e.target.value)}
-        >
-          <option value="">All Dates</option>
-          {dates.map((date, index) => (
-            <option key={index} value={date}>
-              {date}
-            </option>
-          ))}
-        </select>
+      <div className="flex flex-col sm:flex-row flex-wrap justify-between sm:space-x-4 space-y-4 sm:space-y-0 font-custom">
+        <Filters
+          sortField={sortField}
+          setSortField={setSortField}
+          sortOrder={sortOrder}
+          setSortOrder={setSortOrder}
+          selectedAllergens={allergens}
+          setSelectedAllergens={setAllergens}
+          diningHall={diningHall}
+          setDiningHall={setDiningHall}
+          mealType={mealType}
+          setMealType={setMealType}
+          selectedPreference={preferences}
+          setSelectedPreference={setPreferences}
+          dateServed={dateServed}
+          setDateServed={setDateServed}
+          dates={dates}
+        />
       </div>
 
       <div className="flex justify-between items-center">

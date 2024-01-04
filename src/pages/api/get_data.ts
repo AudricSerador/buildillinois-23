@@ -15,6 +15,18 @@ export default async function handler(
   const mealType = req.query.mealType as string;
   const searchTerm = req.query.searchTerm as string;
   const dateServed = req.query.dateServed as string;
+  const allergens = req.query.allergens as string;
+  const preferences = req.query.preferences as string;
+
+  const allergensArray = allergens ? allergens.split(",") : [];
+
+  const allergensConditions = allergensArray.map((allergen) => ({
+    allergens: {
+      not: {
+        contains: allergen.trim(),
+      },
+    },
+  }));
 
   const food = await prisma.foodInfo.findMany({
     skip: pageNumber * pageSize,
@@ -48,7 +60,7 @@ export default async function handler(
               },
             }
           : {},
-        searchTerm && searchTerm !== "undefined"
+          searchTerm && searchTerm !== "undefined"
           ? {
               name: { contains: searchTerm, mode: "insensitive" },
             }
@@ -60,6 +72,14 @@ export default async function handler(
                   dateServed: { equals: dateServed },
                 },
               },
+            }
+          : {},
+        {
+          AND: allergensConditions,
+        },
+        preferences && preferences !== "undefined"
+          ? {
+              preferences: { contains: preferences },
             }
           : {},
       ],
@@ -93,7 +113,7 @@ export default async function handler(
               },
             }
           : {},
-        searchTerm && searchTerm !== "undefined"
+          searchTerm && searchTerm !== "undefined"
           ? {
               name: { contains: searchTerm, mode: "insensitive" },
             }
@@ -107,11 +127,23 @@ export default async function handler(
               },
             }
           : {},
+        {
+          AND: allergensConditions,
+        },
+        preferences && preferences !== "undefined"
+          ? {
+              preferences: { contains: preferences },
+            }
+          : {},
       ],
     },
   });
 
-  const dates = (await prisma.$queryRaw<{ dateServed: string }[]>`SELECT DISTINCT "dateServed" FROM "mealDetails";`).map(date => date.dateServed);
+  const dates = (
+    await prisma.$queryRaw<
+      { dateServed: string }[]
+    >`SELECT DISTINCT "dateServed" FROM "mealDetails";`
+  ).map((date) => date.dateServed);
 
   res.status(200).json({ food, foodCount, dates });
 }
