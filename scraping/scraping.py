@@ -16,7 +16,7 @@ NON_VEGETARIAN_INGREDIENTS = {'gelatin', 'rennet', 'carmine', 'isinglass', 'fish
 
 
 food_data = []
-DATE_TO_SCRAPE = 'Wednesday, January 17, 2024' # THIS SPECIFIC FORMAT
+DATE_TO_SCRAPE = 'Thursday, January 18, 2024' # THIS SPECIFIC FORMAT
 
 def back_to_food_list():
     dropdown = WebDriverWait(driver, 10).until(
@@ -140,8 +140,10 @@ def get_dining_hall_name(facility_name):
         return 'Illinois Street Dining Center (ISR)'
     elif facility_name in ["Sky Garden", "Abbondante Grill", "Abbondante Pizza & Pasta", "Arugula's Salad Bar", "La Avenida", "Provolone Soup, Sandwich & Dessert Station", "Build Your Own (PAR)"]:
         return 'Pennsylvania Avenue Dining Hall (PAR)'
-    elif facility_name in ["LAR Daily Menu", "Build Your Own (LAR)", "Kosher Kitchen", "Field of Greens"]:
-        return 'Lincoln Avenue Dining Hall (LAR)'
+    elif facility_name in ["LAR Daily Menu", "Build Your Own (LAR)", "Kosher Kitchen"]:
+        return 'Lincoln Avenue Dining Hall (Allen/LAR)'
+    elif facility_name in ["Field of Greens"]:
+        return 'Field of Greens (LAR)'
     else:
         return facility_name
 

@@ -67,6 +67,7 @@ export const diningOptions = [
   { value: "TerraByte", label: "TerraByte (ISR)" },
   { value: "Urbana South Market", label: "Urbana South Market (PAR)" },
   { value: "57 North", label: "57 North (Ike)" },
+  { value: "InfiniTEA", label: "InfiniTEA (ISR)" },
 ];
 
 export const mealTypeOptions = [

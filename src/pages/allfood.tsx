@@ -106,7 +106,7 @@ export default function AllFood(): JSX.Element {
 
 
   return (
-    <div className="px-4 sm:px-8 md:px-16 lg:px-32 mt-4">
+    <div className="px-4 sm:px-8 md:px-16 lg:px-64 mt-4">
       <IconLegend />
       <p className="text-4xl font-custombold mt-4 mb-4">Filters</p>
       <div className="flex flex-col sm:flex-row flex-wrap justify-between sm:space-x-4 space-y-4 sm:space-y-0 font-custom">

@@ -2,6 +2,7 @@ import { GetStaticPaths, GetStaticProps } from 'next';
 import { useRouter } from 'next/router';
 import prisma from '../../../lib/prisma';
 import NutritionFacts from '@/components/nutrition_facts';
+import { EntriesDisplay } from '@/components/entries_display';
 
 export const getStaticPaths: GetStaticPaths = async () => {
   const foodItems = await prisma.foodInfo.findMany();
@@ -41,16 +42,7 @@ export default function FoodItemPage({ foodItem }: { foodItem: any }) {
             Allergens: <span className="font-custom">{foodItem.allergens}</span>
           </p>
           <h2 className="text-2xl font-custombold mb-2">Dates Served</h2>
-          {foodItem.mealEntries.map((mealEntry: any) => (
-            <div key={mealEntry.id} className="mb-4">
-              <p>
-                Dining Hall: <span className="font-custom">{mealEntry.diningHall}</span><br />
-                Dining Facility: <span className="font-custom">{mealEntry.diningFacility}</span><br />
-                Date Served: <span className="font-custom">{mealEntry.dateServed}</span><br />
-                Meal Type: <span className="font-custom">{mealEntry.mealType}</span>
-              </p>
-            </div>
-          ))}
+          <EntriesDisplay mealEntries={foodItem.mealEntries} />
         </div>
         <NutritionFacts foodItem={foodItem} />
       </div>

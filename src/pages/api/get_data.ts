@@ -53,7 +53,7 @@ export default async function handler(
                   mealType: {
                     in:
                       mealType === "A la Carte"
-                        ? ["A la Carte--APP DISPLAY", "A la Carte--POS FEED"]
+                        ? ["A la Carte--APP DISPLAY", "A la Carte--POS Feed"]
                         : [mealType],
                   },
                 },
