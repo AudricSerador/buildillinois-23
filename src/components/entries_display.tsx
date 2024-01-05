@@ -71,11 +71,11 @@ export const EntriesDisplay: React.FC<EntriesDisplayProps> = ({
       {Object.entries(groupedEntries).map(([date, diningHalls]) => (
         <div key={date} className="mb-4 p-4 border rounded bg-white shadow">
           <button
-            className="text-lg font-custombold flex justify-between items-center w-full bg-blue-500 text-white rounded p-2"
+            className="text-lg font-custombold flex justify-between items-center w-full bg-uiucorange text-white rounded p-2"
             onClick={() => setExpandedDate(expandedDate === date ? null : date)}
           >
             <span>{date}</span>
-            <span>{expandedDate === date ? "▲" : "▼"}</span>
+            <span className="text-uiucblue">{expandedDate === date ? "▲" : "▼"}</span>
           </button>
           <div
             style={{
