@@ -3,21 +3,11 @@ import Link from "next/link";
 
 export default function Home(): JSX.Element {
   return (
-    <div
-      style={{
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "stretch",
-        margin: 0,
-        padding: 0,
-        marginBottom: "-25px",
-      }}
-    >
-      <div
-        className="m-0 p-0 bg-cover bg-center text-white flex-grow"
+    <div className="h-screen flex flex-col items-stretch m-0 p-0 mb-[-25px]">
+      <div className="m-0 p-0 bg-cover bg-center text-white flex-grow"
         style={{
           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(/images/dininghall.jpg)`,
+          backgroundAttachment: 'fixed',
         }}
       >
         <div className="flex justify-center items-start mt-20 text-center px-4 sm:px-0">
@@ -41,7 +31,7 @@ export default function Home(): JSX.Element {
         </div>
         <div className="flex justify-center mt-8 px-4 sm:px-0">
           <Link href="#">
-            <button className="bg-uiucblue text-white font-custombold py-2 px-4 rounded mr-4">
+            <button className="bg-uiucblue text-white font-custombold py-2 px-4 rounded mr-4 transition duration-500 ease-in-out transform hover:scale-105">
               Sign Up
             </button>
           </Link>

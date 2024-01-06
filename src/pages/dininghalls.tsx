@@ -110,23 +110,29 @@ export default function DiningHalls(): JSX.Element {
             />
           </svg>
         </button>
-        <div ref={scrollContainer} className="flex overflow-x-auto pb-4 scrollbar-hide p-4 bg-gray-100 border border-gray-300 rounded-lg min-h-[200px] w-full">
-  {openDiningHalls.length > 0 ? (
-    openDiningHalls.map(({ hall, message }) => (
-      <div key={hall} className="flex-none w-64 m-3 bg-white shadow-md rounded-lg overflow-hidden">
-        <div className="h-2 bg-uiucorange"></div>
-        <div className="p-6">
-          <h2 className="text-xl font-bold mb-2">{hall}</h2>
-          <p className="text-gray-700 text-sm">{message}</p>
+        <div
+          ref={scrollContainer}
+          className="flex overflow-x-auto pb-4 scrollbar-hide p-4 bg-gray-100 border border-gray-300 rounded-lg min-h-[200px] w-full"
+        >
+          {openDiningHalls.length > 0 ? (
+            openDiningHalls.map(({ hall, message }) => (
+              <div
+                key={hall}
+                className="flex-none w-64 m-3 bg-white shadow-md rounded-lg overflow-hidden"
+              >
+                <div className="h-2 bg-uiucorange"></div>
+                <div className="p-6">
+                  <h2 className="text-xl font-bold mb-2">{hall}</h2>
+                  <p className="text-gray-700 text-sm">{message}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="grid place-items-center w-full h-[200px]">
+              <p>No dining halls open :(</p>
+            </div>
+          )}
         </div>
-      </div>
-    ))
-  ) : (
-<div className="grid place-items-center w-full h-[200px]">
-  <p>No dining halls open :(</p>
-</div>
-  )}
-</div>
         <button onClick={() => scroll(1)} className="md:block hidden">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -144,12 +150,23 @@ export default function DiningHalls(): JSX.Element {
           </svg>
         </button>
       </div>
-      <p className="text-4xl font-custombold mt-4">All Dining Halls</p>
-      <div>
+      <p className="text-4xl font-custombold mt-4 mb-4">All Dining Halls</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {allDiningHalls.map(({ hall, message }) => (
-          <div key={hall} className="card">
-            <h2>{hall}</h2>
-            <p>{message}</p>
+          <div
+            key={hall}
+            className="card bg-white shadow-md rounded-lg overflow-hidden"
+          >
+            <img
+              src="https://via.placeholder.com/150"
+              alt="Dining Hall"
+              className="w-full h-32 object-cover"
+            />
+            <div className="h-2 bg-uiucorange"></div>
+            <div className="p-6">
+              <h2 className="text-xl font-bold mb-2">{hall}</h2>
+              <p className="text-gray-700 text-sm">{message}</p>
+            </div>
           </div>
         ))}
       </div>
