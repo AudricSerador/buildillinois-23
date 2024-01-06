@@ -4,33 +4,33 @@ interface EntriesDisplayProps {
   mealEntries: any[];
 }
 
-const diningHallTimes: { [key: string]: { [key: string]: string } } = {
+export const diningHallTimes: { [key: string]: { [key: string]: string } } = {
   "Ikenberry Dining Center (Ike)": {
-    Breakfast: "7:00AM - 10:00AM",
-    Lunch: "10:30AM - 1:30PM",
+    "Breakfast": "7:00AM - 10:00AM",
+    "Lunch": "10:30AM - 1:30PM",
     "Light Lunch": "1:30PM - 3:00PM",
-    Dinner: "4:30PM - 8:00PM",
+    "Dinner": "4:30PM - 8:00PM",
   },
   "Illinois Street Dining Center (ISR)": {
-    Breakfast: "7:00AM - 10:00AM",
-    Lunch: "10:30AM - 2:00PM",
-    Dinner: "4:30PM - 8:00PM",
+    "Breakfast": "7:00AM - 10:00AM",
+    "Lunch": "10:30AM - 2:00PM",
+    "Dinner": "4:30PM - 8:00PM",
   },
   "Pennsylvania Avenue Dining Hall (PAR)": {
-    Breakfast: "7:00AM - 10:00AM",
-    Lunch: "10:30AM - 2:30PM",
-    Dinner: "4:30PM - 8:00PM",
+    "Breakfast": "7:00AM - 10:00AM",
+    "Lunch": "10:30AM - 2:30PM",
+    "Dinner": "4:30PM - 8:00PM",
   },
   "Lincoln Avenue Dining Hall (LAR)": {
-    Breakfast: "7:00AM - 10:00AM",
-    Lunch: "10:30AM - 1:30PM",
-    Dinner: "4:30PM - 7:00PM",
+    "Breakfast": "7:00AM - 10:00AM",
+    "Lunch": "10:30AM - 1:30PM",
+    "Dinner": "4:30PM - 7:00PM",
   },
   "Field of Greens (LAR)": {
-    Lunch: "10:00AM - 3:00PM",
+    "Lunch": "10:00AM - 3:00PM",
   },
-  InfiniTEA: {
-    "A la Carte--APP DISPLAY": "7:00AM - 10:30PM",
+  "InfiniTEA": {
+    "A la Carte--APP DISPLAY": "7:00AM - 11:30PM",
     "A la Carte--POS Feed": "7:00AM - 10:30PM",
   },
   "Urbana South Market": {
@@ -41,7 +41,7 @@ const diningHallTimes: { [key: string]: { [key: string]: string } } = {
     "A la Carte--APP DISPLAY": "9:00AM - 10:00PM",
     "A la Carte--POS Feed": "9:00AM - 10:00PM",
   },
-  Terrabyte: {
+  "Terrabyte": {
     "A la Carte--APP DISPLAY": "10:00AM - 10:30PM",
     "A la Carte--POS Feed": "10:00AM - 10:30PM",
   },

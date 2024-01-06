@@ -1,9 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { FoodItemDisplay } from "../components/allfood/food_item_display";
 import { useRouter } from "next/router";
 import LoadingSpinner from "../components/loading_spinner";
 import { Filters } from "../components/allfood/filters";
 import { IconLegend } from "@/components/icon_legend";
+
+function debounce(fn: Function, delay: number) {
+    let timer: NodeJS.Timeout;
+    return function (this: any, ...args: any[]) {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        fn.apply(this, args);
+      }, delay);
+    };
+  }
 
 export default function AllFood(): JSX.Element {
   const router = useRouter();
@@ -24,6 +34,14 @@ export default function AllFood(): JSX.Element {
   const [foodCount, setFoodCount] = useState(0);
   const [dates, setDates] = useState<string[]>([]);
   const [error, setError] = useState(null);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+
+  const debouncedFetchData = useCallback(
+    debounce((value: string) => {
+      setDebouncedSearchTerm(value);
+    }, 500),
+    []
+  );
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -34,7 +52,7 @@ export default function AllFood(): JSX.Element {
       setSearchTerm(localStorage.getItem("searchTerm") || "");
       setDateServed(localStorage.getItem("dateServed") || "");
       setPreferences(localStorage.getItem("preferences") || "");
-      
+
       const allergensFromLocalStorage = localStorage.getItem("allergens");
       if (allergensFromLocalStorage) {
         setAllergens(JSON.parse(allergensFromLocalStorage));
@@ -51,8 +69,9 @@ export default function AllFood(): JSX.Element {
         const allergensString = allergens.join(",");
 
         const res = await fetch(
-          `/api/get_data?page=${pageNumber}&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${mealType}&searchTerm=${searchTerm}&dateServed=${dateServed}&allergens=${allergensString}&preferences=${preferences}`
+          `/api/get_data?page=${pageNumber}&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${mealType}&searchTerm=${debouncedSearchTerm}&dateServed=${dateServed}&allergens=${allergensString}&preferences=${preferences}`
         );
+
         if (!res.ok) {
           throw Error(res.statusText);
         }
@@ -73,7 +92,7 @@ export default function AllFood(): JSX.Element {
     sortOrder,
     diningHall,
     mealType,
-    searchTerm,
+    debouncedSearchTerm,
     dateServed,
     allergens,
     preferences,
@@ -102,8 +121,6 @@ export default function AllFood(): JSX.Element {
     Math.min(totalPages, pageNumber + 2),
     Math.min(totalPages, startPage + 4)
   );
-
-
 
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-64 mt-4">
@@ -135,7 +152,10 @@ export default function AllFood(): JSX.Element {
           type="text"
           className="w-48 md:w-64 lg:w-96 xl:w-128 sm:w-auto ml-auto mt-4 block bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            debouncedFetchData(e.target.value);
+          }}
           placeholder="Search food..."
         />
       </div>

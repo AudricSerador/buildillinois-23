@@ -93,7 +93,7 @@ export function Navbar(): JSX.Element {
                   My Favorites
                 </Link>
                 <Link
-                  href="/"
+                  href="/dininghalls"
                   className="mt-4 text-white hover:uiucorange"
                   onClick={closeMenu}
                 >
@@ -120,7 +120,7 @@ export function Navbar(): JSX.Element {
               </Link>
             </li>
             <li>
-              <Link href="/" className="hover:text-uiucorange">
+              <Link href="/dininghalls" className="hover:text-uiucorange">
                 Dining Halls
               </Link>
             </li>
