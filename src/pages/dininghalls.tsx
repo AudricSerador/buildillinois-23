@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { diningHallTimes } from "@/components/entries_display";
+import Link from "next/link";
 
 export default function DiningHalls(): JSX.Element {
   const currentTime = new Date();
@@ -82,6 +83,20 @@ export default function DiningHalls(): JSX.Element {
     }
   };
 
+  const getHallName = (hall: string) => {
+    switch (hall) {
+      case "InfiniTEA":
+      case "Terrabyte":
+        return `${hall} (ISR)`;
+      case "Urbana South Market":
+        return `${hall} (PAR)`;
+      case "57 North":
+        return `${hall} (Ike)`;
+      default:
+        return hall;
+    }
+  };
+
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-64 mt-4 font-custom">
       <p className="text-4xl font-custombold mt-4 mb-4">
@@ -116,16 +131,21 @@ export default function DiningHalls(): JSX.Element {
         >
           {openDiningHalls.length > 0 ? (
             openDiningHalls.map(({ hall, message }) => (
-              <div
-                key={hall}
-                className="flex-none w-64 m-3 bg-white shadow-md rounded-lg overflow-hidden"
-              >
-                <div className="h-2 bg-uiucorange"></div>
-                <div className="p-6">
-                  <h2 className="text-xl font-bold mb-2">{hall}</h2>
-                  <p className="text-gray-700 text-sm">{message}</p>
+              <Link href={`/hall/${hall}`}>
+                <div
+                  key={hall}
+                  className="flex-none w-64 h-36 m-3 bg-white shadow-md rounded-lg overflow-hidden flex flex-col"
+                >
+                  <div className="h-2 bg-uiucorange"></div>
+                  <div className="p-6 flex flex-col justify-between h-full">
+                    <h2 className="text-xl font-bold mb-2">
+                      {getHallName(hall)}
+                    </h2>
+                    <div></div>
+                    <p className="text-gray-700 text-sm">{message}</p>
+                  </div>
                 </div>
-              </div>
+              </Link>
             ))
           ) : (
             <div className="grid place-items-center w-full h-[200px]">
@@ -153,21 +173,23 @@ export default function DiningHalls(): JSX.Element {
       <p className="text-4xl font-custombold mt-4 mb-4">All Dining Halls</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {allDiningHalls.map(({ hall, message }) => (
-          <div
-            key={hall}
-            className="card bg-white shadow-md rounded-lg overflow-hidden"
+          <Link
+            href={`/hall/${hall}`}
+            className="card bg-white shadow-md rounded-lg overflow-hidden h-full"
           >
-            <img
-              src="https://via.placeholder.com/150"
-              alt="Dining Hall"
-              className="w-full h-32 object-cover"
-            />
-            <div className="h-2 bg-uiucorange"></div>
-            <div className="p-6">
-              <h2 className="text-xl font-bold mb-2">{hall}</h2>
-              <p className="text-gray-700 text-sm">{message}</p>
+            <div key={hall}>
+              <img
+                src="https://via.placeholder.com/150"
+                alt="Dining Hall"
+                className="w-full h-32 object-cover"
+              />
+              <div className="h-2 bg-uiucorange"></div>
+              <div className="p-6 h-32">
+                <h2 className="text-xl font-bold mb-2">{getHallName(hall)}</h2>
+                <p className="text-gray-700 text-sm">{message}</p>
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
