@@ -1,13 +1,20 @@
 import React from "react";
 import Link from "next/link";
+import Image from 'next/image';
 
 export default function Home(): JSX.Element {
   return (
-    <div className="h-screen flex flex-col items-stretch m-0 p-0 mb-[-25px]">
-      <div className="m-0 p-0 bg-cover bg-center text-white flex-grow"
+    <div className="relative h-screen flex flex-col items-stretch m-0 p-0 mb-[-25px]">
+      <Image
+        src="/images/dininghall.jpg"
+        alt="Dining Hall"
+        layout="fill"
+        objectFit="cover"
+        quality={100}
+      />
+      <div className="relative m-0 p-0 text-white flex-grow"
         style={{
-          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(/images/dininghall.jpg)`,
-          backgroundAttachment: 'fixed',
+          background: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5))`,
         }}
       >
         <div className="flex justify-center items-start mt-20 text-center px-4 sm:px-0">
