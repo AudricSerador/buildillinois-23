@@ -28,7 +28,7 @@ interface FoodItem {
 export default function FoodItemPage() {
   const router = useRouter();
   const { id } = router.query;
-  const [foodItem, setFoodItem] = useState<FoodItem | null>(null); // Add type annotation to foodItem
+  const [foodItem, setFoodItem] = useState<FoodItem | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -62,23 +62,23 @@ export default function FoodItemPage() {
 
   return (
     <div className="px-2 sm:px-32 py-6 mt-4 bg-white shadow-md rounded-lg">
-      <h1 className="text-4xl font-custombold mb-4">{foodItem.name}</h1>
+      <h1 className="text-4xl font-custombold mb-4">{foodItem?.name}</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
         <div>
           <h2 className="text-2xl font-custombold mb-2">Meal Details</h2>
           <p className="mb-4">
             Serving Size:{" "}
-            <span className="font-custom">{foodItem.servingSize}</span>
+            <span className="font-custom">{foodItem?.servingSize}</span>
             <br />
             Ingredients:{" "}
-            <span className="font-custom">{foodItem.ingredients}</span>
+            <span className="font-custom">{foodItem?.ingredients}</span>
             <br />
-            Allergens: <span className="font-custom">{foodItem.allergens}</span>
+            Allergens: <span className="font-custom">{foodItem?.allergens}</span>
           </p>
           <h2 className="text-2xl font-custombold mb-2">Dates Served</h2>
-          <EntriesDisplay mealEntries={foodItem.mealEntries} />
+          {foodItem?.mealEntries && <EntriesDisplay mealEntries={foodItem.mealEntries} />}
         </div>
-        <NutritionFacts foodItem={foodItem} />
+        {foodItem && <NutritionFacts foodItem={foodItem} />}
       </div>
     </div>
   );

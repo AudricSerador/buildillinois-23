@@ -11,7 +11,7 @@ export const PreferenceIcons: React.FC<PreferenceIconsProps> = ({
     const allergensList = allergens.toLowerCase().split(', ');
 
     return (
-        <div className="flex bg-white">
+        <div className="flex flex-wrap bg-white">
             {preferencesList.map(preference => (
                 preference.trim() !== '' && (
                     <div className="mr-2" key={preference}>

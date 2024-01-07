@@ -69,7 +69,7 @@ export default function AllFood(): JSX.Element {
         const allergensString = allergens.join(",");
 
         const res = await fetch(
-          `/api/get_data?page=${pageNumber}&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${mealType}&searchTerm=${debouncedSearchTerm}&dateServed=${dateServed}&allergens=${allergensString}&preferences=${preferences}`
+          `/api/get_allfood?page=${pageNumber}&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${mealType}&searchTerm=${debouncedSearchTerm}&dateServed=${dateServed}&allergens=${allergensString}&preferences=${preferences}`
         );
 
         if (!res.ok) {
@@ -177,7 +177,7 @@ export default function AllFood(): JSX.Element {
           <ul>
             {food.length > 0 ? (
               food.map((foodItem: any) => (
-                <FoodItemDisplay key={foodItem.id} foodItem={foodItem} />
+                <FoodItemDisplay key={foodItem.id} foodItem={foodItem} includeEntries={true}/>
               ))
             ) : (
               <p className="font-custom text-center my-6">
@@ -186,41 +186,41 @@ export default function AllFood(): JSX.Element {
               </p>
             )}
           </ul>
-          <div className="flex justify-center space-x-2">
-            <button
-              onClick={() => handlePageChange(pageNumber - 1)}
-              className={`px-4 py-2 rounded-md text-white font-custom ${
-                pageNumber === 1
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-blue-500 hover:bg-blue-700"
-              }`}
-              disabled={pageNumber === 1}
-            >
-              Back
-            </button>
-            {[...Array(Math.max(0, endPage + 1 - startPage))].map((e, i) => (
-              <button
-                key={i}
-                onClick={() => handlePageChange(i + startPage)}
-                className={`px-4 py-2 rounded-md text-white font-custom ${
-                  pageNumber === i + startPage ? "bg-blue-500" : "bg-gray-300"
-                } hover:bg-blue-700`}
-              >
-                {i + startPage}
-              </button>
-            ))}
-            <button
-              onClick={() => handlePageChange(pageNumber + 1)}
-              className={`px-4 py-2 rounded-md text-white font-custom ${
-                pageNumber === totalPages
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-blue-500 hover:bg-blue-700"
-              }`}
-              disabled={pageNumber === totalPages}
-            >
-              Next
-            </button>
-          </div>
+          <div className="flex items-center justify-center space-x-2 mt-4 mb-8">
+  <button
+    onClick={() => handlePageChange(pageNumber - 1)}
+    className={`px-4 py-2 rounded-md text-white font-custom ${
+      pageNumber === 1
+        ? "bg-gray-300 cursor-not-allowed"
+        : "bg-blue-500 hover:bg-blue-700"
+    }`}
+    disabled={pageNumber === 1}
+  >
+    Back
+  </button>
+  {[...Array(Math.max(0, endPage + 1 - startPage))].map((e, i) => (
+    <button
+      key={i}
+      onClick={() => handlePageChange(i + startPage)}
+      className={`px-4 py-2 rounded-md text-white font-custom ${
+        pageNumber === i + startPage ? "bg-blue-500" : "bg-gray-300 hover:bg-blue-700"
+      }`}
+    >
+      {i + startPage}
+    </button>
+  ))}
+  <button
+    onClick={() => handlePageChange(pageNumber + 1)}
+    className={`px-4 py-2 rounded-md text-white font-custom ${
+      pageNumber === totalPages
+        ? "bg-gray-300 cursor-not-allowed"
+        : "bg-blue-500 hover:bg-blue-700"
+    }`}
+    disabled={pageNumber === totalPages}
+  >
+    Next
+  </button>
+</div>
         </>
       )}
     </div>

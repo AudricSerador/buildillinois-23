@@ -1,74 +1,92 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { diningHallTimes } from "@/components/entries_display";
 import Link from "next/link";
 
+
+
 export default function DiningHalls(): JSX.Element {
-  const currentTime = new Date();
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [openDiningHalls, setOpenDiningHalls] = useState([{ hall: "", message: "" }]);
+  const [allDiningHalls, setAllDiningHalls] = useState([{ hall: "", message: "" }]);
 
-  const isTimeInRange = (timeRange: string) => {
-    const [start, end] = timeRange.split(" - ").map((time) => {
-      let [hours, minutesPeriod] = time.split(":");
-      let hoursNum = Number(hours);
-      let minutes = Number(minutesPeriod.slice(0, -2));
-      const period = minutesPeriod.slice(-2);
-      if (period.toUpperCase() === "PM" && hoursNum !== 12) hoursNum += 12;
-      if (period.toUpperCase() === "AM" && hoursNum === 12) hoursNum = 0;
-      const date = new Date();
-      date.setHours(hoursNum);
-      date.setMinutes(minutes);
-      return date.getTime();
-    });
-    const currentTime = new Date().getTime();
-    return currentTime >= start && currentTime <= end;
-  };
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(() => new Date());
+    }, 60000);
+  
+    return () => clearInterval(timer);
+  }, []);
 
-  const getMessage = (times: any) => {
-    const timeKeys = Object.keys(times);
-    for (let i = 0; i < timeKeys.length; i++) {
-      if (isTimeInRange(times[timeKeys[i]])) {
-        if (timeKeys[i].includes("A la Carte")) {
-          return `Open until ${times[timeKeys[i]].split(" - ")[1]}`;
-        } else {
-          return `Serving ${timeKeys[i]} until ${
-            times[timeKeys[i]].split(" - ")[1]
-          }`;
+  useEffect(() => {
+    const isTimeInRange = (timeRange: string) => {
+      const [start, end] = timeRange.split(" - ").map((time) => {
+        let [hours, minutesPeriod] = time.split(":");
+        let hoursNum = Number(hours);
+        let minutes = Number(minutesPeriod.slice(0, -2));
+        const period = minutesPeriod.slice(-2);
+        if (period.toUpperCase() === "PM" && hoursNum !== 12) hoursNum += 12;
+        if (period.toUpperCase() === "AM" && hoursNum === 12) hoursNum = 0;
+        const date = new Date(currentTime);
+        date.setHours(hoursNum);
+        date.setMinutes(minutes);
+        return date.getTime();
+      });
+      const currentTimeInMilliseconds = currentTime.getTime();
+      return currentTimeInMilliseconds >= start && currentTimeInMilliseconds <= end;
+    };
+
+    const getMessage = (times: any) => {
+      const timeKeys = Object.keys(times);
+      for (let i = 0; i < timeKeys.length; i++) {
+        if (isTimeInRange(times[timeKeys[i]])) {
+          if (timeKeys[i].includes("A la Carte")) {
+            return `Open until ${times[timeKeys[i]].split(" - ")[1]}`;
+          } else {
+            return `Serving ${timeKeys[i]} until ${
+              times[timeKeys[i]].split(" - ")[1]
+            }`;
+          }
         }
       }
-    }
-    for (let i = 0; i < timeKeys.length; i++) {
-      if (
-        currentTime.getTime() <
-        new Date(times[timeKeys[i]].split(" - ")[0]).getTime()
-      ) {
-        if (timeKeys[i].includes("A la Carte")) {
-          return `Opening at ${times[timeKeys[i]].split(" - ")[0]}`;
-        } else {
-          return `Opening at ${times[timeKeys[i]].split(" - ")[0]} for ${
-            timeKeys[i]
-          }`;
+      for (let i = 0; i < timeKeys.length; i++) {
+        if (
+          currentTime.getTime() <
+          new Date(times[timeKeys[i]].split(" - ")[0]).getTime()
+        ) {
+          if (timeKeys[i].includes("A la Carte")) {
+            return `Opening at ${times[timeKeys[i]].split(" - ")[0]}`;
+          } else {
+            return `Opening at ${times[timeKeys[i]].split(" - ")[0]} for ${
+              timeKeys[i]
+            }`;
+          }
         }
       }
-    }
-    return "Closed for today";
-  };
+      return "Closed for today";
+    };
 
-  const openDiningHalls = Object.entries(diningHallTimes)
-    .map(([hall, times]) => {
-      return {
-        hall,
-        message: getMessage(times),
-      };
-    })
-    .filter((diningHall) => diningHall.message !== "Closed for today");
+    const openDiningHalls = Object.entries(diningHallTimes)
+      .map(([hall, times]) => {
+        return {
+          hall,
+          message: getMessage(times),
+        };
+      })
+      .filter((diningHall) => diningHall.message !== "Closed for today");
 
-  const allDiningHalls = Object.entries(diningHallTimes).map(
-    ([hall, times]) => {
-      return {
-        hall,
-        message: getMessage(times),
-      };
-    }
-  );
+    const allDiningHalls = Object.entries(diningHallTimes).map(
+      ([hall, times]) => {
+        return {
+          hall,
+          message: getMessage(times),
+        };
+      }
+    );
+
+    setOpenDiningHalls(openDiningHalls);
+    setAllDiningHalls(allDiningHalls);
+  }, [currentTime]);
+
 
   const scrollContainer = useRef<HTMLDivElement>(null);
 
