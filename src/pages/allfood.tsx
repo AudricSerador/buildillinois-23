@@ -40,7 +40,7 @@ export default function AllFood(): JSX.Element {
     debounce((value: string) => {
       setDebouncedSearchTerm(value);
     }, 500),
-    []
+    [setDebouncedSearchTerm]
   );
 
   useEffect(() => {

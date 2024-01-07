@@ -49,7 +49,7 @@ export default function FoodItemPage() {
     };
 
     fetchFoodItem();
-  }, [id]);
+  }, [id, router]);
 
   if (isLoading) {
     return (

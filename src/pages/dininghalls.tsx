@@ -2,18 +2,20 @@ import React, { useRef, useState, useEffect } from "react";
 import { diningHallTimes } from "@/components/entries_display";
 import Link from "next/link";
 
-
-
 export default function DiningHalls(): JSX.Element {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [openDiningHalls, setOpenDiningHalls] = useState([{ hall: "", message: "" }]);
-  const [allDiningHalls, setAllDiningHalls] = useState([{ hall: "", message: "" }]);
+  const [openDiningHalls, setOpenDiningHalls] = useState([
+    { hall: "", message: "" },
+  ]);
+  const [allDiningHalls, setAllDiningHalls] = useState([
+    { hall: "", message: "" },
+  ]);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(() => new Date());
     }, 60000);
-  
+
     return () => clearInterval(timer);
   }, []);
 
@@ -32,7 +34,9 @@ export default function DiningHalls(): JSX.Element {
         return date.getTime();
       });
       const currentTimeInMilliseconds = currentTime.getTime();
-      return currentTimeInMilliseconds >= start && currentTimeInMilliseconds <= end;
+      return (
+        currentTimeInMilliseconds >= start && currentTimeInMilliseconds <= end
+      );
     };
 
     const getMessage = (times: any) => {
@@ -86,7 +90,6 @@ export default function DiningHalls(): JSX.Element {
     setOpenDiningHalls(openDiningHalls);
     setAllDiningHalls(allDiningHalls);
   }, [currentTime]);
-
 
   const scrollContainer = useRef<HTMLDivElement>(null);
 
@@ -149,11 +152,8 @@ export default function DiningHalls(): JSX.Element {
         >
           {openDiningHalls.length > 0 ? (
             openDiningHalls.map(({ hall, message }) => (
-              <Link href={`/hall/${hall}`}>
-                <div
-                  key={hall}
-                  className="flex-none w-64 h-36 m-3 bg-white shadow-md rounded-lg overflow-hidden flex flex-col"
-                >
+              <Link key={hall} href={`/hall/${hall}`}>
+                <div className="flex-none w-64 h-36 m-3 bg-white shadow-md rounded-lg overflow-hidden flex flex-col">
                   <div className="h-2 bg-uiucorange"></div>
                   <div className="p-6 flex flex-col justify-between h-full">
                     <h2 className="text-xl font-bold mb-2">
@@ -192,10 +192,11 @@ export default function DiningHalls(): JSX.Element {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {allDiningHalls.map(({ hall, message }) => (
           <Link
+            key={hall}
             href={`/hall/${hall}`}
             className="card bg-white shadow-md rounded-lg overflow-hidden h-full"
           >
-            <div key={hall}>
+            <div>
               <img
                 src="https://via.placeholder.com/150"
                 alt="Dining Hall"

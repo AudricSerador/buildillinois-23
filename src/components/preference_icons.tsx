@@ -1,3 +1,5 @@
+import Image from 'next/image';
+
 interface PreferenceIconsProps {
     preferences: string;
     allergens: string;
@@ -15,7 +17,7 @@ export const PreferenceIcons: React.FC<PreferenceIconsProps> = ({
             {preferencesList.map(preference => (
                 preference.trim() !== '' && (
                     <div className="mr-2" key={preference}>
-                        <img 
+                        <Image 
                             src={`/images/icons/${preference}.svg`} 
                             alt={preference} 
                             width={24}
@@ -27,7 +29,7 @@ export const PreferenceIcons: React.FC<PreferenceIconsProps> = ({
             {allergensList.map(allergen => (
                 allergen.trim() !== '' && allergen !== 'n/a' && (
                     <div className="mr-2" key={allergen}>
-                        <img 
+                        <Image 
                             src={`/images/icons/${allergen}.svg`} 
                             alt={allergen} 
                             width={24}

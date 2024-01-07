@@ -83,6 +83,7 @@ export default function HallFoodPage({
         {foodDates && foodDates.length > 0 ? (
           foodDates.map((date) => (
             <button
+              key={date}
               className={`px-4 py-2 text-xl focus:outline-none ${
                 dateServed === date
                   ? "bg-uiucblue text-white"
@@ -181,6 +182,7 @@ export default function HallFoodPage({
             )
             .map((mealTypeItem) => (
               <button
+                key={mealTypeItem}
                 className={`px-4 py-2 text-xl focus:outline-none ${
                   mealType === mealTypeItem
                     ? "bg-uiucblue text-white"
@@ -204,6 +206,10 @@ export default function HallFoodPage({
               Error loading data: {error}
             </div>
           </div>
+        ) : Object.entries(foodData).length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-16">
+            <div className="font-custombold text-xl">No food data found :(</div>
+          </div>
         ) : (
           Object.entries(foodData).map(
             ([facility, foodItems]: [string, any[]]) => (
@@ -217,6 +223,7 @@ export default function HallFoodPage({
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {foodItems.map((foodItem: any) => (
                     <FoodItemDisplay
+                      key={foodItem.id}
                       foodItem={foodItem}
                       includeEntries={false}
                     />
