@@ -1,6 +1,8 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { FoodItemDisplay } from "@/components/allfood/food_item_display";
+import { diningHallTimes } from "@/components/entries_display";
+import { IconLegend } from "@/components/icon_legend";
 import LoadingSpinner from "@/components/loading_spinner";
 import { GetServerSideProps } from "next";
 import prisma from "../../../lib/prisma";
@@ -54,6 +56,20 @@ export default function HallFoodPage({
     foodDates && foodDates.length > 0 ? foodDates[0] : ""
   );
   const [error, setError] = useState(null);
+  const [dateIndex, setDateIndex] = useState(0);
+  const incrementDate = () => {
+    if (dateIndex < foodDates.length - 1) {
+      setDateIndex(dateIndex + 1);
+    }
+  };
+  const decrementDate = () => {
+    if (dateIndex > 0) {
+      setDateIndex(dateIndex - 1);
+    }
+  };
+  useEffect(() => {
+    setDateServed(foodDates[dateIndex]);
+  }, [dateIndex]);
 
   useEffect(() => {
     const fetchFoodData = async () => {
@@ -79,28 +95,55 @@ export default function HallFoodPage({
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-64 mt-4">
       <p className="text-4xl font-custombold mt-4 mb-4">{id}</p>
-      <div className="flex flex-row mb-4">
-        {foodDates && foodDates.length > 0 ? (
-          foodDates.map((date) => (
-            <button
-              key={date}
-              className={`px-4 py-2 text-xl focus:outline-none ${
-                dateServed === date
-                  ? "bg-uiucblue text-white"
-                  : "bg-white text-uiucblue border border-uiucblue"
-              }`}
-              onClick={() => setDateServed(date)}
-            >
-              {date}
-            </button>
-          ))
-        ) : (
-          <p>No dates found</p>
-        )}
+      <div className="mb-4">
+        <IconLegend />
       </div>
-      <div className="flex flex-row mb-4">
+      <div className="flex items-center justify-center space-x-4 mb-4">
         <button
-          className={`px-4 py-2 text-xl rounded-l-lg focus:outline-none ${
+          onClick={decrementDate}
+          className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 focus:outline-none"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            className="h-6 w-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </button>
+        <span className="text-3xl font-custombold text-uiucblue">
+          {foodDates[dateIndex]}
+        </span>
+        <button
+          onClick={incrementDate}
+          className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 focus:outline-none"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            className="h-6 w-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </button>
+      </div>
+      <div className="flex w-full mb-4">
+        <button
+          className={`flex-1 px-4 py-2 text-xl rounded-l-lg focus:outline-none ${
             mealType === "Breakfast"
               ? "bg-uiucblue text-white"
               : "bg-white text-uiucblue border border-uiucblue"
@@ -110,7 +153,7 @@ export default function HallFoodPage({
           Breakfast
         </button>
         <button
-          className={`px-4 py-2 text-xl focus:outline-none ${
+          className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
             mealType === "Lunch"
               ? "bg-uiucblue text-white"
               : "bg-white text-uiucblue border border-uiucblue"
@@ -121,7 +164,7 @@ export default function HallFoodPage({
         </button>
         {id === "Ikenberry Dining Center (Ike)" && (
           <button
-            className={`px-4 py-2 text-xl focus:outline-none ${
+            className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
               mealType === "Light Lunch"
                 ? "bg-uiucblue text-white"
                 : "bg-white text-uiucblue border border-uiucblue"
@@ -133,7 +176,7 @@ export default function HallFoodPage({
         )}
         {id === "Lincoln Avenue Dining Hall (LAR)" && (
           <button
-            className={`px-4 py-2 text-xl focus:outline-none ${
+            className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
               mealType === "Kosher Lunch"
                 ? "bg-uiucblue text-white"
                 : "bg-white text-uiucblue border border-uiucblue"
@@ -145,7 +188,7 @@ export default function HallFoodPage({
         )}
         {id === "Lincoln Avenue Dining Hall (LAR)" && (
           <button
-            className={`px-4 py-2 text-xl focus:outline-none ${
+            className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
               mealType === "Kosher Dinner"
                 ? "bg-uiucblue text-white"
                 : "bg-white text-uiucblue border border-uiucblue"
@@ -157,7 +200,7 @@ export default function HallFoodPage({
         )}
 
         <button
-          className={`px-4 py-2 text-xl rounded-r-lg focus:outline-none ${
+          className={`flex-1 px-4 py-2 text-xl rounded-r-lg focus:outline-none ${
             mealType === "Dinner"
               ? "bg-uiucblue text-white"
               : "bg-white text-uiucblue border border-uiucblue"
@@ -166,7 +209,8 @@ export default function HallFoodPage({
         >
           Dinner
         </button>
-
+      </div>
+      <div>
         {mealTypes &&
           mealTypes
             .filter(

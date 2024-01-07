@@ -9,16 +9,16 @@ export const PreferenceIcons: React.FC<PreferenceIconsProps> = ({
     preferences,
     allergens,
 }) => {
-    const preferencesList = preferences.split(' ');
-    const allergensList = allergens.toLowerCase().split(', ');
+    const preferencesList = preferences ? preferences.split(' ') : [];
+    const allergensList = allergens ? allergens.toLowerCase().split(', ') : [];
 
     return (
         <div className="flex flex-wrap bg-white">
             {preferencesList.map(preference => (
-                preference.trim() !== '' && (
+                preference.trim() !== '' && preference != 'N/A' && (
                     <div className="mr-2" key={preference}>
                         <Image 
-                            src={`/images/icons/${preference}.svg`} 
+                             src={`/images/icons/${preference}.svg`} 
                             alt={preference} 
                             width={24}
                             height={24}
