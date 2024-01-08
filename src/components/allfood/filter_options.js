@@ -47,40 +47,61 @@ export const preferenceOptions = [
 ];
 
 export const diningOptions = [
-  { value: "", label: "All Dining Halls" },
   {
-    value: "Ikenberry Dining Center (Ike)",
-    label: "Ikenberry Dining Center (Ike)",
+    label: "Dining Halls",
+    options: [
+      {
+        value: "Ikenberry Dining Center (Ike)",
+        label: "Ikenberry Dining Center (Ike)",
+      },
+      {
+        value: "Illinois Street Dining Center (ISR)",
+        label: "Illinois Street Dining Center (ISR)",
+      },
+      {
+        value: "Pennsylvania Avenue Dining Hall (PAR)",
+        label: "Pennsylvania Avenue Dining Hall (PAR)",
+      },
+      {
+        value: "Lincoln Avenue Dining Hall (LAR)",
+        label: "Lincoln Avenue Dining Hall (LAR)",
+      },
+    ],
   },
   {
-    value: "Illinois Street Dining Center (ISR)",
-    label: "Illinois Street Dining Center (ISR)",
+    label: "A la Carte",
+    options: [
+      { value: "TerraByte", label: "TerraByte (ISR)" },
+      { value: "Urbana South Market", label: "Urbana South Market (PAR)" },
+      { value: "57 North", label: "57 North (Ike)" },
+      { value: "InfiniTEA", label: "InfiniTEA (ISR)" },
+    ],
   },
-  {
-    value: "Pennsylvania Avenue Dining Hall (PAR)",
-    label: "Pennsylvania Avenue Dining Hall (PAR)",
-  },
-  {
-    value: "Lincoln Avenue Dining Hall (LAR)",
-    label: "Lincoln Avenue Dining Hall (LAR)",
-  },
-  { value: "TerraByte", label: "TerraByte (ISR)" },
-  { value: "Urbana South Market", label: "Urbana South Market (PAR)" },
-  { value: "57 North", label: "57 North (Ike)" },
-  { value: "InfiniTEA", label: "InfiniTEA (ISR)" },
 ];
 
 export const mealTypeOptions = [
-  { value: "", label: "All Meal Types" },
-  { value: "Breakfast", label: "Breakfast" },
-  { value: "Lunch", label: "Lunch" },
-  { value: "Dinner", label: "Dinner" },
-  { value: "A la Carte", label: "A la Carte" },
-  { value: "Deli & Bagel Bar", label: "Deli & Bagel Bar" },
-  { value: "Waffle Bar", label: "Waffle Bar" },
-  { value: "Salad Bar", label: "Salad Bar" },
-  { value: "Cereal", label: "Cereal" },
-  { value: "Ice Cream", label: "Ice Cream" },
-  { value: "Beverages", label: "Beverages" },
-  { value: "Condiments", label: "Condiments" },
+  {
+    label: "Meal Times",
+    options: [
+      { value: "Breakfast", label: "Breakfast" },
+      { value: "Light Lunch", label: "Light Lunch" },
+      { value: "Lunch", label: "Lunch" },
+      { value: "Dinner", label: "Dinner" },
+      { value: "Kosher Lunch", label: "Kosher Lunch" },
+      { value: "Kosher Dinner", label: "Kosher Dinner" },
+      { value: "A la Carte", label: "A la Carte" },
+    ],
+  },
+  {
+    label: "Food Stations (Always Available)",
+    options: [
+      { value: "Deli & Bagel Bar", label: "Deli & Bagel Bar" },
+      { value: "Waffle Bar", label: "Waffle Bar" },
+      { value: "Salad Bar", label: "Salad Bar" },
+      { value: "Cereal", label: "Cereal" },
+      { value: "Ice Cream", label: "Ice Cream" },
+      { value: "Beverages", label: "Beverages" },
+      { value: "Condiments", label: "Condiments" },
+    ],
+  }
 ];
