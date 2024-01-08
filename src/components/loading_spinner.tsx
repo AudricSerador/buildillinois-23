@@ -2,7 +2,7 @@ import React from 'react';
 
 const LoadingSpinner: React.FC = () => {
     return (
-        <div role="status" className="flex justify-center items-center h-full">
+        <div role="status" className="flex flex-col justify-center font-custombold items-center h-full">
             <svg
                 aria-hidden="true"
                 className="w-16 h-16 text-uiucblue animate-spin dark:text-uiucblue fill-uiucorange"
@@ -19,7 +19,7 @@ const LoadingSpinner: React.FC = () => {
                     fill="currentFill"
                 />
             </svg>
-            <span className="sr-only">Loading...</span>
+            <span className="mt-2">Loading food data</span>
         </div>
     );
 };

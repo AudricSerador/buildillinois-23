@@ -24,7 +24,9 @@ export const diningHallTimes: { [key: string]: { [key: string]: string } } = {
   "Lincoln Avenue Dining Hall (LAR)": {
     "Breakfast": "7:00AM - 10:00AM",
     "Lunch": "10:30AM - 1:30PM",
+    "Kosher Lunch": "10:45AM - 1:30PM",
     "Dinner": "4:30PM - 7:00PM",
+    "Kosher Dinner": "4:45PM - 6:15PM",
   },
   "Field of Greens (LAR)": {
     "Lunch": "10:00AM - 3:00PM",

@@ -93,7 +93,7 @@ export default function HallFoodPage({
   }, [id, mealType, dateServed]);
 
   return (
-    <div className="px-4 sm:px-8 md:px-16 lg:px-64 mt-4">
+    <div className="px-4 sm:px-8 font-custom md:px-16 lg:px-64 mt-4">
       <p className="text-4xl font-custombold mt-4 mb-4">{id}</p>
       <div className="mb-4">
         <IconLegend />
@@ -142,75 +142,93 @@ export default function HallFoodPage({
         </button>
       </div>
       <div className="flex w-full mb-4">
-        <button
-          className={`flex-1 px-4 py-2 text-xl rounded-l-lg focus:outline-none ${
-            mealType === "Breakfast"
-              ? "bg-uiucblue text-white"
-              : "bg-white text-uiucblue border border-uiucblue"
-          }`}
-          onClick={() => setMealType("Breakfast")}
-        >
-          Breakfast
-        </button>
-        <button
-          className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
-            mealType === "Lunch"
-              ? "bg-uiucblue text-white"
-              : "bg-white text-uiucblue border border-uiucblue"
-          }`}
-          onClick={() => setMealType("Lunch")}
-        >
-          Lunch
-        </button>
-        {id === "Ikenberry Dining Center (Ike)" && (
+        {["Terrabyte", "57 North", "Urbana South Market", "InfiniTEA"].includes(
+          id as string
+        ) ? (
           <button
-            className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
-              mealType === "Light Lunch"
+            className={`flex-1 px-4 py-2 text-xl rounded-l-lg focus:outline-none ${
+              mealType === "A la Carte"
                 ? "bg-uiucblue text-white"
                 : "bg-white text-uiucblue border border-uiucblue"
             }`}
-            onClick={() => setMealType("Light Lunch")}
+            onClick={() => setMealType("A la Carte")}
           >
-            Light Lunch
+            A la Carte (
+            {diningHallTimes[id as string]["A la Carte--APP DISPLAY"]})
           </button>
+        ) : (
+          <>
+            <button
+              className={`flex-1 px-4 py-2 text-xl rounded-l-lg focus:outline-none ${
+                mealType === "Breakfast"
+                  ? "bg-uiucblue text-white"
+                  : "bg-white text-uiucblue border border-uiucblue"
+              }`}
+              onClick={() => setMealType("Breakfast")}
+            >
+              Breakfast ({diningHallTimes[id as string]["Breakfast"]})
+            </button>
+            <button
+              className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
+                mealType === "Lunch"
+                  ? "bg-uiucblue text-white"
+                  : "bg-white text-uiucblue border border-uiucblue"
+              }`}
+              onClick={() => setMealType("Lunch")}
+            >
+              Lunch ({diningHallTimes[id as string]["Lunch"]})
+            </button>
+            {id === "Ikenberry Dining Center (Ike)" && (
+              <button
+                className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
+                  mealType === "Light Lunch"
+                    ? "bg-uiucblue text-white"
+                    : "bg-white text-uiucblue border border-uiucblue"
+                }`}
+                onClick={() => setMealType("Light Lunch")}
+              >
+                Light Lunch ({diningHallTimes[id as string]["Light Lunch"]})
+              </button>
+            )}
+            {id === "Lincoln Avenue Dining Hall (LAR)" && (
+              <button
+                className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
+                  mealType === "Kosher Lunch"
+                    ? "bg-uiucblue text-white"
+                    : "bg-white text-uiucblue border border-uiucblue"
+                }`}
+                onClick={() => setMealType("Kosher Lunch")}
+              >
+                Kosher Lunch ({diningHallTimes[id as string]["Kosher Lunch"]})
+              </button>
+            )}
+            <button
+              className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
+                mealType === "Dinner"
+                  ? "bg-uiucblue text-white"
+                  : "bg-white text-uiucblue border border-uiucblue"
+              }`}
+              onClick={() => setMealType("Dinner")}
+            >
+              Dinner ({diningHallTimes[id as string]["Dinner"]})
+            </button>
+            {id === "Lincoln Avenue Dining Hall (LAR)" && (
+              <button
+                className={`flex-1 px-4 py-2 text-xl rounded-r-lg focus:outline-none ${
+                  mealType === "Kosher Dinner"
+                    ? "bg-uiucblue text-white"
+                    : "bg-white text-uiucblue border border-uiucblue"
+                }`}
+                onClick={() => setMealType("Kosher Dinner")}
+              >
+                Kosher Dinner ({diningHallTimes[id as string]["Kosher Dinner"]})
+              </button>
+            )}
+          </>
         )}
-        {id === "Lincoln Avenue Dining Hall (LAR)" && (
-          <button
-            className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
-              mealType === "Kosher Lunch"
-                ? "bg-uiucblue text-white"
-                : "bg-white text-uiucblue border border-uiucblue"
-            }`}
-            onClick={() => setMealType("Kosher Lunch")}
-          >
-            Kosher Lunch
-          </button>
-        )}
-        {id === "Lincoln Avenue Dining Hall (LAR)" && (
-          <button
-            className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
-              mealType === "Kosher Dinner"
-                ? "bg-uiucblue text-white"
-                : "bg-white text-uiucblue border border-uiucblue"
-            }`}
-            onClick={() => setMealType("Kosher Dinner")}
-          >
-            Kosher Dinner
-          </button>
-        )}
-
-        <button
-          className={`flex-1 px-4 py-2 text-xl rounded-r-lg focus:outline-none ${
-            mealType === "Dinner"
-              ? "bg-uiucblue text-white"
-              : "bg-white text-uiucblue border border-uiucblue"
-          }`}
-          onClick={() => setMealType("Dinner")}
-        >
-          Dinner
-        </button>
       </div>
       <div>
+        <p className="font-custombold text-lg">Always Open</p>
         {mealTypes &&
           mealTypes
             .filter(
@@ -222,6 +240,8 @@ export default function HallFoodPage({
                   "Dinner",
                   "Kosher Lunch",
                   "Kosher Dinner",
+                  "A la Carte--POS Feed",
+                  "A la Carte--APP DISPLAY",
                 ].includes(mealTypeItem)
             )
             .map((mealTypeItem) => (
@@ -238,21 +258,21 @@ export default function HallFoodPage({
               </button>
             ))}
       </div>
-      <div className="flex flex-col">
+      <div className="flex flex-col p-4">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-screen">
             <LoadingSpinner />
-            <p className="mt-4 font-custom text-xl">Loading food data...</p>
+            <p className="mt-4 font-custom text-xl text-gray-600">Loading food data...</p>
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center h-screen">
-            <div className="font-custombold text-xl">
+            <div className="font-custombold text-xl text-red-500">
               Error loading data: {error}
             </div>
           </div>
         ) : Object.entries(foodData).length === 0 ? (
           <div className="flex flex-col items-center justify-center h-16">
-            <div className="font-custombold text-xl">No food data found :(</div>
+            <div className="font-custombold text-xl text-gray-500">No food data found :(</div>
           </div>
         ) : (
           Object.entries(foodData).map(
@@ -261,7 +281,7 @@ export default function HallFoodPage({
                 key={facility}
                 className="mb-8 bg-white shadow rounded-lg p-6"
               >
-                <h2 className="text-2xl font-bold mb-4 text-center">
+                <h2 className="text-2xl font-bold mb-4 text-center text-gray-700">
                   {facility}
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

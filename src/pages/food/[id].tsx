@@ -61,24 +61,23 @@ export default function FoodItemPage() {
   }
 
   return (
-    <div className="px-2 sm:px-32 py-6 mt-4 bg-white shadow-md rounded-lg">
+    <div className="px-4 sm:px-8 font-custom md:px-16 lg:px-64 mt-4">
       <h1 className="text-4xl font-custombold mb-4">{foodItem?.name}</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 items-start justify-items-center sm:justify-items-start">
+        {foodItem && <NutritionFacts foodItem={foodItem} />}
         <div>
-          <h2 className="text-2xl font-custombold mb-2">Meal Details</h2>
-          <p className="mb-4">
-            Serving Size:{" "}
-            <span className="font-custom">{foodItem?.servingSize}</span>
-            <br />
+          <p className="mb-4 font-custombold">
             Ingredients:{" "}
             <span className="font-custom">{foodItem?.ingredients}</span>
             <br />
-            Allergens: <span className="font-custom">{foodItem?.allergens}</span>
+            Allergens:{" "}
+            <span className="font-custom">{foodItem?.allergens}</span>
           </p>
           <h2 className="text-2xl font-custombold mb-2">Dates Served</h2>
-          {foodItem?.mealEntries && <EntriesDisplay mealEntries={foodItem.mealEntries} />}
+          {foodItem?.mealEntries && (
+            <EntriesDisplay mealEntries={foodItem.mealEntries} />
+          )}
         </div>
-        {foodItem && <NutritionFacts foodItem={foodItem} />}
       </div>
     </div>
   );
