@@ -262,7 +262,6 @@ export default function HallFoodPage({
         {isLoading ? (
           <div className="flex flex-col items-center justify-center h-screen">
             <LoadingSpinner />
-            <p className="mt-4 font-custom text-xl text-gray-600">Loading food data...</p>
           </div>
         ) : error ? (
           <div className="flex flex-col items-center justify-center h-screen">

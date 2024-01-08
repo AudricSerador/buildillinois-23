@@ -196,7 +196,7 @@ export default function AllFood(): JSX.Element {
               className={`px-4 py-2 rounded-md text-white font-custom ${
                 pageNumber === 1
                   ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-blue-500 hover:bg-blue-700"
+                  : "bg-uiucorange hover:bg-orange-600"
               }`}
               disabled={pageNumber === 1}
             >
@@ -208,8 +208,8 @@ export default function AllFood(): JSX.Element {
                 onClick={() => handlePageChange(i + startPage)}
                 className={`px-4 py-2 rounded-md text-white font-custom ${
                   pageNumber === i + startPage
-                    ? "bg-blue-500"
-                    : "bg-gray-300 hover:bg-blue-700"
+                    ? "bg-uiucorange"
+                    : "bg-gray-300 hover:bg-orange-600"
                 }`}
               >
                 {i + startPage}
@@ -220,7 +220,7 @@ export default function AllFood(): JSX.Element {
               className={`px-4 py-2 rounded-md text-white font-custom ${
                 pageNumber === totalPages
                   ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-blue-500 hover:bg-blue-700"
+                  : "bg-uiucorange hover:bg-orange-600"
               }`}
               disabled={pageNumber === totalPages}
             >

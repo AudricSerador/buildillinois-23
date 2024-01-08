@@ -8,6 +8,7 @@ export default function App({ Component, pageProps }: AppProps) {
   <div className="flex flex-col min-h-screen">
     <main className="flex-grow">
       <Navbar />
+      <div className="h-16 md:block hidden"></div>
       <Component {...pageProps} />;
     </main>
     <Footer />

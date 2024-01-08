@@ -42,36 +42,36 @@ export const IconLegend: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="p-4 bg-white rounded shadow-lg font-custom">
+    <div className="p-3 bg-uiucorange rounded shadow-lg font-custom">
       <button
-        className="flex items-center justify-between w-full text-2xl font-custombold mb-2"
+        className="flex items-center justify-between w-full text-2xl font-custombold text-white mb-2"
         onClick={() => setIsOpen(!isOpen)}
       >
         <span>Icon Legend</span>
         <span>{isOpen ? "▲" : "▼"}</span>
       </button>
       <div
-  className={`overflow-y-hidden transition-all duration-500 ease-in-out ${
-    isOpen ? "max-h-screen" : "max-h-0"
-  }`}
->
-  <div className="mb-4">
-    <span className="text-md font-semibold">Dietary Preferences</span>
-    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4 mt-2 ml-2">
-      {dietaryPreferences.map((icon, index) => (
-        <IconLabel key={index} src={icon.src} label={icon.label} />
-      ))}
-    </div>
-  </div>
-  <div>
-    <span className="text-md font-semibold">Allergens</span>
-    <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4 mt-2 ml-2">
-      {allergens.map((icon, index) => (
-        <IconLabel key={index} src={icon.src} label={icon.label} />
-      ))}
-    </div>
-  </div>
-</div>
+        className={`overflow-y-hidden bg-white transition-all duration-500 ease-in-out ${
+          isOpen ? "max-h-screen" : "max-h-0"
+        }`}
+      >
+        <div className="mb-4 mt-2">
+          <span className="text-md ml-2 font-custombold">Dietary Preferences</span>
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4 mt-2 ml-3">
+            {dietaryPreferences.map((icon, index) => (
+              <IconLabel key={index} src={icon.src} label={icon.label} />
+            ))}
+          </div>
+        </div>
+        <div>
+          <span className="text-md ml-2 font-custombold">Allergens</span>
+          <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4 mt-2 ml-3">
+            {allergens.map((icon, index) => (
+              <IconLabel key={index} src={icon.src} label={icon.label} />
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

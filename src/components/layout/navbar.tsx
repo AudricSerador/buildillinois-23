@@ -36,7 +36,7 @@ export function Navbar(): JSX.Element {
     <nav
       className={`${
         isMobile ? "fixed top-0" : ""
-      } bg-gray-900 text-white w-full shadow-lg z-10`}
+      } fixed bg-gray-900 text-white w-full shadow-lg z-10`}
     >
       <div className="px-5 xl:px-12 py-6 flex w-full items-center justify-center">
         <Link
