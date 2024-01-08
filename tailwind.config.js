@@ -14,6 +14,12 @@ module.exports = {
       colors: {
         'uiucblue': '#13294B',
         'uiucorange': '#FF5F05',
+        'heritageorange': '#F5821E',
+        'almamater': '#B1B3B3',
+        'cloud': '#F8FAFC',
+        'clouddark': '#E8E9EB',
+        'clouddarker': '#DDDEDE',
+        'clouddarkest': '#D2D2D2',
       },
     },
   },
