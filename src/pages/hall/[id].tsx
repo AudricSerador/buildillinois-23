@@ -98,204 +98,212 @@ export default function HallFoodPage({
       <div className="mb-4">
         <IconLegend />
       </div>
-      <div className="flex items-center justify-center space-x-4 mb-4">
-        <button
-          onClick={decrementDate}
-          className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 focus:outline-none"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            className="h-6 w-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
-        <span className="text-3xl font-custombold text-uiucblue">
-          {foodDates[dateIndex]}
-        </span>
-        <button
-          onClick={incrementDate}
-          className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 focus:outline-none"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            className="h-6 w-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </button>
-      </div>
-      <div className="flex w-full mb-4">
-        {["Terrabyte", "57 North", "Urbana South Market", "InfiniTEA"].includes(
-          id as string
-        ) ? (
+      <div className="bg-clouddark">
+        <div className="flex items-center justify-center space-x-4 mb-4">
           <button
-            className={`flex-1 px-4 py-2 text-xl rounded-l-lg focus:outline-none ${
-              mealType === "A la Carte"
-                ? "bg-uiucblue text-white"
-                : "bg-white text-uiucblue border border-uiucblue"
-            }`}
-            onClick={() => setMealType("A la Carte")}
+            onClick={decrementDate}
+            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 focus:outline-none"
           >
-            A la Carte (
-            {diningHallTimes[id as string]["A la Carte--APP DISPLAY"]})
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              className="h-6 w-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
           </button>
-        ) : (
-          <>
+          <span className="text-3xl font-custombold text-uiucblue">
+            {foodDates[dateIndex]}
+          </span>
+          <button
+            onClick={incrementDate}
+            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 focus:outline-none"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              className="h-6 w-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        </div>
+        <div className="flex w-full mb-4">
+          {[
+            "Terrabyte",
+            "57 North",
+            "Urbana South Market",
+            "InfiniTEA",
+          ].includes(id as string) ? (
             <button
               className={`flex-1 px-4 py-2 text-xl rounded-l-lg focus:outline-none ${
-                mealType === "Breakfast"
+                mealType === "A la Carte"
                   ? "bg-uiucblue text-white"
                   : "bg-white text-uiucblue border border-uiucblue"
               }`}
-              onClick={() => setMealType("Breakfast")}
+              onClick={() => setMealType("A la Carte")}
             >
-              Breakfast ({diningHallTimes[id as string]["Breakfast"]})
+              A la Carte (
+              {diningHallTimes[id as string]["A la Carte--APP DISPLAY"]})
             </button>
-            <button
-              className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
-                mealType === "Lunch"
-                  ? "bg-uiucblue text-white"
-                  : "bg-white text-uiucblue border border-uiucblue"
-              }`}
-              onClick={() => setMealType("Lunch")}
-            >
-              Lunch ({diningHallTimes[id as string]["Lunch"]})
-            </button>
-            {id === "Ikenberry Dining Center (Ike)" && (
+          ) : (
+            <div className="flex px-4">
+              <button
+                className={`flex-1 px-4 py-2 text-xl rounded-l-lg focus:outline-none ${
+                  mealType === "Breakfast"
+                    ? "bg-uiucblue text-white"
+                    : "bg-white text-uiucblue border border-uiucblue"
+                }`}
+                onClick={() => setMealType("Breakfast")}
+              >
+                Breakfast ({diningHallTimes[id as string]["Breakfast"]})
+              </button>
               <button
                 className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
-                  mealType === "Light Lunch"
+                  mealType === "Lunch"
                     ? "bg-uiucblue text-white"
                     : "bg-white text-uiucblue border border-uiucblue"
                 }`}
-                onClick={() => setMealType("Light Lunch")}
+                onClick={() => setMealType("Lunch")}
               >
-                Light Lunch ({diningHallTimes[id as string]["Light Lunch"]})
+                Lunch ({diningHallTimes[id as string]["Lunch"]})
               </button>
-            )}
-            {id === "Lincoln Avenue Dining Hall (LAR)" && (
+              {id === "Ikenberry Dining Center (Ike)" && (
+                <button
+                  className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
+                    mealType === "Light Lunch"
+                      ? "bg-uiucblue text-white"
+                      : "bg-white text-uiucblue border border-uiucblue"
+                  }`}
+                  onClick={() => setMealType("Light Lunch")}
+                >
+                  Light Lunch ({diningHallTimes[id as string]["Light Lunch"]})
+                </button>
+              )}
+              {id === "Lincoln Avenue Dining Hall (LAR)" && (
+                <button
+                  className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
+                    mealType === "Kosher Lunch"
+                      ? "bg-uiucblue text-white"
+                      : "bg-white text-uiucblue border border-uiucblue"
+                  }`}
+                  onClick={() => setMealType("Kosher Lunch")}
+                >
+                  Kosher Lunch ({diningHallTimes[id as string]["Kosher Lunch"]})
+                </button>
+              )}
               <button
                 className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
-                  mealType === "Kosher Lunch"
+                  mealType === "Dinner"
                     ? "bg-uiucblue text-white"
                     : "bg-white text-uiucblue border border-uiucblue"
                 }`}
-                onClick={() => setMealType("Kosher Lunch")}
+                onClick={() => setMealType("Dinner")}
               >
-                Kosher Lunch ({diningHallTimes[id as string]["Kosher Lunch"]})
+                Dinner ({diningHallTimes[id as string]["Dinner"]})
               </button>
-            )}
-            <button
-              className={`flex-1 px-4 py-2 text-xl focus:outline-none ${
-                mealType === "Dinner"
-                  ? "bg-uiucblue text-white"
-                  : "bg-white text-uiucblue border border-uiucblue"
-              }`}
-              onClick={() => setMealType("Dinner")}
-            >
-              Dinner ({diningHallTimes[id as string]["Dinner"]})
-            </button>
-            {id === "Lincoln Avenue Dining Hall (LAR)" && (
-              <button
-                className={`flex-1 px-4 py-2 text-xl rounded-r-lg focus:outline-none ${
-                  mealType === "Kosher Dinner"
-                    ? "bg-uiucblue text-white"
-                    : "bg-white text-uiucblue border border-uiucblue"
-                }`}
-                onClick={() => setMealType("Kosher Dinner")}
-              >
-                Kosher Dinner ({diningHallTimes[id as string]["Kosher Dinner"]})
-              </button>
-            )}
-          </>
-        )}
-      </div>
-      <div>
-        <p className="font-custombold text-lg">Always Open</p>
-        {mealTypes &&
-          mealTypes
-            .filter(
-              (mealTypeItem) =>
-                ![
-                  "Breakfast",
-                  "Lunch",
-                  "Light Lunch",
-                  "Dinner",
-                  "Kosher Lunch",
-                  "Kosher Dinner",
-                  "A la Carte--POS Feed",
-                  "A la Carte--APP DISPLAY",
-                ].includes(mealTypeItem)
-            )
-            .map((mealTypeItem) => (
-              <button
-                key={mealTypeItem}
-                className={`px-4 py-2 text-xl focus:outline-none ${
-                  mealType === mealTypeItem
-                    ? "bg-uiucblue text-white"
-                    : "bg-white text-uiucblue border border-uiucblue"
-                }`}
-                onClick={() => setMealType(mealTypeItem)}
-              >
-                {mealTypeItem}
-              </button>
-            ))}
-      </div>
-      <div className="flex flex-col p-4">
-        {isLoading ? (
-          <div className="flex flex-col items-center justify-center h-screen">
-            <LoadingSpinner />
-          </div>
-        ) : error ? (
-          <div className="flex flex-col items-center justify-center h-screen">
-            <div className="font-custombold text-xl text-red-500">
-              Error loading data: {error}
+              {id === "Lincoln Avenue Dining Hall (LAR)" && (
+                <button
+                  className={`flex-1 px-4 py-2 text-xl rounded-r-lg focus:outline-none ${
+                    mealType === "Kosher Dinner"
+                      ? "bg-uiucblue text-white"
+                      : "bg-white text-uiucblue border border-uiucblue"
+                  }`}
+                  onClick={() => setMealType("Kosher Dinner")}
+                >
+                  Kosher Dinner (
+                  {diningHallTimes[id as string]["Kosher Dinner"]})
+                </button>
+              )}
             </div>
-          </div>
-        ) : Object.entries(foodData).length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-16">
-            <div className="font-custombold text-xl text-gray-500">No food data found :(</div>
-          </div>
-        ) : (
-          Object.entries(foodData).map(
-            ([facility, foodItems]: [string, any[]]) => (
-              <div
-                key={facility}
-                className="mb-8 bg-white shadow rounded-lg p-6"
-              >
-                <h2 className="text-2xl font-bold mb-4 text-center text-gray-700">
-                  {facility}
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {foodItems.map((foodItem: any) => (
-                    <FoodItemDisplay
-                      key={foodItem.id}
-                      foodItem={foodItem}
-                      includeEntries={false}
-                    />
-                  ))}
-                </div>
+          )}
+        </div>
+        <div>
+          <p className="font-custombold text-lg">Always Open</p>
+          {mealTypes &&
+            mealTypes
+              .filter(
+                (mealTypeItem) =>
+                  ![
+                    "Breakfast",
+                    "Lunch",
+                    "Light Lunch",
+                    "Dinner",
+                    "Kosher Lunch",
+                    "Kosher Dinner",
+                    "A la Carte--POS Feed",
+                    "A la Carte--APP DISPLAY",
+                  ].includes(mealTypeItem)
+              )
+              .map((mealTypeItem) => (
+                <button
+                  key={mealTypeItem}
+                  className={`px-4 py-2 text-xl focus:outline-none ${
+                    mealType === mealTypeItem
+                      ? "bg-uiucblue text-white"
+                      : "bg-white text-uiucblue border border-uiucblue"
+                  }`}
+                  onClick={() => setMealType(mealTypeItem)}
+                >
+                  {mealTypeItem}
+                </button>
+              ))}
+        </div>
+        <div className="flex flex-col p-4">
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center h-screen">
+              <LoadingSpinner />
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center h-screen">
+              <div className="font-custombold text-xl text-red-500">
+                Error loading data: {error}
               </div>
+            </div>
+          ) : Object.entries(foodData).length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-16">
+              <div className="font-custombold text-xl text-gray-500">
+                No food data found :(
+              </div>
+            </div>
+          ) : (
+            Object.entries(foodData).map(
+              ([facility, foodItems]: [string, any[]]) => (
+                <div
+                  key={facility}
+                  className="mb-8 bg-white shadow rounded-lg p-6"
+                >
+                  <h2 className="text-2xl font-bold mb-4 text-center text-gray-700">
+                    {facility}
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {foodItems.map((foodItem: any) => (
+                      <FoodItemDisplay
+                        key={foodItem.id}
+                        foodItem={foodItem}
+                        includeEntries={false}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )
             )
-          )
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

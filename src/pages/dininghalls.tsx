@@ -46,23 +46,28 @@ export default function DiningHalls(): JSX.Element {
           if (timeKeys[i].includes("A la Carte")) {
             return `Open until ${times[timeKeys[i]].split(" - ")[1]}`;
           } else {
-            return `Serving ${timeKeys[i]} until ${
-              times[timeKeys[i]].split(" - ")[1]
-            }`;
+            return `Serving ${timeKeys[i]} until ${times[timeKeys[i]].split(" - ")[1]}`;
           }
         }
       }
       for (let i = 0; i < timeKeys.length; i++) {
-        if (
-          currentTime.getTime() <
-          new Date(times[timeKeys[i]].split(" - ")[0]).getTime()
-        ) {
+        const [start, end] = times[timeKeys[i]].split(" - ").map((time: string) => {
+          let [hours, minutesPeriod] = time.split(":");
+          let hoursNum = Number(hours);
+          let minutes = Number(minutesPeriod.slice(0, -2));
+          const period = minutesPeriod.slice(-2);
+          if (period.toUpperCase() === "PM" && hoursNum !== 12) hoursNum += 12;
+          if (period.toUpperCase() === "AM" && hoursNum === 12) hoursNum = 0;
+          const date = new Date(currentTime);
+          date.setHours(hoursNum);
+          date.setMinutes(minutes);
+          return date.getTime();
+        });
+        if (currentTime.getTime() < start) {
           if (timeKeys[i].includes("A la Carte")) {
             return `Opening at ${times[timeKeys[i]].split(" - ")[0]}`;
           } else {
-            return `Opening at ${times[timeKeys[i]].split(" - ")[0]} for ${
-              timeKeys[i]
-            }`;
+            return `Opening at ${times[timeKeys[i]].split(" - ")[0]} for ${timeKeys[i]}`;
           }
         }
       }
@@ -76,7 +81,7 @@ export default function DiningHalls(): JSX.Element {
           message: getMessage(times),
         };
       })
-      .filter((diningHall) => diningHall.message !== "Closed for today");
+      .filter((diningHall) => diningHall.message.startsWith("Open until") || diningHall.message.startsWith("Serving"));
 
     const allDiningHalls = Object.entries(diningHallTimes).map(
       ([hall, times]) => {
