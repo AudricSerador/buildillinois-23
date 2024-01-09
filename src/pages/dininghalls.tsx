@@ -112,7 +112,7 @@ export default function DiningHalls(): JSX.Element {
   const getHallName = (hall: string) => {
     switch (hall) {
       case "InfiniTEA":
-      case "Terrabyte":
+      case "TerraByte":
         return `${hall} (ISR)`;
       case "Urbana South Market":
         return `${hall} (PAR)`;

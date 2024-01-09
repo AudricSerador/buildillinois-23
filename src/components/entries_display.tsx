@@ -43,7 +43,7 @@ export const diningHallTimes: { [key: string]: { [key: string]: string } } = {
     "A la Carte--APP DISPLAY": "9:00AM - 10:00PM",
     "A la Carte--POS Feed": "9:00AM - 10:00PM",
   },
-  "Terrabyte": {
+  "TerraByte": {
     "A la Carte--APP DISPLAY": "10:00AM - 10:30PM",
     "A la Carte--POS Feed": "10:00AM - 10:30PM",
   },
@@ -103,7 +103,7 @@ export const EntriesDisplay: React.FC<EntriesDisplayProps> = ({
                           {[
                             "InfiniTEA",
                             "Urbana South Market",
-                            "Terrabyte",
+                            "TerraByte",
                             "57 North",
                           ].includes(facility)
                             ? "Daily Menu"
