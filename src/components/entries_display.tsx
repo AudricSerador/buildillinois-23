@@ -53,17 +53,17 @@ const EntriesDates: React.FC<{ diningHalls: { [key: string]: any } }> = ({
   diningHalls,
 }) => {
   return (
-    <div className="p-4 pt-0 pb-4">
+    <div className="pt-0">
       {Object.entries(diningHalls as { [key: string]: any }).map(
         ([hall, facilities]) => (
-          <div key={hall}>
-            <h2 className="text-xl font-custombold mb-2 text-center mt-2">
+          <div className="border border-gray-300 p-3">
+            <h2 className="text-xl font-custombold mb-2 text-center mt-1">
               {hall}
             </h2>
             <div className="grid grid-cols-2 gap-4">
               {Object.entries(facilities).map(([facility, entries]) => (
                 <div key={facility}>
-                  <h2 className="font-bold mb-2 ">
+                  <h2 className="font-bold mb-2">
                     {[
                       "InfiniTEA",
                       "Urbana South Market",
@@ -191,7 +191,7 @@ export const EntriesDisplay: React.FC<EntriesDisplayProps> = ({
             </span>
           </div>
           <div
-            className={`collapse-css-transition bg-clouddark rounded-b-lg shadow ${
+            className={`collapse-css-transition bg-cloud rounded-b-lg shadow ${
               expandedDate === date ? "open" : ""
             }`}
           >

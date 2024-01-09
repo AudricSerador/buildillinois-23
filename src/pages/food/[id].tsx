@@ -36,19 +36,19 @@ export default function FoodItemPage() {
       if (id) {
         const res = await fetch(`/api/food/${id}`);
         const data = await res.json();
-
+  
         if (!data) {
           router.push("/404");
         } else {
           setFoodItem(data);
           setIsLoading(false);
         }
-      } else {
-        router.push("/404");
       }
     };
-
-    fetchFoodItem();
+  
+    if (id) {
+      fetchFoodItem();
+    }
   }, [id, router]);
 
   if (isLoading) {
