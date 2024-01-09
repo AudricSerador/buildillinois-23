@@ -49,6 +49,109 @@ export const diningHallTimes: { [key: string]: { [key: string]: string } } = {
   },
 };
 
+const EntriesDates: React.FC<{ diningHalls: { [key: string]: any } }> = ({
+  diningHalls,
+}) => {
+  return (
+    <div className="p-4 pt-0 pb-4">
+      {Object.entries(diningHalls as { [key: string]: any }).map(
+        ([hall, facilities]) => (
+          <div key={hall}>
+            <h2 className="text-xl font-custombold mb-2 text-center mt-2">
+              {hall}
+            </h2>
+            <div className="grid grid-cols-2 gap-4">
+              {Object.entries(facilities).map(([facility, entries]) => (
+                <div key={facility}>
+                  <h2 className="font-bold mb-2 ">
+                    {[
+                      "InfiniTEA",
+                      "Urbana South Market",
+                      "TerraByte",
+                      "57 North",
+                    ].includes(facility)
+                      ? "Daily Menu"
+                      : facility.startsWith("Build Your Own")
+                      ? `${facility.substring(0, facility.indexOf(" ("))}: ${
+                          (entries as any[])[0].mealType
+                        }`
+                      : facility.includes("(")
+                      ? facility.substring(0, facility.indexOf("("))
+                      : facility}
+                  </h2>
+                  <ul className="list-disc pl-5">
+                    {(entries as any[]).map((entry: any) => {
+                      const mealTypes = [
+                        "Breakfast",
+                        "Lunch",
+                        "Light Lunch",
+                        "Kosher Lunch",
+                        "Kosher Dinner",
+                        "Dinner",
+                        "A la Carte--APP DISPLAY",
+                        "A la Carte--POS Feed",
+                      ];
+                      const defaultMealTypes = ["Breakfast", "Lunch", "Dinner"];
+                      if (hall === "Ikenberry Dining Center (Ike)") {
+                        defaultMealTypes.push("Light Lunch");
+                      } else if (hall === "Lincoln Avenue Dining Hall (LAR)") {
+                        defaultMealTypes.push("Kosher Lunch", "Kosher Dinner");
+                      }
+                      let displayMealType;
+                      if (mealTypes.includes(entry.mealType)) {
+                        displayMealType = [
+                          {
+                            type: entry.mealType.startsWith("A la Carte")
+                              ? entry.mealType.substring(
+                                  0,
+                                  entry.mealType.indexOf("--")
+                                )
+                              : entry.mealType,
+                            time:
+                              (diningHallTimes[hall] &&
+                                diningHallTimes[hall][entry.mealType]) ||
+                              "Not Available",
+                          },
+                        ];
+                      } else {
+                        let existingMealTypes = (entries as any[]).map(
+                          (entry: any) => entry.mealType
+                        );
+                        displayMealType = defaultMealTypes
+                          .filter(
+                            (mealType) => !existingMealTypes.includes(mealType)
+                          )
+                          .map((mealType) => ({
+                            type: mealType,
+                            time:
+                              (diningHallTimes[hall] &&
+                                diningHallTimes[hall][mealType]) ||
+                              "Not Available",
+                          }));
+                        (entries as any[]).push(
+                          ...displayMealType.map((meal) => ({
+                            mealType: meal.type,
+                          }))
+                        );
+                      }
+
+                      return displayMealType.map((meal, index) => (
+                        <li key={index}>
+                          {meal.type} ({meal.time})
+                        </li>
+                      ));
+                    })}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      )}
+    </div>
+  );
+};
+
 export const EntriesDisplay: React.FC<EntriesDisplayProps> = ({
   mealEntries,
 }) => {
@@ -69,137 +172,30 @@ export const EntriesDisplay: React.FC<EntriesDisplayProps> = ({
   const [expandedDate, setExpandedDate] = useState<string | null>(null);
 
   return (
-    <div className="p-4 border rounded font-custom bg-gray-100">
+    <div className="max-w-2xl my-8 font-custom">
       {Object.entries(groupedEntries).map(([date, diningHalls]) => (
-        <div key={date} className="mb-4 p-4 border rounded bg-white shadow">
-          <button
-            className="text-lg font-custombold flex justify-between items-center w-full bg-uiucorange text-white rounded p-2"
-            onClick={() => setExpandedDate(expandedDate === date ? null : date)}
+        <div key={date} className="mb-3">
+          <div
+            className={`bg-uiucorange text-white p-4 flex justify-between items-center cursor-pointer ${
+              expandedDate === date ? "rounded-t-lg" : "rounded-lg"
+            }`}
+            onClick={() =>
+              setExpandedDate((currentDate) =>
+                currentDate === date ? null : date
+              )
+            }
           >
-            <span>{date}</span>
-            <span className="text-uiucblue">
+            <h1 className="text-xl font-custombold">{date}</h1>
+            <span className="text-white">
               {expandedDate === date ? "▲" : "▼"}
             </span>
-          </button>
+          </div>
           <div
-            style={{
-              maxHeight: expandedDate === date ? "1000px" : "0",
-              overflow: "hidden",
-              transition: "max-height 0.3s ease-in-out",
-            }}
+            className={`collapse-css-transition bg-clouddark rounded-b-lg shadow ${
+              expandedDate === date ? "open" : ""
+            }`}
           >
-            {Object.entries(diningHalls as { [key: string]: any }).map(
-              ([hall, facilities]) => (
-                <div
-                  key={hall}
-                  className="mt-2 ml-4 p-2 border rounded bg-gray-200"
-                >
-                  <h3 className="text-md font-semibold">{hall}</h3>
-                  {Object.entries(facilities).map(([facility, entries]) => (
-                    <div
-                      key={facility}
-                      className="mt-1 ml-4 p-2 flex justify-between items-center border rounded bg-gray-100"
-                    >
-                      <div className="flex-1 mr-2">
-                        <h4 className="text-md font-medium">
-                          {[
-                            "InfiniTEA",
-                            "Urbana South Market",
-                            "TerraByte",
-                            "57 North",
-                          ].includes(facility)
-                            ? "Daily Menu"
-                            : facility.startsWith("Build Your Own")
-                            ? `${facility.substring(
-                                0,
-                                facility.indexOf(" (")
-                              )}: ${(entries as any[])[0].mealType}`
-                            : facility.includes("(")
-                            ? facility.substring(0, facility.indexOf("("))
-                            : facility}
-                        </h4>
-                      </div>
-                      <div>
-                        {(entries as any[]).map((entry: any) => {
-                          const mealTypes = [
-                            "Breakfast",
-                            "Lunch",
-                            "Light Lunch",
-                            "Kosher Lunch",
-                            "Kosher Dinner",
-                            "Dinner",
-                            "A la Carte--APP DISPLAY",
-                            "A la Carte--POS Feed",
-                          ];
-                          const defaultMealTypes = [
-                            "Breakfast",
-                            "Lunch",
-                            "Dinner",
-                          ];
-                          if (hall === "Ikenberry Dining Center (Ike)") {
-                            defaultMealTypes.push("Light Lunch");
-                          } else if (
-                            hall === "Lincoln Avenue Dining Hall (LAR)"
-                          ) {
-                            defaultMealTypes.push(
-                              "Kosher Lunch",
-                              "Kosher Dinner"
-                            );
-                          }
-                          let displayMealType;
-                          if (mealTypes.includes(entry.mealType)) {
-                            displayMealType = [
-                              {
-                                type: entry.mealType.startsWith("A la Carte")
-                                  ? entry.mealType.substring(
-                                      0,
-                                      entry.mealType.indexOf("--")
-                                    )
-                                  : entry.mealType,
-                                time:
-                                  (diningHallTimes[hall] &&
-                                    diningHallTimes[hall][entry.mealType]) ||
-                                  "Not Available",
-                              },
-                            ];
-                          } else {
-                            let existingMealTypes = (entries as any[]).map(
-                              (entry: any) => entry.mealType
-                            );
-                            displayMealType = defaultMealTypes
-                              .filter(
-                                (mealType) =>
-                                  !existingMealTypes.includes(mealType)
-                              )
-                              .map((mealType) => ({
-                                type: mealType,
-                                time:
-                                  (diningHallTimes[hall] &&
-                                    diningHallTimes[hall][mealType]) ||
-                                  "Not Available",
-                              }));
-                            (entries as any[]).push(
-                              ...displayMealType.map((meal) => ({
-                                mealType: meal.type,
-                              }))
-                            );
-                          }
-
-                          return displayMealType.map((meal, index) => (
-                            <p
-                              key={index}
-                              className="text-sm sm:text-base text-gray-700"
-                            >
-                              {meal.type} ({meal.time})
-                            </p>
-                          ));
-                        })}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )
-            )}
+            <EntriesDates diningHalls={diningHalls as { [key: string]: any }} />
           </div>
         </div>
       ))}
