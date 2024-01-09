@@ -6,32 +6,32 @@ interface EntriesDisplayProps {
 
 export const diningHallTimes: { [key: string]: { [key: string]: string } } = {
   "Ikenberry Dining Center (Ike)": {
-    "Breakfast": "7:00AM - 10:00AM",
-    "Lunch": "10:30AM - 1:30PM",
+    Breakfast: "7:00AM - 10:00AM",
+    Lunch: "10:30AM - 1:30PM",
     "Light Lunch": "1:30PM - 3:00PM",
-    "Dinner": "4:30PM - 8:00PM",
+    Dinner: "4:30PM - 8:00PM",
   },
   "Illinois Street Dining Center (ISR)": {
-    "Breakfast": "7:00AM - 10:00AM",
-    "Lunch": "10:30AM - 2:00PM",
-    "Dinner": "4:30PM - 8:00PM",
+    Breakfast: "7:00AM - 10:00AM",
+    Lunch: "10:30AM - 2:00PM",
+    Dinner: "4:30PM - 8:00PM",
   },
   "Pennsylvania Avenue Dining Hall (PAR)": {
-    "Breakfast": "7:00AM - 10:00AM",
-    "Lunch": "10:30AM - 2:30PM",
-    "Dinner": "4:30PM - 8:00PM",
+    Breakfast: "7:00AM - 10:00AM",
+    Lunch: "10:30AM - 2:30PM",
+    Dinner: "4:30PM - 8:00PM",
   },
   "Lincoln Avenue Dining Hall (LAR)": {
-    "Breakfast": "7:00AM - 10:00AM",
-    "Lunch": "10:30AM - 1:30PM",
+    Breakfast: "7:00AM - 10:00AM",
+    Lunch: "10:30AM - 1:30PM",
     "Kosher Lunch": "10:45AM - 1:30PM",
-    "Dinner": "4:30PM - 7:00PM",
+    Dinner: "4:30PM - 7:00PM",
     "Kosher Dinner": "4:45PM - 6:15PM",
   },
   "Field of Greens (LAR)": {
-    "Lunch": "10:00AM - 3:00PM",
+    Lunch: "10:00AM - 3:00PM",
   },
-  "InfiniTEA": {
+  InfiniTEA: {
     "A la Carte--APP DISPLAY": "7:00AM - 11:30PM",
     "A la Carte--POS Feed": "7:00AM - 10:30PM",
   },
@@ -43,7 +43,7 @@ export const diningHallTimes: { [key: string]: { [key: string]: string } } = {
     "A la Carte--APP DISPLAY": "9:00AM - 10:00PM",
     "A la Carte--POS Feed": "9:00AM - 10:00PM",
   },
-  "TerraByte": {
+  TerraByte: {
     "A la Carte--APP DISPLAY": "10:00AM - 10:30PM",
     "A la Carte--POS Feed": "10:00AM - 10:30PM",
   },
@@ -77,7 +77,9 @@ export const EntriesDisplay: React.FC<EntriesDisplayProps> = ({
             onClick={() => setExpandedDate(expandedDate === date ? null : date)}
           >
             <span>{date}</span>
-            <span className="text-uiucblue">{expandedDate === date ? "▲" : "▼"}</span>
+            <span className="text-uiucblue">
+              {expandedDate === date ? "▲" : "▼"}
+            </span>
           </button>
           <div
             style={{
@@ -98,8 +100,8 @@ export const EntriesDisplay: React.FC<EntriesDisplayProps> = ({
                       key={facility}
                       className="mt-1 ml-4 p-2 flex justify-between items-center border rounded bg-gray-100"
                     >
-                      <div className="flex-1">
-                        <h4 className="text-sm font-medium">
+                      <div className="flex-1 mr-2">
+                        <h4 className="text-md font-medium">
                           {[
                             "InfiniTEA",
                             "Urbana South Market",
@@ -123,50 +125,65 @@ export const EntriesDisplay: React.FC<EntriesDisplayProps> = ({
                             "Breakfast",
                             "Lunch",
                             "Light Lunch",
+                            "Kosher Lunch",
+                            "Kosher Dinner",
                             "Dinner",
                             "A la Carte--APP DISPLAY",
                             "A la Carte--POS Feed",
                           ];
-                          let displayMealType = mealTypes.includes(
-                            entry.mealType
-                          )
-                            ? [
-                                {
-                                  type: entry.mealType.startsWith("A la Carte")
-                                    ? entry.mealType.substring(
-                                        0,
-                                        entry.mealType.indexOf("--")
-                                      )
-                                    : entry.mealType,
-                                  time:
-                                    (diningHallTimes[hall] &&
-                                      diningHallTimes[hall][entry.mealType]) ||
-                                    "Not Available",
-                                },
-                              ]
-                            : [
-                                {
-                                  type: "Breakfast",
-                                  time:
-                                    (diningHallTimes[hall] &&
-                                      diningHallTimes[hall]["Breakfast"]) ||
-                                    "Not Available",
-                                },
-                                {
-                                  type: "Lunch",
-                                  time:
-                                    (diningHallTimes[hall] &&
-                                      diningHallTimes[hall]["Lunch"]) ||
-                                    "Not Available",
-                                },
-                                {
-                                  type: "Dinner",
-                                  time:
-                                    (diningHallTimes[hall] &&
-                                      diningHallTimes[hall]["Dinner"]) ||
-                                    "Not Available",
-                                },
-                              ];
+                          const defaultMealTypes = [
+                            "Breakfast",
+                            "Lunch",
+                            "Dinner",
+                          ];
+                          if (hall === "Ikenberry Dining Center (Ike)") {
+                            defaultMealTypes.push("Light Lunch");
+                          } else if (
+                            hall === "Lincoln Avenue Dining Hall (LAR)"
+                          ) {
+                            defaultMealTypes.push(
+                              "Kosher Lunch",
+                              "Kosher Dinner"
+                            );
+                          }
+                          let displayMealType;
+                          if (mealTypes.includes(entry.mealType)) {
+                            displayMealType = [
+                              {
+                                type: entry.mealType.startsWith("A la Carte")
+                                  ? entry.mealType.substring(
+                                      0,
+                                      entry.mealType.indexOf("--")
+                                    )
+                                  : entry.mealType,
+                                time:
+                                  (diningHallTimes[hall] &&
+                                    diningHallTimes[hall][entry.mealType]) ||
+                                  "Not Available",
+                              },
+                            ];
+                          } else {
+                            let existingMealTypes = (entries as any[]).map(
+                              (entry: any) => entry.mealType
+                            );
+                            displayMealType = defaultMealTypes
+                              .filter(
+                                (mealType) =>
+                                  !existingMealTypes.includes(mealType)
+                              )
+                              .map((mealType) => ({
+                                type: mealType,
+                                time:
+                                  (diningHallTimes[hall] &&
+                                    diningHallTimes[hall][mealType]) ||
+                                  "Not Available",
+                              }));
+                            (entries as any[]).push(
+                              ...displayMealType.map((meal) => ({
+                                mealType: meal.type,
+                              }))
+                            );
+                          }
 
                           return displayMealType.map((meal, index) => (
                             <p
