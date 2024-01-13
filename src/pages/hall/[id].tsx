@@ -57,7 +57,7 @@ export default function HallFoodPage({
 }: {
   foodDates: string[];
   mealTypes: string[];
-}) {
+}): JSX.Element {
   const router = useRouter();
   const { id } = router.query;
   const [mealType, setMealType] = useState("");

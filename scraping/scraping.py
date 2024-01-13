@@ -2,23 +2,151 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from supabase_py import create_client, Client
+import os
+import uuid
+from datetime import datetime, timedelta
 import json
 import time
 import re
 
-start_time = time.time()
 
-driver = webdriver.Chrome()
-driver.get('https://eatsmart.housing.illinois.edu/NetNutrition/46')
 
 NON_VEGAN_INGREDIENTS = {'gelatin', 'fish', 'tuna', 'salmon', 'tilapia', 'rennet', 'carmine', 'isenglass', 'fish sauce', 'anchovies', 'suet', 'lard', 'cochineal', 'shellac', 'cysteine', 'tyrosine', 'enzymes', 'collagen', 'bone char', 'whey', 'casein', 'fish oil', 'omega-3', 'confectioner', 'beeswax', 'oleic acid', 'stearic acid', 'vitamin d3', 'lanolin', 'lecithin', 'glycerides', 'glycerin', 'lactic acid', 'squalane', 'squalene', 'tallow', 'glyceryl stearate', 'vitamin a', 'vitamin b12', 'vitamin d2', 'vitamin d3', 'xanthan gum', 'zinc stearate', 'meat', 'poultry', 'chicken', 'beef', 'pork', 'lamb', 'venison', 'rabbit', 'duck', 'goose', 'turkey', 'veal', 'organ meat', 'wild game', 'seafood', 'shellfish', 'clams', 'crab', 'lobster', 'shrimp', 'oysters', 'mussels', 'eggs', 'egg white', 'egg yolk', 'egg albumen', 'mayonnaise', 'aioli', 'milk', 'butter', 'cheese', 'cream', 'yogurt', 'honey'}
 NON_VEGETARIAN_INGREDIENTS = {'gelatin', 'rennet', 'carmine', 'isinglass', 'fish', 'tuna', 'salmon', 'tilapia', 'fish sauce', 'anchovies', 'suet', 'lard', 'cochineal', 'shellac', 'cysteine', 'tyrosine', 'enzymes', 'collagen', 'bone char', 'whey', 'casein', 'fish oil', 'omega-3', 'confectioner', 'beeswax', 'oleic acid', 'stearic acid', 'vitamin d3', 'lanolin', 'lecithin', 'glycerides', 'glycerin', 'lactic acid', 'squalane', 'squalene', 'tallow', 'glyceryl stearate', 'vitamin a', 'vitamin b12', 'vitamin d2', 'vitamin d3', 'xanthan gum', 'zinc stearate', 'meat', 'poultry', 'chicken', 'beef', 'pork', 'lamb', 'venison', 'rabbit', 'duck', 'goose', 'turkey', 'veal', 'organ meat', 'wild game', 'seafood', 'shellfish', 'clams', 'crab', 'lobster', 'shrimp', 'oysters', 'mussels'}
 
+SUPABASE_URL = "https://wwtceflcyqqdgqrynvxe.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3dGNlZmxjeXFxZGdxcnludnhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDQ3OTI4ODMsImV4cCI6MjAyMDM2ODg4M30.dSkzIATRnYneCPbUXpo7_qQdKoB1UHk7LqIYbal8wgQ"
 
-food_data = []
-DATE_TO_SCRAPE = 'Thursday, January 18, 2024' # THIS SPECIFIC FORMAT
+def lambda_handler(event, context):
+    start_time = time.time()
+    food_data = []
+    
+    today = datetime.now()    
+    date = today + timedelta(days=7)
+    DATE_TO_SCRAPE = date.strftime('%A, %B %d, %Y')
+    
+    supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-def back_to_food_list():
+    driver = webdriver.Chrome()
+    driver.get('https://eatsmart.housing.illinois.edu/NetNutrition/46')
+    
+    ### GET RESTAURANT DATA ###
+    back_to_food_list(driver)
+    main_lists = WebDriverWait(driver, 10).until(
+            EC.visibility_of_element_located((By.XPATH, '//*[@id="navBarResults"]/div/div'))
+        )
+    title_elements = main_lists.find_elements(By.XPATH, '//span[@class="text-white"]')
+    restaurant_titles = []
+    byw_count = 0
+    for title in title_elements:
+        if title.text == "Build Your Own":
+            if byw_count == 0:
+                restaurant_titles.append(f"{title.text} (Ike)")
+            elif byw_count == 1:
+                restaurant_titles.append(f"{title.text} (ISR)")
+            elif byw_count == 2:
+                restaurant_titles.append(f"{title.text} (PAR)")
+            elif byw_count == 3:
+                restaurant_titles.append(f"{title.text} (LAR)")
+            byw_count += 1
+        else:
+            restaurant_titles.append(title.text)
+
+    restaurant_meals = []
+    restaurant_groups = main_lists.find_elements(By.XPATH, '//ul[@class="list-group"]')
+    for meal in restaurant_groups:
+        meal_nav = [nav.get_attribute('onclick') for nav in meal.find_elements(By.XPATH, './/li[@class="list-group-item"]')]
+        meal_dates = [date.text for date in meal.find_elements(By.XPATH, './/div')]
+        restaurant_meals.append(list(zip(meal_nav, meal_dates))) # 0th element: js navigation script, 1st element: date of meal
+
+    # zip meals and titles together and make them into a dictionary
+    restaurant_data = dict(zip(restaurant_titles, restaurant_meals))
+
+    ### GET FOOD DATA ###
+    for title, data in restaurant_data.items():
+        for nav, info in data:
+            # Only get food data for current day
+            date = info.split('-', 1)[0].strip()
+            if date != DATE_TO_SCRAPE:
+                continue
+            
+            print(f"scraping food data for {title} - {info}")
+            driver.execute_script(nav)
+            get_food_nutrition(title, info, driver, food_data)
+
+    print("All food data scraped. Starting upload to database...")
+    import_json_to_database(food_data, supabase)
+    
+    driver.quit()
+            
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    
+    return {
+        'statusCode': 200,
+        'body': json.dumps(f'Web scraping complete!\nTime taken: {elapsed_time} seconds\nItems scraped: {len(food_data)}')
+    }
+    
+def import_json_to_database(food_data, supabase):
+    try:
+        for food in food_data:
+            existing_food = supabase.table('foodInfo').select().eq('name', food['name']).execute()
+
+            if existing_food['data']:
+                for entry in food['mealEntries']:
+                    supabase.table('mealDetails').insert({
+                        'diningHall': entry['diningHall'],
+                        'diningFacility': entry['diningFacility'],
+                        'mealType': entry['mealType'],
+                        'dateServed': entry['dateServed'],
+                        'foodId': existing_food['data'][0]['id'],
+                    }).execute()
+                print(f"Updated FoodInfo with ID: {existing_food['data'][0]['id']}")
+            else:
+                new_food = supabase.table('foodInfo').insert({
+                    'id': str(uuid.uuid4()),
+                    'name': food['name'],
+                    'servingSize': food['servingSize'],
+                    'ingredients': food['ingredients'],
+                    'allergens': food['allergens'],
+                    'preferences': food['preferences'],
+                    'calories': food['calories'],
+                    'caloriesFat': food['caloriesFat'],
+                    'totalFat': food['totalFat'],
+                    'saturatedFat': food['saturatedFat'],
+                    'transFat': food['transFat'],
+                    'polyFat': food['polyFat'],
+                    'monoFat': food['monoFat'],
+                    'cholesterol': food['cholesterol'],
+                    'sodium': food['sodium'],
+                    'potassium': food['potassium'],
+                    'totalCarbohydrates': food['totalCarbohydrates'],
+                    'fiber': food['fiber'],
+                    'sugars': food['sugars'],
+                    'protein': food['protein'],
+                    'calciumDV': food['calciumDV'],
+                    'ironDV': food['ironDV'],
+                }, {
+                    'returning': 'minimal',  # Only return the number of rows inserted
+                }).execute()
+                print(f"Created FoodInfo with ID: {new_food['data'][0]['id']}")
+
+                for entry in food['mealEntries']:
+                    supabase.table('mealDetails').insert({
+                        'diningHall': entry['diningHall'],
+                        'diningFacility': entry['diningFacility'],
+                        'mealType': entry['mealType'],
+                        'dateServed': entry['dateServed'],
+                        'foodId': new_food['data'][0]['id'],
+                    }).execute()
+    except Exception as e:
+        print(f"Error appending data to the database: {e}")
+        raise e
+    finally:
+        print("Upload successful.")
+
+def back_to_food_list(driver):
     dropdown = WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.XPATH, '//*[@id="nav-unit-selector"]'))
     )
@@ -57,7 +185,7 @@ def check_preferences(ingredients, name):
 
     return ' '.join(preferences)
 
-def scrape_nutrition_facts(food_id):
+def scrape_nutrition_facts(food_id, driver):
     data =  {   
                 "name": "N/A",
                 "mealEntries": [],
@@ -147,14 +275,14 @@ def get_dining_hall_name(facility_name):
     else:
         return facility_name
 
-def get_food_nutrition(title, info):
+def get_food_nutrition(title, info, driver, food_data):
     elements_present = EC.presence_of_element_located((By.XPATH, '//a[starts-with(@id, "showNutrition_")]'))
     WebDriverWait(driver, 10).until(elements_present)
 
     food_ids = [food.get_attribute('id') for food in driver.find_elements(By.XPATH, '//a[starts-with(@id, "showNutrition_")]')]
     for food_id in food_ids:
         parsed_id = food_id.split('_')[-1]
-        data_to_add = scrape_nutrition_facts(parsed_id)
+        data_to_add = scrape_nutrition_facts(parsed_id, driver)
         
         meal_details = {}
         meal_details['diningFacility'] = title
@@ -172,58 +300,7 @@ def get_food_nutrition(title, info):
             food_data.append(data_to_add)
 
 
-### GET RESTAURANT DATA ###
 
-back_to_food_list()
-main_lists = WebDriverWait(driver, 10).until(
-        EC.visibility_of_element_located((By.XPATH, '//*[@id="navBarResults"]/div/div'))
-    )
-title_elements = main_lists.find_elements(By.XPATH, '//span[@class="text-white"]')
-restaurant_titles = []
-byw_count = 0
-for title in title_elements:
-    if title.text == "Build Your Own":
-        if byw_count == 0:
-            restaurant_titles.append(f"{title.text} (Ike)")
-        elif byw_count == 1:
-            restaurant_titles.append(f"{title.text} (ISR)")
-        elif byw_count == 2:
-            restaurant_titles.append(f"{title.text} (PAR)")
-        elif byw_count == 3:
-            restaurant_titles.append(f"{title.text} (LAR)")
-        byw_count += 1
-    else:
-        restaurant_titles.append(title.text)
-
-restaurant_meals = []
-restaurant_groups = main_lists.find_elements(By.XPATH, '//ul[@class="list-group"]')
-for meal in restaurant_groups:
-    meal_nav = [nav.get_attribute('onclick') for nav in meal.find_elements(By.XPATH, './/li[@class="list-group-item"]')]
-    meal_dates = [date.text for date in meal.find_elements(By.XPATH, './/div')]
-    restaurant_meals.append(list(zip(meal_nav, meal_dates))) # 0th element: js navigation script, 1st element: date of meal
-
-# zip meals and titles together and make them into a dictionary
-restaurant_data = dict(zip(restaurant_titles, restaurant_meals))
-
-### GET FOOD DATA ###
-for title, data in restaurant_data.items():
-    for nav, info in data:
-        # Only get food data for current day
-        date = info.split('-', 1)[0].strip()
-        if date != DATE_TO_SCRAPE:
-            continue
-        
-        print(f"scraping food data for {title} - {info}")
-        driver.execute_script(nav)
-        get_food_nutrition(title, info)
-
-### READ TO JSON ###
-with open('food_data_1_17_2024.json', 'w') as json_file:
-    json.dump(food_data, json_file, indent=4)
-        
-end_time = time.time()
-elapsed_time = end_time - start_time
-print(f"Web scraping complete!\nTime taken: {elapsed_time} seconds\nItems scraped: {len(food_data)}")
 
 
 
