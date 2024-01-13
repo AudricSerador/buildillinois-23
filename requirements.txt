@@ -1,2 +1,0 @@
-selenium==3.141.0
-supabase-py==0.0.2
