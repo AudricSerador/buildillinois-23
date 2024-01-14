@@ -56,7 +56,7 @@ const EntriesDates: React.FC<{ diningHalls: { [key: string]: any } }> = ({
     <div className="pt-0">
       {Object.entries(diningHalls as { [key: string]: any }).map(
         ([hall, facilities]) => (
-          <div className="border border-gray-300 p-3">
+          <div key={hall} className="border border-gray-300 p-3">
             <h2 className="text-xl font-custombold mb-2 text-center mt-1">
               {hall}
             </h2>
