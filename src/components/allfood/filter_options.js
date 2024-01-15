@@ -1,5 +1,5 @@
 export const sortFields = [
-  { value: "", label: "Sort by Nutrient" },
+  { value: "", label: "All" },
   { value: "calories", label: "Calories" },
   { value: "totalCarbohydrates", label: "Carbohydrates" },
   { value: "protein", label: "Protein" },
@@ -11,9 +11,8 @@ export const sortFields = [
 ];
 
 export const sortOrders = [
-  { value: "", label: "Sort order"},
-  { value: "asc", label: "Low to High" },
   { value: "desc", label: "High to Low" },
+  { value: "asc", label: "Low to High" },
 ];
 
 export const allergenOptions = [
@@ -39,7 +38,7 @@ export const allergenOptions = [
 
 
 export const preferenceOptions = [
-  { value: "", label: "All Preferences" },
+  { value: "", label: "None" },
   { value: "vegetarian", label: "Vegetarian" },
   { value: "vegan", label: "Vegan" },
   { value: "kosher", label: "Kosher" },

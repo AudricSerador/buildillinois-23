@@ -61,6 +61,7 @@ export const Filters: React.FC<FiltersProps> = ({
   return (
     <>
       <div style={{ flexGrow: 1, flexBasis: 0 }}>
+        <label>Nutrients</label>
         <Select
           styles={customStyles}
           classNamePrefix="select"
@@ -71,6 +72,7 @@ export const Filters: React.FC<FiltersProps> = ({
       </div>
       {sortField && (
         <div style={{ flexGrow: 1, flexBasis: 0 }}>
+          <label>&nbsp;</label>
           <Select
             styles={customStyles}
             classNamePrefix="select"
@@ -81,6 +83,7 @@ export const Filters: React.FC<FiltersProps> = ({
         </div>
       )}
       <div style={{ flexGrow: 1, flexBasis: 0 }}>
+        <label>Allergens</label>
         <Select
           isMulti
           styles={customStyles}
@@ -95,6 +98,7 @@ export const Filters: React.FC<FiltersProps> = ({
         />
       </div>
       <div style={{ flexGrow: 1, flexBasis: 0 }}>
+        <label>Preferences</label>
         <Select
           styles={customStyles}
           classNamePrefix="select"
@@ -108,6 +112,7 @@ export const Filters: React.FC<FiltersProps> = ({
         />
       </div>
       <div style={{ flexGrow: 1, flexBasis: 0 }}>
+        <label>Dining Hall</label>
         <Select
           styles={customStyles}
           classNamePrefix="select"
@@ -119,6 +124,7 @@ export const Filters: React.FC<FiltersProps> = ({
         />
       </div>
       <div style={{ flexGrow: 1, flexBasis: 0 }}>
+        <label>Meal Type</label>
         <Select
           styles={customStyles}
           classNamePrefix="select"
@@ -130,6 +136,7 @@ export const Filters: React.FC<FiltersProps> = ({
         />
       </div>
       <div style={{ flexGrow: 1, flexBasis: 0 }}>
+        <label>Date Served</label>
         <Select
           styles={customStyles}
           classNamePrefix="select"

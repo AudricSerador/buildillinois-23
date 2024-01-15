@@ -126,8 +126,8 @@ export default function AllFood(): JSX.Element {
     <div className="px-4 sm:px-8 md:px-16 lg:px-64 mt-4">
       <IconLegend />
       <p className="text-4xl font-custombold mt-4 mb-4">Filters</p>
-      <div className="flex flex-col sm:flex-row flex-wrap justify-between sm:space-x-4 space-y-4 sm:space-y-0 font-custom">
-        <Filters
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 font-custom">        
+      <Filters
           sortField={sortField}
           setSortField={setSortField}
           sortOrder={sortOrder}
