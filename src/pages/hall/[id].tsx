@@ -11,11 +11,13 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
     const { id } = context.query;
 
-    const dates = (
+    let dates = (
       await prisma.$queryRaw<
         { dateServed: string }[]
       >`SELECT DISTINCT "dateServed" FROM "mealDetails";`
     ).map((date) => date.dateServed);
+
+    dates = dates.reverse();
 
     const mealTypes = (
       await prisma.$queryRaw<
