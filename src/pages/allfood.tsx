@@ -63,6 +63,19 @@ export default function AllFood(): JSX.Element {
   }, []);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("sortField", sortField);
+      localStorage.setItem("sortOrder", sortOrder);
+      localStorage.setItem("diningHall", diningHall);
+      localStorage.setItem("mealType", mealType);
+      localStorage.setItem("searchTerm", searchTerm);
+      localStorage.setItem("dateServed", dateServed);
+      localStorage.setItem("preferences", preferences);
+      localStorage.setItem("allergens", JSON.stringify(allergens));
+    }
+  }, [sortField, sortOrder, diningHall, mealType, searchTerm, dateServed, preferences, allergens]);
+
+  useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
