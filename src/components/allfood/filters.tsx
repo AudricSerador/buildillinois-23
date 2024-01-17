@@ -47,7 +47,10 @@ export const Filters: React.FC<FiltersProps> = ({
   const dateOptions = React.useMemo(
     () => [
       { value: "", label: "All Dates" },
-      ...dates.map((date, index) => ({ value: date, label: date })),
+      ...dates
+        .slice()
+        .reverse()
+        .map((date, index) => ({ value: date, label: date })),
     ],
     [dates]
   );

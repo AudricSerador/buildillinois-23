@@ -50,6 +50,10 @@ export const diningOptions = [
     label: "Dining Halls",
     options: [
       {
+        value: "",
+        label: "All Dining Places",
+      },
+      {
         value: "Ikenberry Dining Center (Ike)",
         label: "Ikenberry Dining Center (Ike)",
       },
@@ -82,6 +86,7 @@ export const mealTypeOptions = [
   {
     label: "Meal Times",
     options: [
+      { value: "", label: "All Meal Times" },
       { value: "Breakfast", label: "Breakfast" },
       { value: "Light Lunch", label: "Light Lunch" },
       { value: "Lunch", label: "Lunch" },
