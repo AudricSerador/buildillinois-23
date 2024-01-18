@@ -69,6 +69,8 @@ export default function HallFoodPage({
     foodDates && foodDates.length > 0 ? foodDates[0] : ""
   );
   const [error, setError] = useState(null);
+  const [expandedFacility, setExpandedFacility] = useState<string | null>(null);
+
   const [dateIndex, setDateIndex] = useState(0);
   const incrementDate = () => {
     if (dateIndex < foodDates.length - 1) {
@@ -299,28 +301,44 @@ export default function HallFoodPage({
               </div>
             </div>
           ) : (
-            Object.entries(foodData).map(
-              ([facility, foodItems]: [string, any[]]) => (
-                <div
-                  key={facility}
-                  className="mb-8 bg-white shadow rounded-lg p-6"
-                >
-                  <h2 className="text-2xl font-bold mb-4 text-center text-gray-700">
-                    {facility}
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {foodItems.map((foodItem: any) => (
-                      <FoodItemDisplay
-                        key={foodItem.id}
-                        foodItem={foodItem}
-                        includeEntries={false}
-                      />
-                    ))}
+              <div className="w-auto my-8 font-custom">
+                {Object.entries(foodData).map(([facility, foodItems]) => (
+                  <div key={facility} className="mb-3">
+                    <div
+                      className={`bg-uiucblue text-white p-4 flex justify-between items-center cursor-pointer ${
+                        expandedFacility === facility ? "rounded-t-lg" : "rounded-lg"
+                      }`}
+                      onClick={() =>
+                        setExpandedFacility((currentFacility) =>
+                          currentFacility === facility ? null : facility
+                        )
+                      }
+                    >
+                      <h1 className="text-xl font-custombold">{facility}</h1>
+                      <span className="text-white">
+                        {expandedFacility === facility ? "▲" : "▼"}
+                      </span>
+                    </div>
+                    <div
+                      className={`collapse-css-transition bg-cloud rounded-b-lg shadow ${
+                        expandedFacility === facility ? "open" : ""
+                      }`}
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {foodItems.map((foodItem: any) => (
+                          <FoodItemDisplay
+                            key={foodItem.id}
+                            foodItem={foodItem}
+                            includeEntries={false}
+                          />
+                        ))}
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )
-            )
-          )}
+                ))}
+              </div>
+          )
+          }
         </div>
       </div>
     </div>
