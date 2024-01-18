@@ -301,44 +301,51 @@ export default function HallFoodPage({
               </div>
             </div>
           ) : (
-              <div className="w-auto my-8 font-custom">
-                {Object.entries(foodData).map(([facility, foodItems]) => (
-                  <div key={facility} className="mb-3">
-                    <div
-                      className={`bg-uiucblue text-white p-4 flex justify-between items-center cursor-pointer ${
-                        expandedFacility === facility ? "rounded-t-lg" : "rounded-lg"
-                      }`}
-                      onClick={() =>
-                        setExpandedFacility((currentFacility) =>
-                          currentFacility === facility ? null : facility
-                        )
-                      }
-                    >
-                      <h1 className="text-xl font-custombold">{facility}</h1>
-                      <span className="text-white">
-                        {expandedFacility === facility ? "▲" : "▼"}
-                      </span>
-                    </div>
-                    <div
-                      className={`collapse-css-transition bg-cloud rounded-b-lg shadow ${
-                        expandedFacility === facility ? "open" : ""
-                      }`}
-                    >
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {foodItems.map((foodItem: any) => (
+            <div className="w-auto my-8 font-custom">
+              {Object.entries(foodData).map(([facility, foodItems]) => (
+                <div key={facility} className="mb-3">
+                  <div
+                    className={`bg-uiucblue text-white p-4 flex justify-between items-center cursor-pointer ${
+                      expandedFacility === facility
+                        ? "rounded-t-lg"
+                        : "rounded-lg"
+                    }`}
+                    onClick={() =>
+                      setExpandedFacility((currentFacility) =>
+                        currentFacility === facility ? null : facility
+                      )
+                    }
+                  >
+                    <h1 className="text-xl font-custombold">{facility}</h1>
+                    <span className="text-white">
+                      {expandedFacility === facility ? "▲" : "▼"}
+                    </span>
+                  </div>
+                  <div
+                    className={`collapse-css-transition bg-cloud rounded-b-lg shadow ${
+                      expandedFacility === facility ? "open" : ""
+                    }`}
+                    style={
+                      expandedFacility === facility
+                        ? { maxHeight: "60vh", overflowY: "auto" }
+                        : {}
+                    }
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2 px-2 py-2 lg:grid-cols-3 gap-x-4">
+                      {foodItems &&
+                        (foodItems as any[]).map((foodItem: any) => (
                           <FoodItemDisplay
                             key={foodItem.id}
                             foodItem={foodItem}
                             includeEntries={false}
                           />
                         ))}
-                      </div>
                     </div>
                   </div>
-                ))}
-              </div>
-          )
-          }
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
