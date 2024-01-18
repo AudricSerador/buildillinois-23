@@ -66,6 +66,7 @@ export const Filters: React.FC<FiltersProps> = ({
       <div style={{ flexGrow: 1, flexBasis: 0 }}>
         <label>Nutrients</label>
         <Select
+          isSearchable={false}
           styles={customStyles}
           classNamePrefix="select"
           options={sortFields}
@@ -77,6 +78,7 @@ export const Filters: React.FC<FiltersProps> = ({
         <div style={{ flexGrow: 1, flexBasis: 0 }}>
           <label>&nbsp;</label>
           <Select
+            isSearchable={false}
             styles={customStyles}
             classNamePrefix="select"
             options={sortOrders}
@@ -89,6 +91,7 @@ export const Filters: React.FC<FiltersProps> = ({
         <label>Allergens</label>
         <Select
           isMulti
+          isSearchable={false}
           styles={customStyles}
           classNamePrefix="select"
           options={allergenOptions}
@@ -103,6 +106,7 @@ export const Filters: React.FC<FiltersProps> = ({
       <div style={{ flexGrow: 1, flexBasis: 0 }}>
         <label>Preferences</label>
         <Select
+          isSearchable={false}
           styles={customStyles}
           classNamePrefix="select"
           options={preferenceOptions}
@@ -117,6 +121,7 @@ export const Filters: React.FC<FiltersProps> = ({
       <div style={{ flexGrow: 1, flexBasis: 0 }}>
         <label>Dining Hall</label>
         <Select
+          isSearchable={false}
           styles={customStyles}
           classNamePrefix="select"
           options={diningOptions}
@@ -129,6 +134,7 @@ export const Filters: React.FC<FiltersProps> = ({
       <div style={{ flexGrow: 1, flexBasis: 0 }}>
         <label>Meal Type</label>
         <Select
+          isSearchable={false}
           styles={customStyles}
           classNamePrefix="select"
           options={mealTypeOptions}
@@ -141,6 +147,7 @@ export const Filters: React.FC<FiltersProps> = ({
       <div style={{ flexGrow: 1, flexBasis: 0 }}>
         <label>Date Served</label>
         <Select
+          isSearchable={false}
           styles={customStyles}
           classNamePrefix="select"
           options={dateOptions}
