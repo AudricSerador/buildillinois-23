@@ -86,18 +86,18 @@ export function Navbar(): JSX.Element {
                   All Food
                 </Link>
                 <Link
-                  href="/"
-                  className="mt-4 text-white hover:uiucorange"
-                  onClick={closeMenu}
-                >
-                  My Favorites
-                </Link>
-                <Link
                   href="/dininghalls"
                   className="mt-4 text-white hover:uiucorange"
                   onClick={closeMenu}
                 >
                   Dining Halls
+                </Link>
+                <Link
+                  href="/"
+                  className="mt-4 text-white hover:uiucorange"
+                  onClick={closeMenu}
+                >
+                  My Favorites
                 </Link>
               </div>
             </div>
