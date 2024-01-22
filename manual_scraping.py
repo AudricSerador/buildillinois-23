@@ -17,7 +17,7 @@ NON_VEGETARIAN_INGREDIENTS = {'gelatin', 'rennet', 'carmine', 'isinglass', 'fish
 
 
 food_data = []
-DATE_TO_SCRAPE = 'Thursday, January 18, 2024' # THIS SPECIFIC FORMAT
+DATE_TO_SCRAPE = 'Monday, January 22, 2024' # THIS SPECIFIC FORMAT
 
 def back_to_food_list():
     dropdown = WebDriverWait(driver, 10).until(
@@ -219,7 +219,7 @@ for title, data in restaurant_data.items():
         get_food_nutrition(title, info)
 
 ### READ TO JSON ###
-with open('food_data_1_17_2024.json', 'w') as json_file:
+with open('food_data_1_22_2024.json', 'w') as json_file:
     json.dump(food_data, json_file, indent=4)
         
 end_time = time.time()
