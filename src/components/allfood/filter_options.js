@@ -66,9 +66,13 @@ export const diningOptions = [
         label: "Pennsylvania Avenue Dining Hall (PAR)",
       },
       {
-        value: "Lincoln Avenue Dining Hall (LAR)",
-        label: "Lincoln Avenue Dining Hall (LAR)",
+        value: "Lincoln Avenue Dining Hall (Allen/LAR)",
+        label: "Lincoln Avenue Dining Hall (Allen/LAR)",
       },
+      {
+        value: "Field of Greens (LAR)",
+        label: "Field of Greens (LAR)",
+      }
     ],
   },
   {

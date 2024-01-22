@@ -1,0 +1,20 @@
+service: clear-past-data
+
+provider:
+  name: aws
+  stage: ${opt:stage, 'prod'}
+  region: ${env:AWS_REGION, 'us-east-2'}
+  ecr:
+    images:
+      img:
+        path: ./
+        platform: linux/amd64
+
+functions:
+  clearPastData:
+    timeout: 900
+    events:
+      - schedule: rate(1 day)
+    memorySize: 2048
+    image:
+      name: img

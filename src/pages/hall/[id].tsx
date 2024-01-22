@@ -208,7 +208,7 @@ export default function HallFoodPage({
                   Light Lunch
                 </button>
               )}
-              {id === "Lincoln Avenue Dining Hall (LAR)" && (
+              {id === "Lincoln Avenue Dining Hall (Allen/LAR)" && (
                 <button
                   className={`m-2 px-4 py-2 text-xl rounded-full focus:outline-none whitespace-nowrap ${
                     mealType === "Kosher Lunch"
@@ -232,7 +232,7 @@ export default function HallFoodPage({
                   Dinner
                 </button>
               </div>
-              {id === "Lincoln Avenue Dining Hall (LAR)" && (
+              {id === "Lincoln Avenue Dining Hall (Allen/LAR)" && (
                 <div className="text-center">
                   <button
                     className={`m-2 px-4 py-2 text-xl rounded-full focus:outline-none whitespace-nowrap ${
