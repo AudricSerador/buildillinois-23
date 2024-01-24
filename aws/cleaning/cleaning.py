@@ -1,7 +1,6 @@
-from supabase import create_client, Client
-from datetime import datetime
-import pytz
 import os
+import datetime
+from supabase import create_client, Client
 
 def handler(event, context):
     try:
@@ -11,34 +10,37 @@ def handler(event, context):
     except Exception as e:
         print(f"Failed to create Supabase client: {e}")
     
-    today = datetime.now(pytz.timezone('UTC'))
+    today = datetime.date.today()
 
-    # Fetch all unique 'dateServed' values from the database
-    response = supabase.table('mealDetails').select('dateServed').execute()
-
-    if response.error:
-        print(f"Failed to fetch rows: {response.error}")
+    try:
+        # Fetch all unique 'dateServed' values from the database
+        response = supabase.table('mealDetails').select('dateServed').execute()
+    except Exception as e:
+        print(f"Failed to fetch rows: {e}")
         return {
             'statusCode': 500,
-            'body': f"Failed to fetch rows: {response.error}"
+            'body': f"Failed to fetch rows: {e}"
         }
 
     # Convert 'dateServed' values to date objects and compare with 'today'
     dates_to_delete = []
     for row in response.data:
-        date_served = datetime.strptime(row['dateServed'], '%A, %B %d, %Y')
+        _, date = row['dateServed'].strip().split(', ', 1)
+        month, day, year = date.split()
+        day = int(day.strip(','))
+        date_served = datetime.datetime.strptime(f"{month} {day} {year}", '%B %d %Y').date()
         if date_served < today:
             dates_to_delete.append(row['dateServed'])
 
     # Delete rows where 'dateServed' is in 'dates_to_delete'
     for date in dates_to_delete:
-        response = supabase.table('mealDetails').delete().eq('dateServed', date).execute()
-
-        if response.error:
-            print(f"Failed to delete rows: {response.error}")
+        try:
+            response = supabase.table('mealDetails').delete().eq('dateServed', date).execute()
+        except Exception as e:
+            print(f"Failed to delete rows: {e}")
             return {
                 'statusCode': 500,
-                'body': f"Failed to delete rows: {response.error}"
+                'body': f"Failed to delete rows: {e}"
             }
 
     print(f"Deleted {len(dates_to_delete)} rows")

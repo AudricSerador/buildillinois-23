@@ -178,7 +178,7 @@
             "Type": "AWS::Lambda::Function",
             "Properties": {
               "Code": {
-                "ImageUri": "386000452342.dkr.ecr.us-east-2.amazonaws.com/serverless-clear-past-data-prod@sha256:8543a02e540795df853bfb0a9373ef6cb9359f8816b63f16a90dc68b8833feb9"
+                "ImageUri": "386000452342.dkr.ecr.us-east-2.amazonaws.com/serverless-clear-past-data-prod@sha256:a10478c8de9d88bc84e0ded7e747c76472ea37d98d67b86c3bb2fbd86e2f96ca"
               },
               "PackageType": "Image",
               "FunctionName": "clear-past-data-prod-clearPastData",
@@ -195,14 +195,14 @@
               "ClearPastDataLogGroup"
             ]
           },
-          "ClearPastDataLambdaVersionEmw7QqULG1vEK3c0WRu1bvGiSrkqeUJNkD7Y499Wek": {
+          "ClearPastDataLambdaVersionpNAhKexdFo4GNS6j7klMulmqZgwQAfiw6TIQt9dEEO4": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ClearPastDataLambdaFunction"
               },
-              "CodeSha256": "8543a02e540795df853bfb0a9373ef6cb9359f8816b63f16a90dc68b8833feb9"
+              "CodeSha256": "a10478c8de9d88bc84e0ded7e747c76472ea37d98d67b86c3bb2fbd86e2f96ca"
             }
           },
           "ClearPastDataEventsRuleSchedule1": {
@@ -255,7 +255,7 @@
           "ClearPastDataLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ClearPastDataLambdaVersionEmw7QqULG1vEK3c0WRu1bvGiSrkqeUJNkD7Y499Wek"
+              "Ref": "ClearPastDataLambdaVersionpNAhKexdFo4GNS6j7klMulmqZgwQAfiw6TIQt9dEEO4"
             },
             "Export": {
               "Name": "sls-clear-past-data-prod-ClearPastDataLambdaFunctionQualifiedArn"
@@ -364,7 +364,7 @@
         "package": {},
         "memory": 2048,
         "vpc": {},
-        "versionLogicalId": "ClearPastDataLambdaVersionEmw7QqULG1vEK3c0WRu1bvGiSrkqeUJNkD7Y499Wek"
+        "versionLogicalId": "ClearPastDataLambdaVersionpNAhKexdFo4GNS6j7klMulmqZgwQAfiw6TIQt9dEEO4"
       }
     },
     "configValidationMode": "warn",
@@ -382,7 +382,7 @@
     "isDashboardMonitoringPreconfigured": false
   },
   "package": {
-    "artifactDirectoryName": "serverless/clear-past-data/prod/1705960366342-2024-01-22T21:52:46.342Z",
+    "artifactDirectoryName": "serverless/clear-past-data/prod/1706064141534-2024-01-24T02:42:21.534Z",
     "artifact": ""
   }
 }
