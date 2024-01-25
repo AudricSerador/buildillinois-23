@@ -21,7 +21,7 @@ export const diningHallTimes: { [key: string]: { [key: string]: string } } = {
     Lunch: "10:30AM - 2:30PM",
     Dinner: "4:30PM - 8:00PM",
   },
-  "Lincoln Avenue Dining Hall (Allen/LAR)": {
+  "Lincoln Avenue Dining Hall (Allen)": {
     Breakfast: "7:00AM - 10:00AM",
     Lunch: "10:30AM - 1:30PM",
     "Kosher Lunch": "10:45AM - 1:30PM",
@@ -94,7 +94,7 @@ const EntriesDates: React.FC<{ diningHalls: { [key: string]: any } }> = ({
                       const defaultMealTypes = ["Breakfast", "Lunch", "Dinner"];
                       if (hall === "Ikenberry Dining Center (Ike)") {
                         defaultMealTypes.push("Light Lunch");
-                      } else if (hall === "Lincoln Avenue Dining Hall (Allen/LAR)") {
+                      } else if (hall === "Lincoln Avenue Dining Hall (Allen)") {
                         defaultMealTypes.push("Kosher Lunch", "Kosher Dinner");
                       }
                       let displayMealType;

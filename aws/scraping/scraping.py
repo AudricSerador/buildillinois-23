@@ -288,6 +288,7 @@ def get_dining_hall_name(facility_name):
         return 'Pennsylvania Avenue Dining Hall (PAR)'
     elif facility_name in ["LAR Daily Menu", "Build Your Own (LAR)", "Kosher Kitchen"]:
         return 'Lincoln Avenue Dining Hall (Allen/LAR)'
+        return 'Lincoln Avenue Dining Hall (Allen)'
     elif facility_name in ["Field of Greens"]:
         return 'Field of Greens (LAR)'
     else:
