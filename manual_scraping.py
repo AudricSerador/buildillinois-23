@@ -1,4 +1,5 @@
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -8,7 +9,10 @@ import re
 
 start_time = time.time()
 
-driver = webdriver.Chrome()
+options = Options()
+options.add_argument("--headless")
+
+driver = webdriver.Chrome(options=options)
 driver.set_window_size(1024, 768)
 driver.get('https://eatsmart.housing.illinois.edu/NetNutrition/46')
 
@@ -17,7 +21,7 @@ NON_VEGETARIAN_INGREDIENTS = {'gelatin', 'rennet', 'carmine', 'isinglass', 'fish
 
 
 food_data = []
-DATES_TO_SCRAPE = ['Wednesday, January 24, 2024', 'Thursday, January 25, 2024', 'Friday, January 25, 2024'] # THIS SPECIFIC FORMAT
+DATES_TO_SCRAPE = ['Friday, January 26, 2024', 'Saturday, January 27, 2024'] # THIS SPECIFIC FORMAT
 
 def back_to_food_list():
     dropdown = WebDriverWait(driver, 10).until(

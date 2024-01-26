@@ -159,7 +159,7 @@
       "Type": "AWS::Lambda::Function",
       "Properties": {
         "Code": {
-          "ImageUri": "386000452342.dkr.ecr.us-east-2.amazonaws.com/serverless-scrape-dining-data-prod@sha256:c20d6904071e875c68310d02af2821f16c6900af15469a0d19ab7eaa7685dd27"
+          "ImageUri": "386000452342.dkr.ecr.us-east-2.amazonaws.com/serverless-scrape-dining-data-prod@sha256:066946ca50c9dbfc0f8c0a7868b29c4a070ca49009a4af086839bbc093165f5e"
         },
         "PackageType": "Image",
         "FunctionName": "scrape-dining-data-prod-demo",
@@ -176,14 +176,14 @@
         "DemoLogGroup"
       ]
     },
-    "DemoLambdaVersionxVjnUCziAxC2RPuLTphsvdvvVmPtaw9B1xdPoBK3nk": {
+    "DemoLambdaVersionZv50PEtoqZ5B9V4z2qwNNmq1g13JEkHHtoDpMvRPx8": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "DemoLambdaFunction"
         },
-        "CodeSha256": "c20d6904071e875c68310d02af2821f16c6900af15469a0d19ab7eaa7685dd27"
+        "CodeSha256": "066946ca50c9dbfc0f8c0a7868b29c4a070ca49009a4af086839bbc093165f5e"
       }
     }
   },
@@ -199,7 +199,7 @@
     "DemoLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "DemoLambdaVersionxVjnUCziAxC2RPuLTphsvdvvVmPtaw9B1xdPoBK3nk"
+        "Ref": "DemoLambdaVersionZv50PEtoqZ5B9V4z2qwNNmq1g13JEkHHtoDpMvRPx8"
       },
       "Export": {
         "Name": "sls-scrape-dining-data-prod-DemoLambdaFunctionQualifiedArn"
