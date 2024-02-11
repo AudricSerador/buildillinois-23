@@ -44,3 +44,11 @@ model mealDetails {
   food           FoodInfo @relation(fields: [foodId], references: [id])
   foodId         String
 }
+
+model User {
+  id          Int       @id @default(autoincrement())
+  email       String    @unique
+  azureId     String    @unique
+  name        String?
+  favorites   FoodInfo[]
+}
