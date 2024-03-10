@@ -6,6 +6,7 @@ import { SEO } from "../components/layout/seo";
 import FeedbackBanner from "@/components/layout/feedback";
 import { useRouter } from "next/router";
 import { useState } from "react";
+import { AuthProvider } from "@/auth/auth.service";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -17,28 +18,32 @@ export default function App({ Component, pageProps }: AppProps) {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <>
       <SEO
         title="UIUC Dining Buddy"
         description="The better dining hall experience."
       />
-      <main className="flex-grow">
-        <Navbar />
-        <div
-          className={
-            !showFeedbackBanner
-              ? "h-16 md:block hidden"
-              : isFeedbackBannerClosed
-              ? "h-16 md:block hidden"
-              : "h-32 md:block hidden"
-          }
-        ></div>
-        {showFeedbackBanner && !isFeedbackBannerClosed && (
-          <FeedbackBanner onClose={handleCloseFeedbackBanner} />
-        )}
-        <Component {...pageProps} />;
-      </main>
-      <Footer />
-    </div>
+      <AuthProvider>
+        <div className="flex flex-col min-h-screen">
+          <main className="flex-grow">
+            <Navbar />
+            <div
+              className={
+                !showFeedbackBanner
+                  ? "h-16 md:block hidden"
+                  : isFeedbackBannerClosed
+                  ? "h-16 md:block hidden"
+                  : "h-32 md:block hidden"
+              }
+            ></div>
+            {showFeedbackBanner && !isFeedbackBannerClosed && (
+              <FeedbackBanner onClose={handleCloseFeedbackBanner} />
+            )}
+            <Component {...pageProps} />;
+          </main>
+          <Footer />
+        </div>
+      </AuthProvider>
+    </>
   );
 }

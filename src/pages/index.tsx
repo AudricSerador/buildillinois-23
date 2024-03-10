@@ -37,7 +37,7 @@ export default function Home(): JSX.Element {
           </div>
         </div>
         <div className="flex justify-center mt-8 px-4 sm:px-0">
-          <Link href="#">
+          <Link href="/login">
             <button className="bg-uiucblue text-white font-custombold py-2 px-4 rounded mr-4 transition duration-500 ease-in-out transform hover:scale-105">
               Sign Up
             </button>

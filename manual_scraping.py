@@ -1,8 +1,9 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.options import Options
+
 import json
 import time
 import re
@@ -21,7 +22,7 @@ NON_VEGETARIAN_INGREDIENTS = {'gelatin', 'rennet', 'carmine', 'isinglass', 'fish
 
 
 food_data = []
-DATES_TO_SCRAPE = ['Friday, January 26, 2024', 'Saturday, January 27, 2024'] # THIS SPECIFIC FORMAT
+DATES_TO_SCRAPE = ['Monday, February 26, 2024'] # THIS SPECIFIC FORMAT
 
 def back_to_food_list():
     dropdown = WebDriverWait(driver, 10).until(
