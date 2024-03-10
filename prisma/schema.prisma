@@ -1,38 +1,38 @@
 datasource db {
-  provider          = "postgresql"
-  url               = env("DATABASE_URL")
-  directUrl         = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 generator client {
   provider = "prisma-client-js"
 }
 
-
 model FoodInfo {
-  id               String      @default(cuid()) @id
-  name             String      @default("") @unique
-  mealEntries      mealDetails[] 
-  servingSize      String      @default("")
-  ingredients      String      @default("")
-  allergens        String      @default("")
-  preferences      String      @default("")
-  calories         Int         @default(0)
-  caloriesFat      Int         @default(0)
-  totalFat         Int         @default(0)
-  saturatedFat     Int         @default(0)
-  transFat         Int         @default(0)
-  polyFat          Int         @default(0)
-  monoFat          Int         @default(0)
-  cholesterol      Int         @default(0)
-  sodium           Int         @default(0)
-  potassium        Int         @default(0)
-  totalCarbohydrates Int       @default(0)
-  fiber            Int         @default(0)
-  sugars           Int         @default(0)
-  protein          Int         @default(0)
-  calciumDV        Int         @default(0)
-  ironDV           Int         @default(0)
+  id                 String        @id @default(cuid())
+  name               String        @unique @default("")
+  mealEntries        mealDetails[]
+  favorites          Favorite[]
+  servingSize        String        @default("")
+  ingredients        String        @default("")
+  allergens          String        @default("")
+  preferences        String        @default("")
+  calories           Int           @default(0)
+  caloriesFat        Int           @default(0)
+  totalFat           Int           @default(0)
+  saturatedFat       Int           @default(0)
+  transFat           Int           @default(0)
+  polyFat            Int           @default(0)
+  monoFat            Int           @default(0)
+  cholesterol        Int           @default(0)
+  sodium             Int           @default(0)
+  potassium          Int           @default(0)
+  totalCarbohydrates Int           @default(0)
+  fiber              Int           @default(0)
+  sugars             Int           @default(0)
+  protein            Int           @default(0)
+  calciumDV          Int           @default(0)
+  ironDV             Int           @default(0)
 }
 
 model mealDetails {
@@ -46,9 +46,20 @@ model mealDetails {
 }
 
 model User {
-  id          Int       @id @default(autoincrement())
-  email       String    @unique
-  azureId     String    @unique
+  id          Int        @id @default(autoincrement())
+  email       String     @unique
+  azureId     String     @unique
   name        String?
-  favorites   FoodInfo[]
+  isNew       Boolean    @default(true)
+  preferences String     @default("")
+  allergies   String     @default("")
+  favorites   Favorite[]
+}
+
+model Favorite {
+  id     Int      @id @default(autoincrement())
+  user   User     @relation(fields: [userId], references: [id])
+  userId Int
+  food   FoodInfo @relation(fields: [foodId], references: [id])
+  foodId String
 }

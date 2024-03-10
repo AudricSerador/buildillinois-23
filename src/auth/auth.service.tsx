@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase } from './supabase_client';
-import { useRouter } from 'next/router'; // Import useRouter
+import { useRouter } from 'next/router';
 
 interface AuthContextType {
   user: User | null;
@@ -30,6 +30,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.log(data)
         if (error) {
           console.error(error);
+          // If there's an error, log the user out
+          await supabase.auth.signOut();
+          return;
         } else {
           setUser(data?.user ?? null);
         }
@@ -37,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         console.error(error);
       }
     };
-
+  
     fetchUser();
 
     const authListener = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {

@@ -100,7 +100,7 @@ export default async function handler(
     await prisma.$queryRaw<
       { dateServed: string }[]
     >`SELECT DISTINCT "dateServed" FROM "mealDetails";`
-  ).map((date) => date.dateServed);
+  ).map((date: any) => date.dateServed);
 
   res.status(200).json({ food, foodCount, dates });
 }
