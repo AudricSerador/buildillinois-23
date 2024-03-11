@@ -10,12 +10,15 @@ import { AuthProvider } from "@/auth/auth.service";
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  const showFeedbackBanner = router.pathname !== "/";
+  const showFeedbackBanner =
+    router.pathname !== "/" && router.pathname !== "/user/onboarding";
   const [isFeedbackBannerClosed, setFeedbackBannerClosed] = useState(false);
 
   const handleCloseFeedbackBanner = () => {
     setFeedbackBannerClosed(true);
   };
+
+  const showNavbarAndFooter = router.pathname !== "/user/onboarding";
 
   return (
     <>
@@ -26,22 +29,24 @@ export default function App({ Component, pageProps }: AppProps) {
       <AuthProvider>
         <div className="flex flex-col min-h-screen">
           <main className="flex-grow">
-            <Navbar />
-            <div
-              className={
-                !showFeedbackBanner
-                  ? "h-16 md:block hidden"
-                  : isFeedbackBannerClosed
-                  ? "h-16 md:block hidden"
-                  : "h-32 md:block hidden"
-              }
-            ></div>
+            {showNavbarAndFooter && <Navbar />}
+            {showNavbarAndFooter && (
+              <div
+                className={
+                  !showFeedbackBanner
+                    ? "h-16 md:block hidden"
+                    : isFeedbackBannerClosed
+                    ? "h-16 md:block hidden"
+                    : "h-32 md:block hidden"
+                }
+              ></div>
+            )}
             {showFeedbackBanner && !isFeedbackBannerClosed && (
               <FeedbackBanner onClose={handleCloseFeedbackBanner} />
             )}
             <Component {...pageProps} />;
           </main>
-          <Footer />
+          {showNavbarAndFooter && <Footer />}
         </div>
       </AuthProvider>
     </>
