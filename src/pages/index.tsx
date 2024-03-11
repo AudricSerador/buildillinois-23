@@ -30,7 +30,7 @@ export default function Home(): JSX.Element {
               Tired of going to dining halls and finding nothing you like?
               Annoyed at having to check the menus of every dining hall to find
               something you want to eat? Find food that YOU want to eat with
-              Dining Buddy. Search for your favorite items across all UIUC
+              IllinEats. Search for your favorite items across all UIUC
               dining halls and get personalized recommendations based on your
               dietary preferences.
             </p>

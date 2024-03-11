@@ -43,7 +43,7 @@ export function Navbar(): JSX.Element {
           href="/"
           className="text-3xl font-bold font-heading text-uiucorange absolute left-5"
         >
-          UIUC Dining Buddy
+          IllinEats
         </Link>
         {isMobile ? (
           <>
