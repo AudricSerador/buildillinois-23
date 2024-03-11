@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/auth/auth.service';
 
@@ -10,10 +10,16 @@ export default function Onboarding(): JSX.Element {
   const [allergies, setAllergies] = useState('');
   const [preferences, setPreferences] = useState('');
 
+  useEffect(() => {
+    if (user && !user.isNew) {
+      router.push('/dashboard');
+    }
+  }, []);
+
   const handleOnboardingCompletion = () => {
     if (user) {
       // Update the user object in the database
-      fetch('/api/updateUser', {
+      fetch('/api/update_user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

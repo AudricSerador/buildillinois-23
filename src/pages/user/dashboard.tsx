@@ -8,13 +8,12 @@ export default function Dashboard(): JSX.Element {
     const { user } = useAuth();
 
     useEffect(() => {
-        if (user) {
-            fetch(`/api/get_user?id=${user.id}`)
-                .then(response => response.json())
-                .then(data => setName(data.data.name))
-                .catch(error => console.error(error));
-        } else {
+        if (user && user.isNew) {
+            router.push('/user/onboarding'); 
+        } else if (user === null) {
             router.push('/login'); 
+        } else {
+            setName(user.name);
         }
     }, [user, router]);
 

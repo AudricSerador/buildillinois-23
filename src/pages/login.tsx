@@ -4,7 +4,16 @@ import { useRouter } from 'next/router';
 
 export default function Login(): JSX.Element {
     const router = useRouter();
-    const { user, signIn, signOut } = useAuth();
+    const { user, signIn, signOut, handleUserSignedIn } = useAuth();
+
+    useEffect(() => {
+        console.log('User:', user);
+        if (user && user.isNew) {
+            router.push('/user/onboarding');
+        } else if (user) {
+            router.push('/user/dashboard');
+        }
+    }, [user, router]);
 
     const handleSignIn = async () => {
         try {
