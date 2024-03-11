@@ -5,15 +5,18 @@ import { useRouter } from 'next/router';
 export default function Dashboard(): JSX.Element {
     const [name, setName] = useState('');
     const router = useRouter();
-    const { user } = useAuth(); // Destructure user from useAuth
+    const { user } = useAuth();
 
     useEffect(() => {
         if (user) {
-            setName(user.user_metadata.full_name); // Set the name state to the user's full name
+            fetch(`/api/get_user?id=${user.id}`)
+                .then(response => response.json())
+                .then(data => setName(data.data.name))
+                .catch(error => console.error(error));
         } else {
-            router.push('/login'); // Redirect to login page
+            router.push('/login'); 
         }
-    }, [user, router]); // Add user to the dependency array
+    }, [user, router]);
 
     return (
         <div className="px-4 sm:px-8 md:px-16 lg:px-64 mt-4">

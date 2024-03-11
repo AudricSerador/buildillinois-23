@@ -10,7 +10,6 @@ export default function Login(): JSX.Element {
         try {
             await signIn();
         } catch (error) {
-            // Handle the error
             console.error(error);
         }
     }

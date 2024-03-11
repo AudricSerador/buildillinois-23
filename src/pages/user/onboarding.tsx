@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '@/auth/auth.service';
 
@@ -10,40 +10,28 @@ export default function Onboarding(): JSX.Element {
   const [allergies, setAllergies] = useState('');
   const [preferences, setPreferences] = useState('');
 
-  useEffect(() => {
+  const handleOnboardingCompletion = () => {
     if (user) {
-      // Create the user object in the database
-      fetch('/api/createUser', {
+      // Update the user object in the database
+      fetch('/api/updateUser', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           id: user.id,
-          email: user.email,
-          azureId: user.user_metadata.azure_id,
           name,
           allergies,
           preferences,
-          isNew: true,
         }),
       })
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          // If the user object was created successfully, ask the user about their food preferences
-          // ...
+          router.push('/dashboard');
         }
       });
     }
-  }, [user, name, allergies, preferences]);
-
-  const handleOnboardingCompletion = () => {
-    // Save the user's food preferences in the database
-    // ...
-
-    // Redirect the user to the dashboard
-    router.push('/dashboard');
   };
 
   return (

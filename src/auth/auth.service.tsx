@@ -3,6 +3,15 @@ import { User, Session, AuthChangeEvent } from '@supabase/supabase-js';
 import { supabase } from './supabase_client';
 import { useRouter } from 'next/router';
 
+interface DiningUser {
+  id: string;
+  email: string;
+  name: string;
+  allergies: string;
+  preferences: string;
+  isNew: boolean;
+}
+
 interface AuthContextType {
   user: User | null;
   signIn: () => Promise<void>;
@@ -20,21 +29,20 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<DiningUser | null>(null);
   const router = useRouter(); // Initialize useRouter
 
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { data, error } = await supabase.auth.getUser();
-        console.log(data)
-        if (error) {
-          console.error(error);
-          // If there's an error, log the user out
-          await supabase.auth.signOut();
+        const { data: { user } } = await supabase.auth.getUser()
+        const response = await fetch(`/api/user/get_user?id=${user?.id}`);
+        const data = await response.json();
+        console.log(data);
+        if (!response.ok) {
           return;
         } else {
-          setUser(data?.user ?? null);
+          setUser(data);
         }
       } catch (error) {
         console.error(error);
@@ -43,20 +51,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
     fetchUser();
 
-    const authListener = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
-      setUser(session?.user ?? null);
+    const authListener = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
+      console.log(session);
       if (session) {
-        router.push('/user/dashboard'); // Redirect the user to the dashboard page
+        const response = await fetch(`/api/user/get_user?id=${session.user.id}`);
+        const data = await response.json();
+        console.log(data)
+        if (!data) {
+          console.log("User not found.")
+          const createUserResponse = await fetch('/api/user/create_user', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: session.user.id, email: session.user.email }) // replace with actual user data
+          });
+      
+          if (!createUserResponse.ok) {
+            const errorData = await createUserResponse.json();
+            console.error(errorData.error);
+          } else {
+            router.push('/user/dashboard');
+          }
+        } else {
+          console.log("User found.");
+          if (data.isNew) {
+            router.push('/user/onboarding');
+          } else {
+            router.push('/user/dashboard');
+          }
+        }
       }
     });
 
-    const refreshInterval = setInterval(async () => {
-      await supabase.auth.refreshSession();
-    }, 5 * 60 * 1000);
-
     return () => {
       authListener.data.subscription.unsubscribe();
-      clearInterval(refreshInterval);
     };
   }, []);
 
@@ -65,7 +94,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       provider: 'azure',
       options: {
         scopes: 'email offline_access',
-        redirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/user/dashboard`,
       },
     });
   
