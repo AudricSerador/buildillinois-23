@@ -62,6 +62,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }),
         });
 
+        const new_res = await fetch(
+          `/api/user/get_user?id=${data.session.user.id}`
+        );
+        const new_user = await new_res.json();
+        setUser({ ...new_user.data });
+        
         if (!createUserResponse.ok) {
           const errorData = await createUserResponse.json();
           console.error(errorData.error);

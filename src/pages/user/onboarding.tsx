@@ -11,7 +11,7 @@ export default function Onboarding(): JSX.Element {
   const [step, setStep] = useState(1);
   const [name, setName] = useState("");
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
-  const [preferences, setPreferences] = useState("");
+  const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
 
   useEffect(() => {
     if (user && !user.isNew) {
@@ -35,19 +35,28 @@ export default function Onboarding(): JSX.Element {
     }
   };
 
+  const handlePreferenceClick = (preference: string) => {
+    if (selectedPreferences.includes(preference)) {
+      setSelectedPreferences(
+        selectedPreferences.filter((a) => a !== preference)
+      );
+    } else {
+      setSelectedPreferences([...selectedPreferences, preference]);
+    }
+  };
   const handleOnboardingCompletion = () => {
     if (user) {
       // Update the user object in the database
-      fetch("/api/update_user", {
-        method: "POST",
+      fetch("/api/user/update_user", {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
           id: user.id,
           name,
-          allergies,
-          preferences,
+          allergies: selectedAllergens.join(','),
+          preferences: selectedPreferences.join(','),
           isNew: false,
         }),
       })
@@ -55,8 +64,12 @@ export default function Onboarding(): JSX.Element {
         .then((data) => {
           if (data.success) {
             router.push("/dashboard");
+          } else {
+            console.error(data.error);
           }
         });
+    } else {
+      console.error("User not found");
     }
   };
 
@@ -82,11 +95,14 @@ export default function Onboarding(): JSX.Element {
             className="mb-4 w-full p-2 text-center border border-gray-300 rounded"
           />
           <button
-  onClick={handleNext}
-  className="w-1/2 py-2 px-4 bg-uiucblue text-white rounded hover:bg-blue-900 fixed bottom-8 left-1/2 transform -translate-x-1/2"
->
-  Next
-</button>
+            onClick={handleNext}
+            disabled={!name}
+            className={`w-1/2 py-2 px-4 bg-uiucblue text-white rounded hover:bg-blue-900 fixed bottom-8 left-1/2 transform -translate-x-1/2 ${
+              !name ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+          >
+            Next
+          </button>
         </div>
       )}
 
@@ -103,7 +119,7 @@ export default function Onboarding(): JSX.Element {
                 className={`inline-flex items-center justify-center rounded-full py-2 px-6 m-2 text-sm font-medium w-36 ${
                   selectedAllergens.includes(label)
                     ? "bg-uiucorange text-white"
-                    : "bg-gray-200 text-gray-700"
+                    : "bg-clouddark text-gray-700"
                 } transition-colors duration-200`}
               >
                 <Image
@@ -118,29 +134,46 @@ export default function Onboarding(): JSX.Element {
             ))}
           </div>
           <button
-  onClick={handleNext}
-  className="w-1/2 py-2 px-4 bg-uiucblue text-white rounded hover:bg-blue-900 fixed bottom-8 left-1/2 transform -translate-x-1/2"
->
-  Next
-</button>
+            onClick={handleNext}
+            className="w-1/2 py-2 px-4 bg-uiucblue text-white rounded hover:bg-blue-900 fixed bottom-8 left-1/2 transform -translate-x-1/2"
+          >
+            Next
+          </button>
         </div>
       )}
 
       {step === 3 && (
         <div>
-          <h3 className="text-5xl mb-4">What are your preferences?</h3>
-          <input
-            type="text"
-            value={preferences}
-            onChange={(e) => setPreferences(e.target.value)}
-            placeholder="Preferences"
-            className="mb-4 w-full p-2 border border-gray-300 rounded"
-          />
+          <h3 className="text-5xl text-center font-custombold mb-4">
+            Do you have any dietary restrictions?
+          </h3>
+          <div className="flex flex-wrap justify-center">
+            {dietaryPreferences.map(({ src, label }) => (
+              <button
+                key={label}
+                onClick={() => handlePreferenceClick(label)}
+                className={`flex flex-col items-center justify-center border border-gray-300 rounded m-2 w-40 h-40 ${
+                  selectedPreferences.includes(label)
+                    ? "bg-uiucorange text-white"
+                    : "bg-gray-200 text-gray-700"
+                } transition-colors duration-200`}
+              >
+                <Image
+                  src={src}
+                  alt={label}
+                  width={72}
+                  height={72}
+                  className="mb-2"
+                />
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
           <button
             onClick={handleOnboardingCompletion}
-            className="w-full py-2 px-4 bg-green-600 text-white rounded hover:bg-green-700"
+            className="w-1/2 py-2 px-4 bg-uiucblue text-white rounded hover:bg-blue-900 fixed bottom-8 left-1/2 transform -translate-x-1/2"
           >
-            Complete Onboarding
+            Finish
           </button>
         </div>
       )}
