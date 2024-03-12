@@ -7,24 +7,15 @@ from selenium.webdriver.chrome.options import Options
 import json
 import time
 import re
-
-start_time = time.time()
-
-options = Options()
-options.add_argument("--headless")
-
-driver = webdriver.Chrome(options=options)
-driver.set_window_size(1024, 768)
-driver.get('https://eatsmart.housing.illinois.edu/NetNutrition/46')
+import traceback
 
 NON_VEGAN_INGREDIENTS = {'gelatin', 'fish', 'tuna', 'salmon', 'tilapia', 'rennet', 'carmine', 'isenglass', 'fish sauce', 'anchovies', 'suet', 'lard', 'cochineal', 'shellac', 'cysteine', 'tyrosine', 'enzymes', 'collagen', 'bone char', 'whey', 'casein', 'fish oil', 'omega-3', 'confectioner', 'beeswax', 'oleic acid', 'stearic acid', 'vitamin d3', 'lanolin', 'lecithin', 'glycerides', 'glycerin', 'lactic acid', 'squalane', 'squalene', 'tallow', 'glyceryl stearate', 'vitamin a', 'vitamin b12', 'vitamin d2', 'vitamin d3', 'xanthan gum', 'zinc stearate', 'meat', 'poultry', 'chicken', 'beef', 'pork', 'lamb', 'venison', 'rabbit', 'duck', 'goose', 'turkey', 'veal', 'organ meat', 'wild game', 'seafood', 'shellfish', 'clams', 'crab', 'lobster', 'shrimp', 'oysters', 'mussels', 'eggs', 'egg white', 'egg yolk', 'egg albumen', 'mayonnaise', 'aioli', 'milk', 'butter', 'cheese', 'cream', 'yogurt', 'honey'}
 NON_VEGETARIAN_INGREDIENTS = {'gelatin', 'rennet', 'carmine', 'isinglass', 'fish', 'tuna', 'salmon', 'tilapia', 'fish sauce', 'anchovies', 'suet', 'lard', 'cochineal', 'shellac', 'cysteine', 'tyrosine', 'enzymes', 'collagen', 'bone char', 'whey', 'casein', 'fish oil', 'omega-3', 'confectioner', 'beeswax', 'oleic acid', 'stearic acid', 'vitamin d3', 'lanolin', 'lecithin', 'glycerides', 'glycerin', 'lactic acid', 'squalane', 'squalene', 'tallow', 'glyceryl stearate', 'vitamin a', 'vitamin b12', 'vitamin d2', 'vitamin d3', 'xanthan gum', 'zinc stearate', 'meat', 'poultry', 'chicken', 'beef', 'pork', 'lamb', 'venison', 'rabbit', 'duck', 'goose', 'turkey', 'veal', 'organ meat', 'wild game', 'seafood', 'shellfish', 'clams', 'crab', 'lobster', 'shrimp', 'oysters', 'mussels'}
 
+DATES_TO_SCRAPE = ['Wednesday, March 20, 2024', 'Thursday, March 21, 2024'] # THIS SPECIFIC FORMAT
+MEALS_TO_SCRAPE = ['Breakfast', 'Lunch', 'Dinner', 'Kosher Lunch', 'Kosher Dinner', 'Light Lunch', 'A la Carte--APP DISPLAY', 'A la Carte--POS Feed'] # idea: separate lambda functions for each breakfast, lunch, dinner, kosher, and other
 
-food_data = []
-DATES_TO_SCRAPE = ['Monday, February 26, 2024'] # THIS SPECIFIC FORMAT
-
-def back_to_food_list():
+def back_to_food_list(driver):
     dropdown = WebDriverWait(driver, 10).until(
         EC.visibility_of_element_located((By.XPATH, '//*[@id="nav-unit-selector"]'))
     )
@@ -38,7 +29,16 @@ def back_to_food_list():
         EC.element_to_be_clickable((By.XPATH, '//a[@class="dropdown-item" and @title="Show All Units"]'))
     )
     time.sleep(1)
-    element.click()
+    
+    # Scroll the element into view
+    driver.execute_script("arguments[0].scrollIntoView();", element)
+    
+    # Add an additional check to ensure the element is clickable
+    try:
+        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//a[@class="dropdown-item" and @title="Show All Units"]')))
+        element.click()
+    except Exception as e:
+        print(f"Error clicking on element: {e}")
 
 def check_preferences(ingredients, name):
     preferences = []
@@ -63,7 +63,7 @@ def check_preferences(ingredients, name):
 
     return ' '.join(preferences)
 
-def scrape_nutrition_facts(food_id):
+def scrape_nutrition_facts(food_id, driver):
     data =  {   
                 "name": "N/A",
                 "mealEntries": [],
@@ -153,14 +153,14 @@ def get_dining_hall_name(facility_name):
     else:
         return facility_name
 
-def get_food_nutrition(title, info):
+def get_food_nutrition(title, info, driver, food_data):
     elements_present = EC.presence_of_element_located((By.XPATH, '//a[starts-with(@id, "showNutrition_")]'))
     WebDriverWait(driver, 10).until(elements_present)
 
     food_ids = [food.get_attribute('id') for food in driver.find_elements(By.XPATH, '//a[starts-with(@id, "showNutrition_")]')]
     for food_id in food_ids:
         parsed_id = food_id.split('_')[-1]
-        data_to_add = scrape_nutrition_facts(parsed_id)
+        data_to_add = scrape_nutrition_facts(parsed_id, driver)
         
         meal_details = {}
         meal_details['diningFacility'] = title
@@ -177,58 +177,128 @@ def get_food_nutrition(title, info):
             data_to_add['mealEntries'].append(meal_details)
             food_data.append(data_to_add)
 
+# Main scraping function
+def scrape(date_to_scrape, meal_to_scrape):
+    print(f'starting scraping for {date_to_scrape} - {meal_to_scrape}...')
+    options = Options()
 
-### GET RESTAURANT DATA ###
+    driver = webdriver.Chrome(options=options)
+    driver.set_window_size(1024, 768)
+    driver.get('https://eatsmart.housing.illinois.edu/NetNutrition/46')
+    
+    try:
+        ### GET RESTAURANT DATA ###
+        print('scraping restaurant data...')
+        food_data = []
 
-back_to_food_list()
-main_lists = WebDriverWait(driver, 10).until(
-        EC.visibility_of_element_located((By.XPATH, '//*[@id="navBarResults"]/div/div'))
-    )
-title_elements = main_lists.find_elements(By.XPATH, '//span[@class="text-white"]')
-restaurant_titles = []
-byw_count = 0
-for title in title_elements:
-    if title.text == "Build Your Own":
-        if byw_count == 0:
-            restaurant_titles.append(f"{title.text} (Ike)")
-        elif byw_count == 1:
-            restaurant_titles.append(f"{title.text} (ISR)")
-        elif byw_count == 2:
-            restaurant_titles.append(f"{title.text} (PAR)")
-        elif byw_count == 3:
-            restaurant_titles.append(f"{title.text} (LAR)")
-        byw_count += 1
-    else:
-        restaurant_titles.append(title.text)
+        back_to_food_list(driver)
+        main_lists = WebDriverWait(driver, 10).until(
+                EC.visibility_of_element_located((By.XPATH, '//*[@id="navBarResults"]/div/div'))
+            )
+        title_elements = main_lists.find_elements(By.XPATH, '//span[@class="text-white"]')
+        restaurant_titles = []
+        byw_count = 0
+        for title in title_elements:
+            if title.text == "Build Your Own":
+                if byw_count == 0:
+                    restaurant_titles.append(f"{title.text} (Ike)")
+                elif byw_count == 1:
+                    restaurant_titles.append(f"{title.text} (ISR)")
+                elif byw_count == 2:
+                    restaurant_titles.append(f"{title.text} (PAR)")
+                elif byw_count == 3:
+                    restaurant_titles.append(f"{title.text} (LAR)")
+                byw_count += 1
+            else:
+                restaurant_titles.append(title.text)
 
-restaurant_meals = []
-restaurant_groups = main_lists.find_elements(By.XPATH, '//ul[@class="list-group"]')
-for meal in restaurant_groups:
-    meal_nav = [nav.get_attribute('onclick') for nav in meal.find_elements(By.XPATH, './/li[@class="list-group-item"]')]
-    meal_dates = [date.text for date in meal.find_elements(By.XPATH, './/div')]
-    restaurant_meals.append(list(zip(meal_nav, meal_dates))) # 0th element: js navigation script, 1st element: date of meal
+        restaurant_meals = []
+        restaurant_groups = main_lists.find_elements(By.XPATH, '//ul[@class="list-group"]')
+        for meal in restaurant_groups:
+            meal_nav = [nav.get_attribute('onclick') for nav in meal.find_elements(By.XPATH, './/li[@class="list-group-item"]')]
+            meal_dates = [date.text for date in meal.find_elements(By.XPATH, './/div')]
+            filtered_meals = []
+            
+            for nav, date in zip(meal_nav, meal_dates):
+                date_part = date.split('-', 1)[0].strip()
+                meal_part = date.split('-', 1)[1].strip()
+                if date_part == date_to_scrape and meal_part == meal_to_scrape:
+                    filtered_meals.append((nav, date))
+                    
+            restaurant_meals.append(filtered_meals)
 
-# zip meals and titles together and make them into a dictionary
-restaurant_data = dict(zip(restaurant_titles, restaurant_meals))
+        # zip meals and titles together and make them into a dictionary
+        restaurant_data = dict(zip(restaurant_titles, restaurant_meals))
+        print(f'restaurant data scraped. {len(restaurant_data)} menu options found.')
 
-### GET FOOD DATA ###
-for title, data in restaurant_data.items():
-    for nav, info in data:
-        # Only get food data for current day
-        date = info.split('-', 1)[0].strip()
-        if date not in DATES_TO_SCRAPE:
-            continue
+        ### GET FOOD DATA ###
+        for title, data in restaurant_data.items():
+            for nav, info in data:
+                print(f"scraping food data for {title} - {info}")
+                driver.execute_script(nav)
+                get_food_nutrition(title, info, driver, food_data)
         
-        print(f"scraping food data for {title} - {info}")
-        driver.execute_script(nav)
-        get_food_nutrition(title, info)
-
-### READ TO JSON ###
-with open('food_data.json', 'w') as json_file:
-    json.dump(food_data, json_file, indent=4)
+        print(f'scraping for {date_to_scrape} - {meal_to_scrape} complete!')
+        driver.close()
         
-end_time = time.time()
-elapsed_time = end_time - start_time
-print(f"Web scraping complete!\nTime taken: {elapsed_time} seconds\nItems scraped: {len(food_data)}")
+        return food_data
 
+    except Exception as e:
+        print(f"An error occurred while scraping {date_to_scrape} - {meal_to_scrape}:")
+        print(traceback.format_exc())
+        driver.close()
+        return []
+    
+
+from concurrent import futures
+
+def scrape_all():
+    tasks = [(date, meal) for date in DATES_TO_SCRAPE for meal in MEALS_TO_SCRAPE]
+
+    scraped_data = []
+
+    with futures.ThreadPoolExecutor(max_workers=4) as executor:
+        future_results = {}
+        for task in tasks:
+            future = executor.submit(scrape, *task)
+            future_results[future] = task
+            time.sleep(5)
+
+        failed_tasks = []
+        for future in futures.as_completed(future_results):
+            date, meal = future_results[future]
+            try:
+                result_data = future.result()
+                scraped_data.extend(result_data)
+            except Exception as e:
+                print(f'An error occurred while scraping {date} - {meal}: {e}')
+                failed_tasks.append((date, meal))  # Add the failed task to the list of failed tasks
+
+        # Retry the failed tasks concurrently
+        future_results = {}
+        for task in failed_tasks:
+            future = executor.submit(scrape, *task)
+            future_results[future] = task
+            time.sleep(5)
+        for future in futures.as_completed(future_results):
+            date, meal = future_results[future]
+            try:
+                result_data = future.result()
+                scraped_data.extend(result_data)
+            except Exception as e:
+                print(f'An error occurred while rescraping {date} - {meal}: {e}')
+
+    return scraped_data
+
+if __name__ == '__main__':
+    start_time = time.time()
+
+    food_data = scrape_all()
+
+    with open('food_data2.json', 'w') as f:
+        json.dump(food_data, f, indent=4)
+
+    end_time = time.time()
+    elapsed_time = end_time - start_time
+    print(f"Web scraping complete!\nTime taken: {elapsed_time} seconds\nItems scraped: {len(food_data)}")
 
