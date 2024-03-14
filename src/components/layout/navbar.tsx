@@ -1,9 +1,13 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/auth/auth.service";
 import Link from "next/link";
 
 export function Navbar(): JSX.Element {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const { user, signOut } = useAuth();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -12,6 +16,10 @@ export function Navbar(): JSX.Element {
   const closeMenu = () => {
     setIsOpen(false);
   };
+
+  const toggleDropdown = () => {
+    setDropdownOpen(!dropdownOpen);
+  }
 
   useEffect(() => {
     const checkMobile = () => {
@@ -36,9 +44,9 @@ export function Navbar(): JSX.Element {
     <nav
       className={`${
         isMobile ? "fixed top-0" : ""
-      } fixed bg-uiucblue text-white w-full shadow-lg z-10`}
+      } fixed bg-uiucblue text-white w-full z-10`}
     >
-      <div className="px-5 xl:px-12 py-6 flex w-full items-center justify-center">
+      <div className="px-5 xl:px-12 py-6 flex w-full items-center shadow-xl justify-center">
         <Link
           href="/"
           className="text-3xl font-bold font-heading text-uiucorange absolute left-5"
@@ -99,11 +107,24 @@ export function Navbar(): JSX.Element {
                 >
                   My Favorites
                 </Link>
+
+                {user ? (
+                  <div className="mt-4">
+                    <p>{user.name}</p>
+                    <p>{user.email}</p>
+                    <button onClick={signOut}>Sign Out</button>
+                  </div>
+                ) : (
+                  <Link href="/login" className="mt-4 text-white hover:uiucorange">
+                    Login
+                  </Link>
+                )}
               </div>
             </div>
           </>
         ) : (
-          <ul className="hidden md:flex px-4 mx-auto font-semibold font-heading space-x-12">
+          <>
+          <ul className="hidden md:flex shadow-xl px-4 mx-auto font-semibold font-heading space-x-12">
             <li>
               <Link href="/" className="hover:text-uiucorange">
                 Home
@@ -125,6 +146,40 @@ export function Navbar(): JSX.Element {
               </Link>
             </li>
           </ul>
+          {user ? (
+            <div className="block font-custombold text-lg -my-1.5">
+  <button className="flex items-center space-x-2" onClick={toggleDropdown}>
+    <span>{user.name}</span>
+    <img className="w-8 h-8 rounded-full" src="https://cdn-icons-png.freepik.com/512/7022/7022927.png" alt="user photo" />
+  </button>
+  {dropdownOpen && (
+    <div className="absolute right-0 mt-7 w-48 mr-8 bg-white rounded-md overflow-hidden shadow-xl">
+      <div className="px-4 py-3 -my-2">
+        <span className="block text-sm text-gray-900">{user.name}</span>
+        <span className="block text-sm text-gray-500 truncate">{user.email}</span>
+      </div>
+      <div className="h-0.5 bg-clouddark mx-2"></div>
+
+      <ul>
+        <li>
+          <Link href="/user/dashboard" className="block px-4 py-2 w-full text-left text-sm text-gray-700 hover:bg-gray-100">Dashboard</Link>
+        </li>
+        <li>
+          <Link href="#" className="block px-4 py-2 w-full text-left text-sm text-gray-700 hover:bg-gray-100">Settings</Link>
+        </li>
+        <li>
+          <button onClick={signOut} className="block px-4 py-2 w-full text-left text-sm text-gray-700 hover:bg-red-100">Sign Out</button>
+        </li>
+      </ul>
+    </div>
+  )}
+</div>
+          ) : (
+            <Link href="/login" className="bg-uiucorange text-lg font-custombold text-white rounded-lg px-6 py-1.5 -my-1.5 hover:text-white">
+            Login
+            </Link>
+          )}
+          </>
         )}
       </div>
     </nav>

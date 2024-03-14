@@ -179,6 +179,12 @@ def get_food_nutrition(title, info, driver, food_data):
 def scrape(date_to_scrape, meal_to_scrape):
     print(f'starting scraping for {date_to_scrape} - {meal_to_scrape}...')
     options = Options()
+    options.add_argument("--disable-extensions")
+    options.add_argument("--start-maximized")
+    options.add_argument("--incognito")
+    options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--no-sandbox")
 
     driver = webdriver.Chrome(options=options)
     driver.set_window_size(1024, 768)

@@ -15,7 +15,9 @@ export default function Onboarding(): JSX.Element {
 
   useEffect(() => {
     if (user && !user.isNew) {
-      router.push("/dashboard");
+      router.push("/user/dashboard");
+    } else if (!user) {
+      router.push("/login");
     }
   }, []);
 

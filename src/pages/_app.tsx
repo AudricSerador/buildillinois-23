@@ -23,7 +23,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <SEO
-        title="UIUC Dining Buddy"
+        title="IllinEats"
         description="The better dining hall experience."
       />
       <AuthProvider>
