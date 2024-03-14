@@ -30,10 +30,8 @@ def back_to_food_list(driver):
     )
     time.sleep(1)
     
-    # Scroll the element into view
     driver.execute_script("arguments[0].scrollIntoView();", element)
     
-    # Add an additional check to ensure the element is clickable
     try:
         WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//a[@class="dropdown-item" and @title="Show All Units"]')))
         element.click()
@@ -272,8 +270,7 @@ def scrape_all():
                 scraped_data.extend(result_data)
             except Exception as e:
                 print(f'An error occurred while scraping {date} - {meal}: {e}')
-                failed_tasks.append((date, meal))  # Add the failed task to the list of failed tasks
-
+                failed_tasks.append((date, meal))
         # Retry the failed tasks concurrently
         future_results = {}
         for task in failed_tasks:
