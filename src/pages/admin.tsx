@@ -1,8 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FileUploader from "../components/file_upload";
+import { useRouter } from "next/router";
+import { useAuth } from "@/auth/auth.service";
 
 const Admin = () => {
   const [message, setMessage] = useState("File status: not uploaded");
+  const router = useRouter();
+  const { user } = useAuth();
+
+  useEffect(() => {
+      if (user && user.email !== "asera3@illinois.edu") {
+        router.push("/");
+      }
+  }, [user, router]);
 
   const readFileAsync = (file: File): Promise<any> => {
     return new Promise((resolve, reject) => {

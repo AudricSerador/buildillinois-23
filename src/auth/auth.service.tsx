@@ -108,6 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(error.message);
     }
     setUser(null);
+    router.push("/");
   };
 
   useEffect(() => {

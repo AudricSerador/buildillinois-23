@@ -18,13 +18,14 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
 
   useEffect(() => {
     const fetchFavorite = async () => {
+      console.log(userId);
       if (userId) {
-        const res = await fetch(`/api/favorite?userId=${userId}&foodId=${foodId}`);
+        const res = await fetch(`/api/favorite/get_favorite?userId=${userId}&foodId=${foodId}`);
         const data = await res.json();
         setIsFavorited(data.success && data.data.length > 0);
       }
     };
-
+  
     fetchFavorite();
   }, [userId, foodId]);
 
@@ -98,7 +99,7 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
   };
 
   return (
-    <>
+    <div className="relative">
       <button
         onClick={isFavorited ? handleUnfavorite : handleFavorite}
         className={`star-btn text-5xl transition-colors duration-200 ${
@@ -111,7 +112,7 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
         {isFavorited ? "★" : "☆"}
       </button>
       {showModal && <FavOnClickModal onClose={() => setShowModal(false)} />}
-    </>
+    </div>
   );
 };
 

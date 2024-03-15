@@ -17,7 +17,8 @@ const FavOnClickModal: React.FC<FavOnClickModalProps> = ({ onClose }) => {
   };
 
   return (
-<div className="fixed top-0 right-0 bottom-0 left-0 flex items-center font-custombold justify-center bg-black bg-opacity-70" onClick={onClose}>      <div className="bg-cloud rounded-lg p-8 text-center" onClick={stopPropagation}>
+    <div className="fixed inset-0 flex items-center justify-center w-screen h-screen font-custombold bg-black bg-opacity-70 box-border left-0 right-0 top-0 bottom-0" onClick={onClose}>
+      <div className="bg-cloud rounded-lg p-8 text-center box-border" onClick={stopPropagation}>
         <h2 className="text-xl font-custom mb-4">Want to save favorite foods? <br></br> Login to IllinEats with your NetID!</h2>
         <button onClick={handleLogin} className="px-4 py-2 px-8 bg-uiucorange text-xl text-white rounded-lg">
           Login
