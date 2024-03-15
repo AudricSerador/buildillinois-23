@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { useRouter } from "next/router";
+import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 import FavOnClickModal from "./fav_onclick_modal";
 
@@ -16,7 +15,18 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
 }) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const router = useRouter();
+
+  useEffect(() => {
+    const fetchFavorite = async () => {
+      if (userId) {
+        const res = await fetch(`/api/favorite?userId=${userId}&foodId=${foodId}`);
+        const data = await res.json();
+        setIsFavorited(data.success && data.data.length > 0);
+      }
+    };
+
+    fetchFavorite();
+  }, [userId, foodId]);
 
   const handleFavorite = async () => {
     if (userId === "") {

@@ -139,7 +139,7 @@ export function Navbar(): JSX.Element {
                 </Link>
               </li>
               <li>
-                <Link href="/" className="hover:text-uiucorange">
+                <Link href="/user/favorites" className="hover:text-uiucorange">
                   My Favorites
                 </Link>
               </li>

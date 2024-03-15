@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { PreferenceIcons } from "../preference_icons";
+import { FoodItem } from "@/pages/food/[id]";
 
 interface FoodItemDisplayProps {
-  foodItem: any;
+  foodItem: FoodItem;
   includeEntries: boolean;
 }
 

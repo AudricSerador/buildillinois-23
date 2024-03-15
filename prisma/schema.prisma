@@ -60,4 +60,6 @@ model Favorite {
   userId String
   food   FoodInfo @relation(fields: [foodId], references: [id])
   foodId String
+
+  @@unique([userId, foodId])
 }

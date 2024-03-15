@@ -6,7 +6,8 @@ import LoadingSpinner from "@/components/loading_spinner";
 import { useAuth } from "@/auth/auth.service";
 import FavoriteBtn from "@/components/favorites/favorite_btn";
 
-interface FoodItem {
+export interface FoodItem {
+  id: string;
   calories: number;
   servingSize: string;
   caloriesFat: number;
@@ -24,6 +25,7 @@ interface FoodItem {
   name: string;
   ingredients: string;
   allergens: string;
+  preferences: string;
   mealEntries: string[];
 }
 

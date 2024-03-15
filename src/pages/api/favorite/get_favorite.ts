@@ -11,6 +11,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           userId: userId as string | undefined,
           foodId: foodId as string | undefined,
         },
+        include: {
+          food: true,
+        },
       });
 
       if (favorites.length > 0) {
