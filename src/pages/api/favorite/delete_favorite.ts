@@ -3,12 +3,13 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'DELETE') {
-    const { id } = req.body;
+    const { userId, foodId } = req.body;
 
     try {
-      const deletedFavorite = await prisma.favorite.delete({
+      const deletedFavorite = await prisma.favorite.deleteMany({
         where: {
-          id: id,
+          userId: userId,
+          foodId: foodId,
         },
       });
 

@@ -20,6 +20,7 @@
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",
     "react-select": "^5.8.0",
+    "react-toastify": "^10.0.4",
     "tailwindcss": "^3.4.0",
     "uuid": "^9.0.1"
   },

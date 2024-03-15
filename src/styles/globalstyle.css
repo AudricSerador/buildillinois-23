@@ -26,6 +26,14 @@
 @tailwind components;
 @tailwind utilities;
 
+body .Toastify__toast {
+  font-family: 'Source Sans Pro', sans-serif;
+}
+
+:root {
+  --toastify-color-success: #ff5f05 !important;
+}
+
 /* Hide scrollbar for Chrome, Safari and Opera */
 @media (max-width: 640px) {
   .scrollbar-hide::-webkit-scrollbar {
