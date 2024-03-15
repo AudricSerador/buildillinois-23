@@ -48,9 +48,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const response = await fetch(
         `/api/user/get_user?id=${data.session.user.id}`
       );
-      const res = await response.json();
-      if (!res) {
-        console.log("User not found.");
+
+      if (response.status === 404) {
+        console.log("User not found. Creating new user.");
         const createUserResponse = await fetch("/api/user/create_user", {
           method: "POST",
           headers: {
@@ -75,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           router.push("/user/dashboard");
         }
       } else {
+        const res = await response.json();
         console.log("User found.");
         setUser({ ...res.data });
         if (res.data.isNew) {
@@ -83,6 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           router.push("/user/dashboard");
         }
       }
+    } else {
+      console.log("No session found.");
     }
   };
 
@@ -106,6 +109,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setUser(null);
   };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const { data, error } = await supabase.auth.getSession()
+      console.log(data);
+      if (data.session) {
+        const response = await fetch(`/api/user/get_user?id=${data.session.user.id}`);
+        const res = await response.json();
+        setUser({ ...res.data });
+      } else {
+        setUser(null);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     if (window.location.hash.includes("#access_token=")) {

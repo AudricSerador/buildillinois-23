@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           email,
         },
       });
-
+      console.log("new user created: ", newUser)
       res.status(200).json({ success: true, data: newUser });
     } catch (error: any) {
       res.status(500).json({ success: false, message: error.message });
