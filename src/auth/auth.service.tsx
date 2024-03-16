@@ -131,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (window.location.hash.includes("#access_token=")) {
       handleUserSignedIn();
     }
-  }, []);
+  }, [handleUserSignedIn]);
 
   return (
     <AuthContext.Provider value={{ user, signIn, signOut, handleUserSignedIn }}>
