@@ -41,22 +41,22 @@ export default function FoodItemPage() {
     const fetchFoodItem = async () => {
       if (foodId) {
         const res = await fetch(`/api/food/${foodId}`);
-        
+
         if (!res.ok) {
           router.push("/404");
           return;
         }
-    
+
         const data = await res.json();
         setFoodItem(data);
         setIsLoading(false);
       }
     };
-  
+
     if (user) {
       setUserId(user.id);
     }
-  
+
     fetchFoodItem();
   }, [foodId, router, user]);
 
@@ -71,10 +71,14 @@ export default function FoodItemPage() {
 
   return (
     <div className="px-4 sm:px-8 font-custom md:px-16 lg:px-64 mt-4">
-<div className="flex items-center space-x-4 mb-4">
-  <h1 className="text-4xl font-custombold">{foodItem?.name}</h1>
-  <FavoriteBtn userId={userId} foodId={foodId as string} foodName={foodItem?.name as string} />
-</div>
+      <div className="flex items-center space-x-4 mb-4">
+        <h1 className="text-4xl font-custombold">{foodItem?.name}</h1>
+        <FavoriteBtn
+          userId={userId}
+          foodId={foodId as string}
+          foodName={foodItem?.name as string}
+        />
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 items-start justify-items-center sm:justify-items-start">
         {foodItem && <NutritionFacts foodItem={foodItem} />}
         <div>

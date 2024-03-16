@@ -173,7 +173,7 @@ export const EntriesDisplay: React.FC<EntriesDisplayProps> = ({
 
   return (
     <div className="max-w-2xl my-8 font-custom">
-      {Object.entries(groupedEntries).map(([date, diningHalls]) => (
+      {Object.entries(groupedEntries).reverse().map(([date, diningHalls]) => (
         <div key={date} className="mb-3">
           <div
             className={`bg-uiucorange text-white p-4 flex justify-between items-center cursor-pointer ${

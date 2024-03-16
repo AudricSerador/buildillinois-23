@@ -17,7 +17,31 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       >`SELECT DISTINCT "dateServed" FROM "mealDetails";`
     ).map((date) => date.dateServed);
 
-    dates = dates.reverse();
+    const parseDate = (dateString: any) => {
+      const months = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+      const parts = dateString.split(", ").slice(1).join(", ");
+      const dateParts = parts.split(" ");
+      return new Date(
+        parseInt(dateParts[2]),
+        months.indexOf(dateParts[0]),
+        parseInt(dateParts[1])
+      );
+    };
+
+    dates.sort((a, b) => parseDate(a).getTime() - parseDate(b).getTime());
 
     const mealTypes = (
       await prisma.$queryRaw<

@@ -2,7 +2,14 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import prisma from "../../../lib/prisma";
 
 function generateWhereClause(query: any) {
-  const { diningHall, mealType, searchTerm, dateServed, allergens, preferences } = query;
+  const {
+    diningHall,
+    mealType,
+    searchTerm,
+    dateServed,
+    allergens,
+    preferences,
+  } = query;
   const allergensArray = allergens ? allergens.split(",") : [];
 
   const allergensConditions = allergensArray.map((allergen: string) => ({
@@ -59,7 +66,7 @@ function generateWhereClause(query: any) {
       : {},
   ];
 
-  return conditions.filter(condition => Object.keys(condition).length > 0);
+  return conditions.filter((condition) => Object.keys(condition).length > 0);
 }
 
 export default async function handler(
@@ -102,5 +109,31 @@ export default async function handler(
     >`SELECT DISTINCT "dateServed" FROM "mealDetails";`
   ).map((date: any) => date.dateServed);
 
-  res.status(200).json({ food, foodCount, dates });
+  const parseDate = (dateString: any) => {
+    const months = [
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    const parts = dateString.split(", ").slice(1).join(", ");
+    const dateParts = parts.split(" ");
+    return new Date(
+      parseInt(dateParts[2]),
+      months.indexOf(dateParts[0]),
+      parseInt(dateParts[1])
+    );
+  };
+
+  dates.sort((a, b) => parseDate(a).getTime() - parseDate(b).getTime());
+
+  res.status(200).json({ food, foodCount, dates: dates.reverse() });
 }
