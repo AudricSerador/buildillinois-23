@@ -21,6 +21,9 @@ module.exports = {
         'clouddarker': '#DDDEDE',
         'clouddarkest': '#D2D2D2',
       },
+      boxShadow: {
+        'glow': '0 0 10px 2px #F5821E',
+      },
     },
   },
   plugins: [],

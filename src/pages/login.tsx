@@ -29,9 +29,20 @@ export default function Login(): JSX.Element {
     }
 
     return (
-        <div className="px-4 sm:px-8 md:px-16 lg:px-64 mt-4">
-            <p className="text-4xl font-custombold mt-4 mb-4">Login with your NetID</p>
-            <button onClick={handleSignIn} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Login with Azure</button>
+        <div className="flex flex-col font-custom items-center justify-center min-h-screen bg-gray-100 py-2">
+          <div className="p-6 max-w-sm w-full bg-white shadow-md rounded-md">
+          <img src="./images/blockI.gif" alt="Description of the GIF" />
+            <div className="flex justify-center items-center">
+              <span className="text-gray-700 font-custombold text-2xl">Login with your NetID</span>
+            </div>
+            <div className="mt-4">
+              <button 
+                onClick={handleSignIn} 
+                className="flex items-center justify-center w-full px-4 py-2 text-white text-sm rounded-md bg-uiucorange transition duration-500 hover:shadow-glow">
+                Continue
+              </button>
+            </div>
+          </div>
         </div>
-    )
+      );
 }
