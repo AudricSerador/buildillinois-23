@@ -48,6 +48,17 @@ export default function FoodItemPage() {
         }
 
         const data = await res.json();
+
+        if (data.mealEntries) {
+          data.mealEntries
+            .sort(
+              (a: any, b: any) =>
+                (new Date(a.dateServed) as any) -
+                (new Date(b.dateServed) as any)
+            )
+            .reverse();
+        }
+
         setFoodItem(data);
         setIsLoading(false);
       }
@@ -90,8 +101,12 @@ export default function FoodItemPage() {
             <span className="font-custom">{foodItem?.allergens}</span>
           </p>
           <h2 className="text-2xl font-custombold mb-2">Dates Served</h2>
-          {foodItem?.mealEntries && (
+          {foodItem?.mealEntries && foodItem.mealEntries.length > 0 ? (
             <EntriesDisplay mealEntries={foodItem.mealEntries} />
+          ) : (
+            <div className="max-w-2xl my-8 font-custom text-lg text-center">
+              <p>This food item has not been served yet.</p>
+            </div>
           )}
         </div>
       </div>

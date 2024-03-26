@@ -55,7 +55,10 @@ export function Navbar(): JSX.Element {
         </Link>
         {isMobile ? (
           <>
-            <button onClick={toggleMenu} className="ml-auto">
+            <button
+              onClick={toggleMenu}
+              className="ml-auto bg-uiucorange rounded-full p-2 -m-2 mr-0.25"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -107,12 +110,44 @@ export function Navbar(): JSX.Element {
                 >
                   My Favorites
                 </Link>
+                <hr className="my-4 border-t-4 border-uiucorange" />
 
                 {user ? (
-                  <div className="mt-4">
-                    <p>{user.name}</p>
-                    <p>{user.email}</p>
-                    <button onClick={signOut}>Sign Out</button>
+                  <div className="flex flex-col">
+                    <div className="flex items-center">
+                      <img
+                        className="w-8 h-8 mr-4 rounded-full"
+                        src="https://cdn-icons-png.freepik.com/512/7022/7022927.png"
+                        alt="user photo"
+                      />
+                      <div>
+                        <p>{user.name}</p>
+                        <p>{user.email}</p>
+                      </div>
+                    </div>
+                    <Link
+                      href="/user/dashboard"
+                      onClick={closeMenu}
+                      className="mt-4 text-white hover:uiucorange"
+                    >
+                      Dashboard
+                    </Link>
+                    <Link
+                      href="/#"
+                      onClick={closeMenu}
+                      className="mt-4 text-white hover:uiucorange"
+                    >
+                      Settings
+                    </Link>
+                    <button
+                      onClick={() => {
+                        signOut();
+                        closeMenu();
+                      }}
+                      className="mt-4 text-white text-left hover:uiucorange"
+                    >
+                      Sign Out
+                    </button>
                   </div>
                 ) : (
                   <Link
@@ -194,19 +229,6 @@ export function Navbar(): JSX.Element {
                         </Link>
                       </li>
                       <li>
-                        <Link
-                          href="/user/dashboard"
-                          onClick={closeMenu}
-                          className="block px-4 py-2 w-full text-left text-sm text-gray-700 hover:bg-red-100"
-                        >
-                          Dashboard
-                        </Link>
-                        <Link
-                          href="#"
-                          className="block px-4 py-2 w-full text-left text-sm text-gray-700 hover:bg-red-100"
-                        >
-                          Settings
-                        </Link>
                         <button
                           onClick={() => {
                             closeMenu();
