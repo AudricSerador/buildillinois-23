@@ -178,6 +178,7 @@ export function Navbar(): JSX.Element {
                       <li>
                         <Link
                           href="/user/dashboard"
+                          onClick={closeMenu}
                           className="block px-4 py-2 w-full text-left text-sm text-gray-700 hover:bg-gray-100"
                         >
                           Dashboard
@@ -186,14 +187,31 @@ export function Navbar(): JSX.Element {
                       <li>
                         <Link
                           href="#"
+                          onClick={closeMenu}
                           className="block px-4 py-2 w-full text-left text-sm text-gray-700 hover:bg-gray-100"
                         >
                           Settings
                         </Link>
                       </li>
                       <li>
+                        <Link
+                          href="/user/dashboard"
+                          onClick={closeMenu}
+                          className="block px-4 py-2 w-full text-left text-sm text-gray-700 hover:bg-red-100"
+                        >
+                          Dashboard
+                        </Link>
+                        <Link
+                          href="#"
+                          className="block px-4 py-2 w-full text-left text-sm text-gray-700 hover:bg-red-100"
+                        >
+                          Settings
+                        </Link>
                         <button
-                          onClick={signOut}
+                          onClick={() => {
+                            closeMenu();
+                            signOut();
+                          }}
                           className="block px-4 py-2 w-full text-left text-sm text-gray-700 hover:bg-red-100"
                         >
                           Sign Out
@@ -206,6 +224,7 @@ export function Navbar(): JSX.Element {
             ) : (
               <Link
                 href="/login"
+                onClick={closeMenu}
                 className="bg-uiucorange text-lg font-custombold text-white rounded-lg px-6 py-1.5 -my-1.5 hover:text-white"
               >
                 Login

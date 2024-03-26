@@ -88,7 +88,7 @@ export default function Onboarding(): JSX.Element {
 
       {step === 1 && (
         <div>
-          <h3 className="text-5xl font-custombold mb-4">What is your name?</h3>
+          <h3 className="text-5xl text-center font-custombold mb-4">What is your name?</h3>
           <input
             type="text"
             value={name}

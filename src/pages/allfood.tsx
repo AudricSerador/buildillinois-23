@@ -82,7 +82,7 @@ export default function AllFood(): JSX.Element {
         const allergensString = allergens.join(",");
 
         const res = await fetch(
-          `/api/get_allfood?page=${pageNumber}&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${mealType}&searchTerm=${debouncedSearchTerm}&dateServed=${dateServed}&allergens=${allergensString}&preferences=${preferences}`
+          `/api/get_allfood?page=${pageNumber}&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${encodeURIComponent(mealType)}&searchTerm=${debouncedSearchTerm}&dateServed=${dateServed}&allergens=${allergensString}&preferences=${preferences}`
         );
 
         if (!res.ok) {

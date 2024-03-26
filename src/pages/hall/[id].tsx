@@ -116,7 +116,7 @@ export default function HallFoodPage({
         setIsLoading(true);
         try {
           const response = await fetch(
-            `/api/get_halldata?id=${id}&mealType=${mealType}&dateServed=${dateServed}`
+            `/api/get_halldata?id=${id}&mealType=${encodeURIComponent(mealType)}&dateServed=${dateServed}`
           );
           const data = await response.json();
           setFoodData(data);
