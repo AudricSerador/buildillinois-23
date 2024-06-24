@@ -104,7 +104,7 @@ export function Navbar(): JSX.Element {
                   Dining Halls
                 </Link>
                 <Link
-                  href="/"
+                  href="/user/favorites"
                   className="mt-4 text-white hover:uiucorange"
                   onClick={closeMenu}
                 >

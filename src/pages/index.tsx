@@ -14,7 +14,7 @@ export default function Home(): JSX.Element {
       />
       <div className="relative m-0 p-0 text-white flex-grow"
         style={{
-          background: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5))`,
+          background: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7))`,
         }}
       >
         <div className="flex justify-center items-start mt-20 text-center px-4 sm:px-0">
@@ -42,6 +42,12 @@ export default function Home(): JSX.Element {
               Sign Up
             </button>
           </Link>
+          <button
+            className="bg-yellow-300 text-black font-custombold py-2 px-4 rounded mr-4 transition duration-500 ease-in-out transform hover:scale-105"
+            onClick={() => window.open('https://buymeacoffee.com/audricserador', '_blank', 'noopener,noreferrer')}
+          >
+            ☕ Buy me a Coffee
+          </button>
         </div>
       </div>
     </div>
