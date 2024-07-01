@@ -24,6 +24,6 @@ export default function Dashboard(): JSX.Element {
                 {user?.allergies && user.allergies.length > 0 ? `Your allergies: ${user.allergies}` : 'You have no allergies.'}
                 {user?.preferences && user.preferences.length > 0 ? `Your preferences: ${user.preferences}` : 'You have no preferences.'}
             </p>
-        </div>
+        </div> 
     )
 }

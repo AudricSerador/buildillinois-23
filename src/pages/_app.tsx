@@ -26,7 +26,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <>
       <SEO title="IllinEats" description="The better dining hall experience." />
       <AuthProvider>
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen w-full">
           <main className="flex-grow">
             {showNavbarAndFooter && <Navbar />}
             {showNavbarAndFooter && (

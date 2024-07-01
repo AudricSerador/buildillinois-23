@@ -22,7 +22,7 @@ def get_next_n_days(n): # get array of dates for next n days starting tomorrow
         dates.append(formatted_date)
     return dates
 
-DATES_TO_SCRAPE = get_next_n_days(1)
+DATES_TO_SCRAPE = get_next_n_days(3)
 MEALS_TO_SCRAPE = ['Breakfast', 'Lunch', 'Dinner', 'Kosher Lunch', 'Kosher Dinner', 'Light Lunch', 'A la Carte--APP DISPLAY', 'A la Carte--POS Feed', 'Deli & Bagel Bar', 'Waffle Bar', 'Salad Bar', 'Cereal', 'Ice Cream'] # idea: separate lambda functions for each breakfast, lunch, dinner, kosher, and other
 
 def back_to_food_list(driver):
