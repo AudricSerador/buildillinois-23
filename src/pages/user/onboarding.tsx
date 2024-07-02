@@ -8,23 +8,30 @@ const StepButton = ({ onClick, text, disabled }: { onClick: () => void; text: st
   <button
     onClick={onClick}
     disabled={disabled}
-    className={`btn btn-primary w-1/3 fixed bottom-8 right-1/8 ${disabled ? "btn-disabled opacity-50 cursor-not-allowed" : ""}`}
+    className={`btn btn-primary fixed w-1/3 max-w-48 rounded-full bottom-8 right-8 ${disabled ? "btn-disabled opacity-50 cursor-not-allowed" : ""}`}
   >
     {text}
   </button>
 );
 
+const BackButton = ({ step, handleBack }: { step: number; handleBack: () => void }) => {
+  return (
+    <>
+      {step > 1 && (
+        <button
+          onClick={handleBack}
+          className="btn btn-secondary fixed w-1/3 rounded-full max-w-48 z-50 bottom-8 left-8"
+        >
+          Back
+        </button>
+      )}
+    </>
+  );
+};
+
 const StepLayout = ({ children, step, handleBack }: { children: React.ReactNode; step: number; handleBack: () => void }) => (
   <div className="flex flex-col font-custom items-center justify-center min-h-screen">
-    {step > 1 && (
-      <button
-        onClick={handleBack}
-        className="btn btn-secondary w-1/3 absolute z-50 bottom-8 left-1/8 transform fixed"
-      >
-        Back
-      </button>
-    )}
-    <div className="w-full flex items-center justify-center h-16 mt-4 top-0 absolute">
+    <div className="w-full flex items-center justify-center h-16 mt-4 top-0 fixed">
       <ul className="steps">
         <li className={`step ${step >= 1 && "step-primary"}`}>Name</li>
         <li className={`step ${step >= 2 && "step-primary"}`}>Allergens</li>
@@ -96,7 +103,7 @@ export default function Onboarding(): JSX.Element {
   return (
     <StepLayout step={step} handleBack={handleBack}>
       {step === 1 && (
-        <div>
+        <div className="flex flex-wrap text-center justify-center px-6">
           <h3 className="text-5xl text-center font-custombold mb-4">What is your name?</h3>
           <input
             type="text"
@@ -124,13 +131,14 @@ export default function Onboarding(): JSX.Element {
               </button>
             ))}
           </div>
+          <BackButton step={step} handleBack={handleBack} />
           <StepButton onClick={handleNext} text="Next" />
         </div>
       )}
 
       {step === 3 && (
-        <div>
-          <h3 className="text-5xl text-center font-custombold mb-4">Do you have any dietary restrictions?</h3>
+        <div className="flex flex-wrap text-center justify-center">
+          <h3 className="text-5xl w-full text-center font-custombold mb-4">Do you have any dietary restrictions?</h3>
           <div className="flex flex-wrap justify-center">
             {dietaryPreferences.map(({ src, label }) => (
               <button
@@ -143,6 +151,7 @@ export default function Onboarding(): JSX.Element {
               </button>
             ))}
           </div>
+          <BackButton step={step} handleBack={handleBack} />
           <StepButton onClick={handleOnboardingCompletion} text="Finish" />
         </div>
       )}
