@@ -29,7 +29,7 @@ const BackButton = ({ step, handleBack }: { step: number; handleBack: () => void
   );
 };
 
-const StepLayout = ({ children, step, handleBack }: { children: React.ReactNode; step: number; handleBack: () => void }) => (
+const StepLayout = ({ children, step, handleBack, fadeClass }: { children: React.ReactNode; step: number; handleBack: () => void, fadeClass: string }) => (
   <div className="flex flex-col font-custom items-center justify-center min-h-screen">
     <div className="w-full flex items-center justify-center h-16 mt-4 top-0 fixed">
       <ul className="steps">
@@ -41,28 +41,60 @@ const StepLayout = ({ children, step, handleBack }: { children: React.ReactNode;
         <li className="step">Finish</li>
       </ul>
     </div>
-    {children}
+    <div className={`transition-container ${fadeClass}`}>
+      {children}
+    </div>
   </div>
 );
 
 export default function Onboarding(): JSX.Element {
   const router = useRouter();
   const { user } = useAuth();
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(0); // Start at step 0 for the welcome screen
   const [name, setName] = useState("");
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
   const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
+  const [isFading, setIsFading] = useState(false);
+  const [showWelcomeText, setShowWelcomeText] = useState(false);
+  const [showAdditionalText, setShowAdditionalText] = useState(false);
 
   useEffect(() => {
     if (user && !user.isNew) {
       router.push("/user/dashboard");
     } else if (!user) {
       router.push("/login");
+    } else {
+      setTimeout(() => {
+        setShowWelcomeText(true);
+        setTimeout(() => {
+          setShowAdditionalText(true);
+          setTimeout(() => {
+            setIsFading(true);
+            setTimeout(() => {
+              setStep(1);
+              setIsFading(false);
+            }, 300); // Duration should match the CSS transition duration
+          }, 2000); // Show the additional text for 1 second
+        }, 3000); // Delay before showing the additional text
+      }, 100); // Delay before showing the welcome text
     }
   }, [user]);
 
-  const handleNext = () => setStep(step + 1);
-  const handleBack = () => setStep(step - 1);
+  const handleNext = () => {
+    setIsFading(true);
+    setTimeout(() => {
+      setStep(step + 1);
+      setIsFading(false);
+    }, 300); // Duration should match the CSS transition duration
+  };
+
+  const handleBack = () => {
+    setIsFading(true);
+    setTimeout(() => {
+      setStep(step - 1);
+      setIsFading(false);
+    }, 300); // Duration should match the CSS transition duration
+  };
 
   const handleToggle = (selectedItems: string[], setSelectedItems: React.Dispatch<React.SetStateAction<string[]>>, item: string) => {
     setSelectedItems(
@@ -101,7 +133,17 @@ export default function Onboarding(): JSX.Element {
   };
 
   return (
-    <StepLayout step={step} handleBack={handleBack}>
+    <StepLayout step={step} handleBack={handleBack} fadeClass={isFading ? 'fade-out' : 'fade-in'}>
+      {step === 0 && (
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <h1 className={`text-6xl font-custombold text-center mb-4 transition-opacity duration-1000 ${showWelcomeText ? 'opacity-100' : 'opacity-0'}`}>
+            Welcome to <span className="text-secondary">IllinEats!</span>
+          </h1>
+          <h2 className={`text-4xl font-semibold text-center mt-2 transition-opacity duration-1000 ${showAdditionalText ? 'opacity-100' : 'opacity-0'}`}>
+            Let's answer a couple questions.
+          </h2>
+        </div>
+      )}
       {step === 1 && (
         <div className="flex flex-wrap text-center justify-center px-6">
           <h3 className="text-5xl text-center font-custombold mb-4">What is your name?</h3>
@@ -131,6 +173,7 @@ export default function Onboarding(): JSX.Element {
               </button>
             ))}
           </div>
+          <p className="w-full text-center">Don't see your food allergy? Please let us know in the feedback form!</p>
           <BackButton step={step} handleBack={handleBack} />
           <StepButton onClick={handleNext} text="Next" />
         </div>
@@ -151,6 +194,7 @@ export default function Onboarding(): JSX.Element {
               </button>
             ))}
           </div>
+          <p className="w-full text-center">Don't see your dietary restriction? Please let us know in the feedback form!</p>
           <BackButton step={step} handleBack={handleBack} />
           <StepButton onClick={handleOnboardingCompletion} text="Finish" />
         </div>

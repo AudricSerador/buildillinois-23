@@ -61,3 +61,16 @@ body .Toastify__toast {
 .collapse-css-transition.open {
   max-height: 1000px;
 }
+
+.transition-container {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.fade-out {
+  opacity: 0;
+}
+
+.fade-in {
+  opacity: 1;
+}
