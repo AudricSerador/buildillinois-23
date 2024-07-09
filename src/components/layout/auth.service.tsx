@@ -168,7 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (initialized) {
       if (!user && isProtectedRoute(router.pathname)) {
         router.push('/login'); 
-      } else if (user && user.isNew) {
+      } else if (user && user.isNew && router.pathname !== '/user/onboarding') {
         router.push('/user/onboarding'); 
       }
     }
