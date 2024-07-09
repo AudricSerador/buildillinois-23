@@ -16,7 +16,7 @@ interface DiningUser {
   allergies: string;
   preferences: string;
   locations: string;
-  goals: string;
+  goal: string;
   isNew: boolean;
 }
 
