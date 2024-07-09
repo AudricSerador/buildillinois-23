@@ -39,6 +39,11 @@ export function useAuth() {
   return context;
 }
 
+// Helper function to check if a route is protected
+const isProtectedRoute = (pathname: string) => {
+  return pathname.startsWith('/user');
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<DiningUser | null>(null);
   const [initialized, setInitialized] = useState(false); // Track initialization
@@ -107,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error(error.message);
     }
     setUser(null);
-    router.push("/");
+    router.push("/login");
   };
 
   useEffect(() => {
@@ -146,10 +151,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (initialized) {
-      if (user && user.isNew) {
-        router.push('/user/onboarding'); 
-      } else if (user === null) {
+      if (!user && isProtectedRoute(router.pathname)) {
         router.push('/login'); 
+      } else if (user && user.isNew) {
+        router.push('/user/onboarding'); 
       }
     }
   }, [user, router, initialized]); // Add `initialized` to the dependency array
