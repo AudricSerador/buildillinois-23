@@ -10,6 +10,14 @@ const IconLabel: React.FC<{ src: string; label: string }> = ({
   </div>
 );
 
+export const locationPreferences = [
+  { src: "/images/icons/dine-in.svg", label: "Allen/LAR" },
+  { src: "/images/icons/take-out.svg", label: "PAR" },
+  { src: "/images/icons/delivery.svg", label: "ISR" },
+  { src: "/images/icons/delivery.svg", label: "Ikenberry" },
+];
+
+
 export const dietaryPreferences = [
   { src: "/images/icons/vegan.svg", label: "Vegan" },
   { src: "/images/icons/vegetarian.svg", label: "Vegetarian" },

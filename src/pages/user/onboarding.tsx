@@ -1,8 +1,16 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { useAuth } from "@/auth/auth.service";
-import { dietaryPreferences, allergens } from "@/components/icon_legend";
+import { dietaryPreferences, allergens, locationPreferences } from "@/components/icon_legend";
 import Image from "next/image";
+import Select from 'react-select';
+
+const dietaryGoalOptions = [
+  { value: "bulk", label: "I want to bulk/build muscle" },
+  { value: "lose_weight", label: "I want to lose weight/get leaner" },
+  { value: "eat_healthy", label: "I want to eat healthy in general" },
+  { value: "other", label: "Other/None" },
+];
 
 const StepButton = ({ onClick, text, disabled }: { onClick: () => void; text: string; disabled?: boolean }) => (
   <button
@@ -54,6 +62,8 @@ export default function Onboarding(): JSX.Element {
   const [name, setName] = useState("");
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
   const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [selectedGoal, setSelectedGoal] = useState<{ value: string; label: string } | null>(null);
   const [isFading, setIsFading] = useState(false);
   const [showWelcomeText, setShowWelcomeText] = useState(false);
   const [showAdditionalText, setShowAdditionalText] = useState(false);
@@ -117,6 +127,8 @@ export default function Onboarding(): JSX.Element {
           allergies: selectedAllergens.join(','),
           preferences: selectedPreferences.join(','),
           isNew: false,
+          locations: selectedLocations.join(','),
+          goal: selectedGoal ? selectedGoal.value : null,
         }),
       })
         .then((response) => response.json())
@@ -196,7 +208,43 @@ export default function Onboarding(): JSX.Element {
           </div>
           <p className="w-full text-center">Don't see your dietary restriction? Please let us know in the feedback form!</p>
           <BackButton step={step} handleBack={handleBack} />
-          <StepButton onClick={handleOnboardingCompletion} text="Finish" />
+          <StepButton onClick={handleNext} text="Next" />
+        </div>
+      )}
+
+      {step == 4 && (
+        <div className="flex flex-wrap text-center justify-center">
+          <h3 className="text-5xl w-full text-center font-custombold mb-4">Any location preferences?</h3>
+          <div className="flex flex-wrap justify-center">
+            {locationPreferences.map(({ src, label }) => (
+              <button
+                key={label}
+                onClick={() => handleToggle(selectedLocations, setSelectedLocations, label)}
+                className={`flex flex-col items-center justify-center border border-gray-300 rounded m-2 w-40 h-40 ${selectedLocations.includes(label) ? "bg-uiucorange text-white" : "bg-gray-200 text-gray-700"} transition-colors duration-200`}
+              >
+                <Image src={src} alt={label} width={72} height={72} className="mb-2" />
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+          <BackButton step={step} handleBack={handleBack} />
+          <StepButton onClick={handleNext} text="Next" />
+        </div>
+      )}
+
+      {step == 5 && (
+        <div className="flex flex-wrap text-center justify-center">
+          <h3 className="text-5xl w-full text-center font-custombold mb-4">What are your goals?</h3>
+          <p className="w-full text-center">We'll use this information to recommend meals that align with your goals.</p>
+          <Select 
+            options={dietaryGoalOptions}
+            onChange={(option) => setSelectedGoal(option)}
+            value={selectedGoal}
+            placeholder="Select a goal"
+            className="w-full max-w-xs mx-auto mt-4"
+          />
+          <BackButton step={step} handleBack={handleBack} />
+          <StepButton onClick={handleOnboardingCompletion} text="Finish" disabled={!selectedGoal} />
         </div>
       )}
     </StepLayout>

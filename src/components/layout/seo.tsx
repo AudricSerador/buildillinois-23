@@ -23,7 +23,7 @@ export const SEO: React.FC<SEOProps> = ({ title, description}) => {
       <meta property="og:description" content={description} />
       <meta
         name="og:url"
-        content={`https://dining-buddy.vercel.app/${asPath === "/" ? "" : asPath}`}
+        content={`https://illineats.com/${asPath === "/" ? "" : asPath}`}
       />
       <meta
         property="og:image"
