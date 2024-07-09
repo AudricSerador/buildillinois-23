@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { useAuth } from "@/auth/auth.service";
+import { useAuth } from "@/components/layout/auth.service";
 import { dietaryPreferences, allergens, locationPreferences } from "@/components/icon_legend";
 import Image from "next/image";
 import Select from 'react-select';

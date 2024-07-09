@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import NutritionFacts from "@/components/nutrition_facts";
 import { EntriesDisplay } from "@/components/entries_display";
 import LoadingSpinner from "@/components/loading_spinner";
-import { useAuth } from "@/auth/auth.service";
+import { useAuth } from "@/components/layout/auth.service";
 import FavoriteBtn from "@/components/favorites/favorite_btn";
 
 export interface FoodItem {

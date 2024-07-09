@@ -1,7 +1,7 @@
 # Terms of Service
 
 ## 1. Introduction
-Welcome to [YourAppName]! These Terms of Service govern your use of our app that recommends dining hall food to University of Illinois Urbana-Champaign students based on their dietary preferences, restrictions, and goals. By using our app, you agree to comply with these terms. If you do not agree with any part of these terms, please do not use our app.
+Welcome to IllinEats! These Terms of Service govern your use of our app that recommends dining hall food to University of Illinois Urbana-Champaign students based on their dietary preferences, restrictions, and goals. By using our app, you agree to comply with these terms. If you do not agree with any part of these terms, please do not use our app.
 
 ## 2. Use of Public Data
 The data displayed on this site is publicly available and has been collected from various sources. We do not claim ownership of the data and it is provided for informational purposes only. We make no guarantees about the accuracy, completeness, or reliability of the data.

@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useAuth } from "../auth/auth.service";
+import { useAuth } from "../components/layout/auth.service";
 import { useRouter } from 'next/router';
 
 export default function Login(): JSX.Element {

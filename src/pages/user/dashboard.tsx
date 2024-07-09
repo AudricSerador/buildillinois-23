@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "@/auth/auth.service";
+import { useAuth } from "@/components/layout/auth.service";
 import { useRouter } from 'next/router';
 import { FaInfo } from "react-icons/fa";
 

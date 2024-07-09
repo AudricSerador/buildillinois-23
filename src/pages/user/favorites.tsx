@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/auth/auth.service';
+import { useAuth } from '@/components/layout/auth.service';
 import { FoodItemDisplay } from '@/components/allfood/food_item_display';
 import { FoodItem } from '@/pages/food/[id]';
 import { useRouter } from 'next/router';

@@ -6,7 +6,7 @@ import {
   useEffect,
   useCallback,
 } from "react";
-import { supabase } from "./supabase_client";
+import { supabase } from "../../auth/supabase_client";
 import { useRouter } from "next/router";
 
 interface DiningUser {
