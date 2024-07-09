@@ -31,7 +31,7 @@ export default function Login(): JSX.Element {
     return (
         <div className="flex flex-col font-custom items-center justify-center min-h-screen bg-gray-100 py-2">
           <div className="p-6 max-w-sm w-full bg-white shadow-md rounded-md">
-          <img src="./images/blockI.gif" alt="Description of the GIF" />
+          <img src="./images/blockI.gif" alt="BlockIGif" />
             <div className="flex justify-center items-center">
               <span className="text-gray-700 font-custombold text-2xl">Login with your NetID</span>
             </div>

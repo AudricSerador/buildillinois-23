@@ -6,7 +6,7 @@ import {
   useEffect,
   useCallback,
 } from "react";
-import { supabase } from "../../auth/supabase_client";
+import { supabase } from "@/auth/supabase_client";
 import { useRouter } from "next/router";
 
 interface DiningUser {
@@ -15,8 +15,6 @@ interface DiningUser {
   name: string;
   allergies: string;
   preferences: string;
-  locations: string;
-  goal: string;
   isNew: boolean;
 }
 
@@ -50,69 +48,79 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
 
   const handleUserSignedIn = useCallback(async () => {
-    const { data, error } = await supabase.auth.getSession();
-    if (data.session) {
-      const response = await fetch(
-        `/api/user/get_user?id=${data.session.user.id}`
-      );
+    try {
+      const { data, error } = await supabase.auth.getSession();
+      if (error) throw error;
+      
+      if (data.session) {
+        const response = await fetch(
+          `/api/user/get_user?id=${data.session.user.id}`
+        );
 
-      if (response.status === 404) {
-        const createUserResponse = await fetch("/api/user/create_user", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            id: data.session.user.id,
-            email: data.session.user.email,
-          }),
-        });
+        if (response.status === 404) {
+          const createUserResponse = await fetch("/api/user/create_user", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              id: data.session.user.id,
+              email: data.session.user.email,
+            }),
+          });
 
-        if (createUserResponse.ok) {
-          const new_res = await fetch(
-            `/api/user/get_user?id=${data.session.user.id}`
-          );
-          const new_user = await new_res.json();
-          setUser({ ...new_user.data });
-          router.push("/user/dashboard");
+          if (createUserResponse.ok) {
+            const new_res = await fetch(
+              `/api/user/get_user?id=${data.session.user.id}`
+            );
+            const new_user = await new_res.json();
+            setUser({ ...new_user.data });
+            router.push("/user/dashboard");
+          } else {
+            const errorData = await createUserResponse.json();
+            console.error(errorData.error);
+          }
         } else {
-          const errorData = await createUserResponse.json();
-          console.error(errorData.error);
+          const res = await response.json();
+          setUser({ ...res.data });
+          if (res.data.isNew) {
+            router.push("/user/onboarding");
+          } else {
+            router.push("/user/dashboard");
+          }
         }
       } else {
-        const res = await response.json();
-        setUser({ ...res.data });
-        if (res.data.isNew) {
-          router.push("/user/onboarding");
-        } else {
-          router.push("/user/dashboard");
-        }
+        console.log("No session found.");
       }
-    } else {
-      console.log("No session found.");
+    } catch (error) {
+      console.error('Error handling user sign in:', error);
     }
   }, [router]);
 
   const signIn = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: "azure",
-      options: {
-        scopes: "email offline_access",
-      },
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "azure",
+        options: {
+          scopes: "email offline_access",
+        },
+      });
 
-    if (error) {
-      throw new Error(error.message);
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error signing in:', error);
     }
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      throw new Error(error.message);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      setUser(null);
+      router.push("/login");
+    } catch (error) {
+      console.error('Error signing out:', error);
     }
-    setUser(null);
-    router.push("/login");
   };
 
   useEffect(() => {
@@ -128,17 +136,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Initial user fetch
     const fetchUserData = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (data.session) {
-        const response = await fetch(
-          `/api/user/get_user?id=${data.session.user.id}`
-        );
-        if (response.ok) {
-          const res = await response.json();
-          setUser({ ...res.data });
+      try {
+        const { data } = await supabase.auth.getSession();
+        if (data.session) {
+          const response = await fetch(
+            `/api/user/get_user?id=${data.session.user.id}`
+          );
+          if (response.ok) {
+            const res = await response.json();
+            setUser({ ...res.data });
+          }
         }
+        setInitialized(true); // Mark initialization as complete
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+        setInitialized(true); // Mark initialization as complete even if there is an error
       }
-      setInitialized(true); // Mark initialization as complete
     };
 
     fetchUserData();

@@ -114,9 +114,9 @@ export default function Onboarding(): JSX.Element {
     );
   };
 
-  const handleOnboardingCompletion = () => {
+  const handleOnboardingCompletion = async () => {
     if (user) {
-      fetch("/api/user/update_user", {
+      const response = await fetch("/api/user/update_user", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -130,15 +130,15 @@ export default function Onboarding(): JSX.Element {
           locations: selectedLocations.join(','),
           goal: selectedGoal ? selectedGoal.value : null,
         }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.success) {
-            router.push("/user/dashboard");
-          } else {
-            console.error(data.error);
-          }
-        });
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        router.push("/user/dashboard");
+      } else {
+        console.error(data.error);
+      }
     } else {
       console.error("User not found");
     }

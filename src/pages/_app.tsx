@@ -8,6 +8,8 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { AuthProvider } from "@/components/layout/auth.service";
 import { ToastContainer } from "react-toastify";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import "react-toastify/dist/ReactToastify.css";
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -44,6 +46,8 @@ export default function App({ Component, pageProps }: AppProps) {
               <FeedbackBanner onClose={handleCloseFeedbackBanner} />
             )}
             <Component {...pageProps} />;
+            <Analytics />
+            <SpeedInsights />
             <ToastContainer
               position="bottom-right"
               autoClose={3000}
