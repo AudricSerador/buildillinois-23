@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import FileUploader from "../components/file_upload";
 import { useRouter } from "next/router";
-import { useAuth } from "@/auth/auth.service";
+import { useAuth } from "@/components/layout/auth.service";
 
 const Admin = () => {
   const [message, setMessage] = useState("File status: not uploaded");

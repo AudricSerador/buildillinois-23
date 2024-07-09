@@ -40,7 +40,7 @@ export const FoodItemDisplay: React.FC<FoodItemDisplayProps> = ({
           <br />
           Serving Size: {foodItem.servingSize}
           <span className="text-gray-500"> | </span>
-          {foodItem.calories} Cal
+          {foodItem.calories} Cal 
           <span className="text-gray-500"> | </span>
           {foodItem.protein}g Protein
           <span className="text-gray-500"> | </span>

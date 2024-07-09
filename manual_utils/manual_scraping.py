@@ -8,12 +8,22 @@ import json
 import time
 import re
 import traceback
+from datetime import datetime, timedelta
 
 NON_VEGAN_INGREDIENTS = {'gelatin', 'fish', 'tuna', 'salmon', 'tilapia', 'rennet', 'carmine', 'isenglass', 'fish sauce', 'anchovies', 'suet', 'lard', 'cochineal', 'shellac', 'cysteine', 'tyrosine', 'enzymes', 'collagen', 'bone char', 'whey', 'casein', 'fish oil', 'omega-3', 'confectioner', 'beeswax', 'oleic acid', 'stearic acid', 'vitamin d3', 'lanolin', 'lecithin', 'glycerides', 'glycerin', 'lactic acid', 'squalane', 'squalene', 'tallow', 'glyceryl stearate', 'vitamin a', 'vitamin b12', 'vitamin d2', 'vitamin d3', 'xanthan gum', 'zinc stearate', 'meat', 'poultry', 'chicken', 'beef', 'pork', 'lamb', 'venison', 'rabbit', 'duck', 'goose', 'turkey', 'veal', 'organ meat', 'wild game', 'seafood', 'shellfish', 'clams', 'crab', 'lobster', 'shrimp', 'oysters', 'mussels', 'eggs', 'egg white', 'egg yolk', 'egg albumen', 'mayonnaise', 'aioli', 'milk', 'butter', 'cheese', 'cream', 'yogurt', 'honey'}
 NON_VEGETARIAN_INGREDIENTS = {'gelatin', 'rennet', 'carmine', 'isinglass', 'fish', 'tuna', 'salmon', 'tilapia', 'fish sauce', 'anchovies', 'suet', 'lard', 'cochineal', 'shellac', 'cysteine', 'tyrosine', 'enzymes', 'collagen', 'bone char', 'whey', 'casein', 'fish oil', 'omega-3', 'confectioner', 'beeswax', 'oleic acid', 'stearic acid', 'vitamin d3', 'lanolin', 'lecithin', 'glycerides', 'glycerin', 'lactic acid', 'squalane', 'squalene', 'tallow', 'glyceryl stearate', 'vitamin a', 'vitamin b12', 'vitamin d2', 'vitamin d3', 'xanthan gum', 'zinc stearate', 'meat', 'poultry', 'chicken', 'beef', 'pork', 'lamb', 'venison', 'rabbit', 'duck', 'goose', 'turkey', 'veal', 'organ meat', 'wild game', 'seafood', 'shellfish', 'clams', 'crab', 'lobster', 'shrimp', 'oysters', 'mussels'}
 
-DATES_TO_SCRAPE = ['Monday, March 18, 2024', 'Tuesday, March 19, 2024', 'Friday, March 22, 2024'] # THIS SPECIFIC FORMAT
-MEALS_TO_SCRAPE = ['Breakfast', 'Lunch', 'Dinner', 'Kosher Lunch', 'Kosher Dinner', 'Light Lunch', 'A la Carte--APP DISPLAY', 'A la Carte--POS Feed', 'Deli & Bagel Bar'] # idea: separate lambda functions for each breakfast, lunch, dinner, kosher, and other
+def get_next_n_days(n): # get array of dates for next n days starting tomorrow
+    today = datetime.now() + timedelta(days=1)
+    dates = []
+    for i in range(n):
+        next_day = today + timedelta(days=i)
+        formatted_date = next_day.strftime('%A, %B ') + str(next_day.day) + next_day.strftime(', %Y')
+        dates.append(formatted_date)
+    return dates
+
+DATES_TO_SCRAPE = get_next_n_days(3)
+MEALS_TO_SCRAPE = ['Breakfast', 'Lunch', 'Dinner', 'Kosher Lunch', 'Kosher Dinner', 'Light Lunch', 'A la Carte--APP DISPLAY', 'A la Carte--POS Feed', 'Deli & Bagel Bar', 'Waffle Bar', 'Salad Bar', 'Cereal', 'Ice Cream'] # idea: separate lambda functions for each breakfast, lunch, dinner, kosher, and other
 
 def back_to_food_list(driver):
     dropdown = WebDriverWait(driver, 10).until(
@@ -31,12 +41,9 @@ def back_to_food_list(driver):
     time.sleep(1)
     
     driver.execute_script("arguments[0].scrollIntoView();", element)
-    
-    try:
-        WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//a[@class="dropdown-item" and @title="Show All Units"]')))
-        element.click()
-    except Exception as e:
-        print(f"Error clicking on element: {e}")
+
+    WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.XPATH, '//a[@class="dropdown-item" and @title="Show All Units"]')))
+    element.click()
 
 def check_preferences(ingredients, name):
     preferences = []
@@ -251,14 +258,13 @@ def scrape(date_to_scrape, meal_to_scrape):
         print(f"An error occurred while scraping {date_to_scrape} - {meal_to_scrape}:")
         print(traceback.format_exc())
         driver.close()
-        return []
+        raise e
     
 
 from concurrent import futures
 
 def scrape_all():
     tasks = [(date, meal) for date in DATES_TO_SCRAPE for meal in MEALS_TO_SCRAPE]
-
     scraped_data = []
 
     with futures.ThreadPoolExecutor(max_workers=4) as executor:
@@ -268,28 +274,28 @@ def scrape_all():
             future_results[future] = task
             time.sleep(5)
 
-        failed_tasks = []
-        for future in futures.as_completed(future_results):
-            date, meal = future_results[future]
-            try:
-                result_data = future.result()
-                scraped_data.extend(result_data)
-            except Exception as e:
-                print(f'An error occurred while scraping {date} - {meal}: {e}')
-                failed_tasks.append((date, meal))
-        # Retry the failed tasks concurrently
-        future_results = {}
-        for task in failed_tasks:
-            future = executor.submit(scrape, *task)
-            future_results[future] = task
-            time.sleep(5)
-        for future in futures.as_completed(future_results):
-            date, meal = future_results[future]
-            try:
-                result_data = future.result()
-                scraped_data.extend(result_data)
-            except Exception as e:
-                print(f'An error occurred while rescraping {date} - {meal}: {e}')
+        failed_tasks = tasks
+        max_retries = 100
+        for i in range(max_retries):
+            if not failed_tasks:
+                break
+            print(f"========<Retrying failed tasks... Attempt {i+1}/{max_retries}>========")
+            current_failed_tasks = []
+            for future in futures.as_completed(future_results):
+                date, meal = future_results[future]
+                try:
+                    result_data = future.result()
+                    scraped_data.extend(result_data)
+                except Exception as e:
+                    print(f'An error occurred while scraping {date} - {meal}: {e}')
+                    current_failed_tasks.append((date, meal))
+            failed_tasks = current_failed_tasks
+            # Retry the failed tasks concurrently
+            future_results = {}
+            for task in failed_tasks:
+                future = executor.submit(scrape, *task)
+                future_results[future] = task
+                time.sleep(5)
 
     return scraped_data
 
@@ -298,7 +304,7 @@ if __name__ == '__main__':
 
     food_data = scrape_all()
 
-    with open('food_data2.json', 'w') as f:
+    with open('food_data.json', 'w') as f:
         json.dump(food_data, f, indent=4)
 
     end_time = time.time()

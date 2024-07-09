@@ -51,6 +51,8 @@ model User {
   isNew       Boolean    @default(true)
   preferences String     @default("")
   allergies   String     @default("")
+  locations   String     @default("")
+  goal        String     @default("")
   favorites   Favorite[]
 }
 

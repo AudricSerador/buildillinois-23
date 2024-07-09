@@ -26,6 +26,53 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('daisyui'),
+    require('@tailwindcss/typography'),
+  ],
+  daisyui: {
+    themes: [
+      {
+        'light': {
+           'primary' : '#13294B',
+           'primary-focus' : '#10223d',
+           'primary-content' : '#ffffff',
+
+           'secondary' : '#FF5F05',
+           'secondary-focus' : '#d45208',
+           'secondary-content' : '#ffffff',
+
+           'accent' : '#1D58A7',
+           'accent-focus' : '#174582',
+           'accent-content' : '#ffffff',
+
+           'neutral' : '#C8C6C7',
+           'neutral-focus' : '#9C9A9D',
+           'neutral-content' : '#ffffff',
+
+           'base-100' : '#F8FAFC',
+           'base-200' : '#E8E9EB',
+           'base-300' : '#DDDEDE',
+           'base-content' : '#000000',
+
+           'info' : '#009FD4',
+           'success' : '#006230',
+           'warning' : '#FCB316',
+           'error' : '#ff5724',
+
+          '--rounded-box': '1rem',          
+          '--rounded-btn': '.5rem',        
+          '--rounded-badge': '1.9rem',      
+
+          '--animation-btn': '.25s',       
+          '--animation-input': '.2s',       
+
+          '--btn-text-case': 'lowercase',   
+          '--navbar-padding': '.5rem',      
+          '--border-btn': '1px',            
+        },
+      },
+    ],
+  },
 }
 

@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'PUT') {
-    const { id, name, allergies, preferences, isNew } = req.body;
+    const { id, name, allergies, preferences, isNew, goal, locations } = req.body;
 
     try {
       const updatedUser = await prisma.user.update({
@@ -14,6 +14,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           name: name,
           allergies: allergies,
           preferences: preferences,
+          goal: goal,
+          locations: locations,
           isNew: isNew,
         },
       });

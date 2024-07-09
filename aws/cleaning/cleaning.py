@@ -13,7 +13,6 @@ def handler(event, context):
     today = datetime.date.today()
 
     try:
-        # Fetch all unique 'dateServed' values from the database
         response = supabase.table('mealDetails').select('dateServed').execute()
     except Exception as e:
         print(f"Failed to fetch rows: {e}")
@@ -22,7 +21,6 @@ def handler(event, context):
             'body': f"Failed to fetch rows: {e}"
         }
 
-    # Convert 'dateServed' values to date objects and compare with 'today'
     dates_to_delete = []
     for row in response.data:
         _, date = row['dateServed'].strip().split(', ', 1)
@@ -32,7 +30,6 @@ def handler(event, context):
         if date_served < today:
             dates_to_delete.append(row['dateServed'])
 
-    # Delete rows where 'dateServed' is in 'dates_to_delete'
     for date in dates_to_delete:
         try:
             response = supabase.table('mealDetails').delete().eq('dateServed', date).execute()

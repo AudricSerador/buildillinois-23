@@ -15,10 +15,10 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
 }) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [isCooldown, setIsCooldown] = useState(false); // Cooldown state
 
   useEffect(() => {
     const fetchFavorite = async () => {
-      console.log(userId);
       if (userId) {
         const res = await fetch(`/api/favorite/get_favorite?userId=${userId}&foodId=${foodId}`);
         const data = await res.json();
@@ -34,6 +34,25 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
       setShowModal(true);
       return;
     }
+
+    if (isCooldown) {
+      toast.error(
+        <>
+          Please wait a bit before toggling favorites!
+        </>,
+        {
+          icon: (
+            <span role="img" aria-label="star" style={{ fontSize: "20px" }}>
+              🌟
+            </span>
+          ),
+        }
+      );
+      return; // Exit if the button is on cooldown
+    }
+
+    setIsCooldown(true); // Set cooldown
+    setTimeout(() => setIsCooldown(false), 1000); // Reset cooldown after 2 seconds
 
     const response = await fetch("/api/favorite/create_favorite", {
       method: "POST",
@@ -67,6 +86,13 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
   };
 
   const handleUnfavorite = async () => {
+    if (isCooldown) {
+      return; // Exit if the button is on cooldown
+    }
+
+    setIsCooldown(true); // Set cooldown
+    setTimeout(() => setIsCooldown(false), 2000); // Reset cooldown after 2 seconds
+
     const response = await fetch("/api/favorite/delete_favorite", {
       method: "DELETE",
       headers: {
@@ -108,6 +134,7 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
             : "text-gray-500 hover:text-gray-600"
         }`}
         title={isFavorited ? "Remove from favorites" : "Add to favorites"}
+        disabled={isCooldown} // Disable button during cooldown
       >
         {isFavorited ? "★" : "☆"}
       </button>

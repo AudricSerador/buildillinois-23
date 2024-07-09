@@ -6,7 +6,7 @@ import { SEO } from "../components/layout/seo";
 import FeedbackBanner from "@/components/layout/feedback";
 import { useRouter } from "next/router";
 import { useState } from "react";
-import { AuthProvider } from "@/auth/auth.service";
+import { AuthProvider } from "@/components/layout/auth.service";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -26,7 +26,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <>
       <SEO title="IllinEats" description="The better dining hall experience." />
       <AuthProvider>
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen w-full">
           <main className="flex-grow">
             {showNavbarAndFooter && <Navbar />}
             {showNavbarAndFooter && (

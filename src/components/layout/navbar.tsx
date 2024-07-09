@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/auth/auth.service";
+import { useAuth } from "@/components/layout/auth.service";
 import Link from "next/link";
 
 export function Navbar(): JSX.Element {
@@ -104,7 +104,7 @@ export function Navbar(): JSX.Element {
                   Dining Halls
                 </Link>
                 <Link
-                  href="/"
+                  href="/user/favorites"
                   className="mt-4 text-white hover:uiucorange"
                   onClick={closeMenu}
                 >

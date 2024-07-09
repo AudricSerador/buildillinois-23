@@ -4,9 +4,9 @@ import {
   useState,
   ReactNode,
   useEffect,
+  useCallback,
 } from "react";
-import { Session } from "@supabase/supabase-js";
-import { supabase } from "./supabase_client";
+import { supabase } from "../../auth/supabase_client";
 import { useRouter } from "next/router";
 
 interface DiningUser {
@@ -15,6 +15,8 @@ interface DiningUser {
   name: string;
   allergies: string;
   preferences: string;
+  locations: string;
+  goal: string;
   isNew: boolean;
 }
 
@@ -39,18 +41,17 @@ export function useAuth() {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<DiningUser | null>(null);
-  const router = useRouter(); // Initialize useRouter
+  const [initialized, setInitialized] = useState(false); // Track initialization
+  const router = useRouter();
 
-  const handleUserSignedIn = async () => {
+  const handleUserSignedIn = useCallback(async () => {
     const { data, error } = await supabase.auth.getSession();
-    console.log(data);
     if (data.session) {
       const response = await fetch(
         `/api/user/get_user?id=${data.session.user.id}`
       );
 
       if (response.status === 404) {
-        console.log("User not found. Creating new user.");
         const createUserResponse = await fetch("/api/user/create_user", {
           method: "POST",
           headers: {
@@ -62,21 +63,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }),
         });
 
-        const new_res = await fetch(
-          `/api/user/get_user?id=${data.session.user.id}`
-        );
-        const new_user = await new_res.json();
-        setUser({ ...new_user.data });
-        
-        if (!createUserResponse.ok) {
+        if (createUserResponse.ok) {
+          const new_res = await fetch(
+            `/api/user/get_user?id=${data.session.user.id}`
+          );
+          const new_user = await new_res.json();
+          setUser({ ...new_user.data });
+          router.push("/user/dashboard");
+        } else {
           const errorData = await createUserResponse.json();
           console.error(errorData.error);
-        } else {
-          router.push("/user/dashboard");
         }
       } else {
         const res = await response.json();
-        console.log("User found.");
         setUser({ ...res.data });
         if (res.data.isNew) {
           router.push("/user/onboarding");
@@ -87,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else {
       console.log("No session found.");
     }
-  };
+  }, [router]);
 
   const signIn = async () => {
     const { data, error } = await supabase.auth.signInWithOAuth({
@@ -112,26 +111,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      const { data, error } = await supabase.auth.getSession()
-      console.log(data);
-      if (data.session) {
-        const response = await fetch(`/api/user/get_user?id=${data.session.user.id}`);
-        const res = await response.json();
-        setUser({ ...res.data });
-      } else {
-        setUser(null);
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "SIGNED_IN" && session) {
+          handleUserSignedIn();
+        } else if (event === "SIGNED_OUT") {
+          setUser(null);
+        }
       }
+    );
+
+    // Initial user fetch
+    const fetchUserData = async () => {
+      const { data } = await supabase.auth.getSession();
+      if (data.session) {
+        const response = await fetch(
+          `/api/user/get_user?id=${data.session.user.id}`
+        );
+        if (response.ok) {
+          const res = await response.json();
+          setUser({ ...res.data });
+        }
+      }
+      setInitialized(true); // Mark initialization as complete
     };
 
     fetchUserData();
-  }, []);
+
+    // Cleanup subscription on unmount
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, [handleUserSignedIn]);
 
   useEffect(() => {
-    if (window.location.hash.includes("#access_token=")) {
-      handleUserSignedIn();
+    if (initialized) {
+      if (user && user.isNew) {
+        router.push('/user/onboarding'); 
+      } else if (user === null) {
+        router.push('/login'); 
+      }
     }
-  }, [handleUserSignedIn]);
+  }, [user, router, initialized]); // Add `initialized` to the dependency array
 
   return (
     <AuthContext.Provider value={{ user, signIn, signOut, handleUserSignedIn }}>

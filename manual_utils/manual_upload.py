@@ -3,7 +3,7 @@ from uuid import uuid4
 import os
 
 SUPABASE_URL = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
-SUPABASE_KEY = os.getenv("NEXT_PUBLIC_SUPABASE_KEY")
+SUPABASE_KEY = os.getenv("NEXT_PUBLIC_SUPABASE_ANON_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def import_json_to_database(food_data):
@@ -71,7 +71,7 @@ def import_json_to_database(food_data):
 # load the json file and call the function
 import json
 def main():
-    with open('food_data2.json', 'r') as file:
+    with open('food_data.json', 'r') as file:
         food_data = json.load(file)
         import_json_to_database(food_data)
 
