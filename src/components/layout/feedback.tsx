@@ -16,7 +16,7 @@ const FeedbackBanner = ({ onClose }: { onClose: () => void }) => {
     >
       <div className="flex justify-center items-center">
         <span className="mr-2">ℹ️</span>
-          <span>IllinEats is powered by students like you. We'd love if you could fill out this
+          <span>IllinEats is powered by students like you. We&apos;d love if you could fill out this
         <Link
           href="https://forms.gle/4YrhMhBimhmBjuUG7"
           className="text-uiucblue underline ml-2"

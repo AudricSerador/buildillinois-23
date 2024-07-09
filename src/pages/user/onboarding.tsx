@@ -152,7 +152,7 @@ export default function Onboarding(): JSX.Element {
             Welcome to <span className="text-secondary">IllinEats!</span>
           </h1>
           <h2 className={`text-4xl font-semibold text-center mt-2 transition-opacity duration-1000 ${showAdditionalText ? 'opacity-100' : 'opacity-0'}`}>
-            Let's answer a couple questions.
+            Let&apos;s answer a couple questions.
           </h2>
         </div>
       )}
@@ -185,7 +185,7 @@ export default function Onboarding(): JSX.Element {
               </button>
             ))}
           </div>
-          <p className="w-full text-center">Don't see your food allergy? Please let us know in the feedback form!</p>
+          <p className="w-full text-center">Don&apos;t see your food allergy? Please let us know in the feedback form!</p>
           <BackButton step={step} handleBack={handleBack} />
           <StepButton onClick={handleNext} text="Next" />
         </div>
@@ -206,7 +206,7 @@ export default function Onboarding(): JSX.Element {
               </button>
             ))}
           </div>
-          <p className="w-full text-center">Don't see your dietary restriction? Please let us know in the feedback form!</p>
+          <p className="w-full text-center">Don&apos;t see your dietary restriction? Please let us know in the feedback form!</p>
           <BackButton step={step} handleBack={handleBack} />
           <StepButton onClick={handleNext} text="Next" />
         </div>
@@ -235,7 +235,7 @@ export default function Onboarding(): JSX.Element {
       {step == 5 && (
         <div className="flex flex-wrap text-center justify-center">
           <h3 className="text-5xl w-full text-center font-custombold mb-4">What are your goals?</h3>
-          <p className="w-full text-center">We'll use this information to recommend meals that align with your goals.</p>
+          <p className="w-full text-center">We&apos;ll use this information to recommend meals that align with your goals.</p>
           <Select 
             options={dietaryGoalOptions}
             onChange={(option) => setSelectedGoal(option)}
