@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "@/components/layout/auth.service";
 import { useRouter } from 'next/router';
 import { FaInfo } from "react-icons/fa";
+import { FoodInfo } from "@prisma/client";
 
 export default function Dashboard(): JSX.Element {
     const [name, setName] = useState('');
+    const [recommendations, setRecommendations] = useState([]);
     const router = useRouter();
     const { user } = useAuth();
 
@@ -15,6 +17,7 @@ export default function Dashboard(): JSX.Element {
             router.push('/login'); 
         } else {
             setName(user.name);
+            fetchRecommendations(user.id);
         }
     }, [user, router]);
 
@@ -22,10 +25,18 @@ export default function Dashboard(): JSX.Element {
         console.log("User Data:", user);
     }, [user]);
 
-    const renderList = (data: string) => {
-        return data.split(',').map((item, index) => (
-            <li key={index} className="ml-4 list-disc">{item.trim()}</li>
-        ));
+    const fetchRecommendations = async (userId: string) => {
+        try {
+            const response = await fetch(`/api/recommendation/get_recommendation?userId=${userId}&type=dashboard`);
+            const data = await response.json();
+            if (data.success) {
+                setRecommendations(data.data);
+            } else {
+                console.error('Error fetching recommendations:', data.message);
+            }
+        } catch (error) {
+            console.error('Error fetching recommendations:', error);
+        }
     };
 
     return (
@@ -39,7 +50,9 @@ export default function Dashboard(): JSX.Element {
                 <div className="p-4 bg-white shadow-md rounded-lg">
                     <h2 className="text-xl font-semibold mb-2">Allergies</h2>
                     {user?.allergies && user.allergies.length > 0 ? (
-                        <ul>{renderList(user.allergies)}</ul>
+                        <ul>{user.allergies.split(',').map((item, index) => (
+                            <li key={index} className="ml-4 list-disc">{item.trim()}</li>
+                        ))}</ul>
                     ) : (
                         <p>You have no allergies.</p>
                     )}
@@ -47,7 +60,9 @@ export default function Dashboard(): JSX.Element {
                 <div className="p-4 bg-white shadow-md rounded-lg">
                     <h2 className="text-xl font-semibold mb-2">Dietary Restrictions</h2>
                     {user?.preferences && user.preferences.length > 0 ? (
-                        <ul>{renderList(user.preferences)}</ul>
+                        <ul>{user.preferences.split(',').map((item, index) => (
+                            <li key={index} className="ml-4 list-disc">{item.trim()}</li>
+                        ))}</ul>
                     ) : (
                         <p>You have no dietary restrictions.</p>
                     )}
@@ -55,7 +70,9 @@ export default function Dashboard(): JSX.Element {
                 <div className="p-4 bg-white shadow-md rounded-lg">
                     <h2 className="text-xl font-semibold mb-2">Location Preferences</h2>
                     {user?.locations && user.locations.length > 0 ? (
-                        <ul>{renderList(user.locations)}</ul>
+                        <ul>{user.locations.split(',').map((item, index) => (
+                            <li key={index} className="ml-4 list-disc">{item.trim()}</li>
+                        ))}</ul>
                     ) : (
                         <p>You have no location preferences.</p>
                     )}
@@ -63,6 +80,23 @@ export default function Dashboard(): JSX.Element {
                 <div className="p-4 bg-white shadow-md rounded-lg">
                     <h2 className="text-xl font-semibold mb-2">Dietary Goal</h2>
                     <p>{user?.goal ? user.goal : 'You currently have no dietary goals.'}</p>
+                </div>
+                <div className="p-4 bg-white shadow-md rounded-lg">
+                    <h2 className="text-xl font-semibold mb-2">Recommendations</h2>
+                    {recommendations.length > 0 ? (
+                        <ul>
+                            {recommendations.map((food, index) => (
+                                <li key={index} className="ml-4 list-disc">
+                                    <p><strong>{food.name}</strong></p>
+                                    <p>Ingredients: {food.ingredients}</p>
+                                    <p>Calories: {food.calories}</p>
+                                    {/* Add other food details as necessary */}
+                                </li>
+                            ))}
+                        </ul>
+                    ) : (
+                        <p>You have no recommendations at this time.</p>
+                    )}
                 </div>
             </div>
         </div>
