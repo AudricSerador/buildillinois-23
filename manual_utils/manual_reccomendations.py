@@ -87,15 +87,13 @@ def calculate_location_score(df, user):
 def lambda_handler(event, context):
     user_id = event['user_id']
     recommendations_str = generate_recommendations(user_id)
-    print(recommendations_str)
     
-    # Store recommendations in Supabase
     supabase.table('Recommendation').upsert({
         'userId': user_id,
         'foodIds': recommendations_str,
         'createdAt': datetime.now().isoformat(),
-        'type': 'test'  # Example type, adjust as needed
-    }).execute()
+        'type': 'dashboard'
+    }, on_conflict='userId,type').execute()
     
     return {
         'statusCode': 200,
