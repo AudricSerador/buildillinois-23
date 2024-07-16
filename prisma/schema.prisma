@@ -10,66 +10,67 @@ generator client {
 model Recommendation {
   userId    String
   type      String
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
   foodIds   String
 
   @@id([userId, type])
 }
 
 model Favorite {
-  userId String
-  foodId String
+  userId     String
+  foodId     String
+  FoodInfo   FoodInfo? @relation(fields: [foodInfoId], references: [id])
+  foodInfoId String?
+  User       User      @relation(fields: [userId], references: [id])
 
   @@unique([userId, foodId])
 }
 
 model FoodInfo {
-  id          String   @id @default(cuid())
-  name        String   @unique
-  servingSize String?
-  ingredients String?
-  allergens   String?
-  preferences String?
-  calories    Int?
-  caloriesFat Int?
-  totalFat    Int?
-  saturatedFat Int?
-  transFat    Int?
-  polyFat     Int?
-  monoFat     Int?
-  cholesterol Int?
-  sodium      Int?
-  potassium   Int?
-  totalCarbohydrates Int?
-  fiber       Int?
-  sugars      Int?
-  protein     Int?
-  calciumDV   Int?
-  ironDV      Int?
+  id                 String        @id @default(cuid())
+  name               String        @unique @default("")
+  mealEntries        mealDetails[]
+  favorites          Favorite[]
+  servingSize        String        @default("")
+  ingredients        String        @default("")
+  allergens          String        @default("")
+  preferences        String        @default("")
+  calories           Int           @default(0)
+  caloriesFat        Int           @default(0)
+  totalFat           Int           @default(0)
+  saturatedFat       Int           @default(0)
+  transFat           Int           @default(0)
+  polyFat            Int           @default(0)
+  monoFat            Int           @default(0)
+  cholesterol        Int           @default(0)
+  sodium             Int           @default(0)
+  potassium          Int           @default(0)
+  totalCarbohydrates Int           @default(0)
+  fiber              Int           @default(0)
+  sugars             Int           @default(0)
+  protein            Int           @default(0)
+  calciumDV          Int           @default(0)
+  ironDV             Int           @default(0)
+}
 
-  MealDetails MealDetails[]
+model mealDetails {
+  id             Int      @id @default(autoincrement())
+  diningHall     String   @default("")
+  diningFacility String   @default("")
+  mealType       String   @default("")
+  dateServed     String   @default("")
+  food           FoodInfo @relation(fields: [foodId], references: [id])
+  foodId         String
 }
 
 model User {
-  id          String   @id @default(cuid())
-  email       String   @unique
-  name        String?
-  isNew       Boolean?
-  preferences String?
-  allergies   String?
-  locations   String?
-  goal        String?
-}
-
-model MealDetails {
-  id            String  @id @default(cuid())
-  diningHall    String?
-  diningFacility String?
-  mealType      String?
-  dateServed    DateTime?
-  foodId        String
-
-  foodInfo      FoodInfo  @relation(fields: [foodId], references: [id])
-
-  @@index([foodId])
+  id          String     @id
+  email       String     @unique
+  name        String     @default("")
+  isNew       Boolean    @default(true)
+  preferences String     @default("")
+  allergies   String     @default("")
+  locations   String     @default("")
+  goal        String     @default("")
+  favorites   Favorite[]
 }

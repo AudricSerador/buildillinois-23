@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "@/components/layout/auth.service";
 import { useRouter } from 'next/router';
 import { FaInfo } from "react-icons/fa";
-import { FoodInfo } from "@prisma/client";
+import { FoodItemDisplay } from '@/components/allfood/food_item_display';
+import { FoodItem } from '@/pages/food/[id]';
 
 export default function Dashboard(): JSX.Element {
     const [name, setName] = useState('');
@@ -83,17 +84,10 @@ export default function Dashboard(): JSX.Element {
                 </div>
                 <div className="p-4 bg-white shadow-md rounded-lg">
                     <h2 className="text-xl font-semibold mb-2">Recommendations</h2>
-                    {recommendations.length > 0 ? (
-                        <ul>
-                            {recommendations.map((food, index) => (
-                                <li key={index} className="ml-4 list-disc">
-                                    <p><strong>{food.name}</strong></p>
-                                    <p>Ingredients: {food.ingredients}</p>
-                                    <p>Calories: {food.calories}</p>
-                                    {/* Add other food details as necessary */}
-                                </li>
-                            ))}
-                        </ul>
+                    {recommendations && recommendations.length > 0 ? (
+                        recommendations.map((recommendation: FoodItem) => (
+                        <FoodItemDisplay key={recommendation.id} foodItem={recommendation} includeEntries={false} />
+                        ))
                     ) : (
                         <p>You have no recommendations at this time.</p>
                     )}

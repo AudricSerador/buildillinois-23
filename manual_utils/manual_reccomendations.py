@@ -71,10 +71,12 @@ def calculate_nutritional_score(df, user):
     score = pd.Series(0, index=df.index)
     
     if 'goal' in user and user['goal']:
-        if user['goal'] == 'weight_loss':
+        if user['goal'] == 'lose_weight':
             score += (500 - df['calories']) / 500  # Lower calories are better
-        elif user['goal'] == 'muscle_gain':
+        elif user['goal'] == 'bulk':
             score += df['protein'] / 50  # Higher protein is better
+        elif user['goal'] == 'eat_healthy':
+            pass
         # Add more goals as needed
     
     return score
