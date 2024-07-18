@@ -78,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             );
             const new_user = await new_res.json();
             setUser({ ...new_user.data });
+            sessionStorage.setItem('user', JSON.stringify(new_user.data));
             router.push("/user/dashboard");
           } else {
             const errorData = await createUserResponse.json();
@@ -86,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           const res = await response.json();
           setUser({ ...res.data });
+          sessionStorage.setItem('user', JSON.stringify(res.data));
           if (res.data.isNew) {
             router.push("/user/onboarding");
           } else {
@@ -121,6 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       setUser(null);
+      sessionStorage.removeItem('user');
       router.push("/login");
     } catch (error) {
       console.error('Error signing out:', error);
@@ -128,17 +131,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === "SIGNED_IN" && session) {
-          handleUserSignedIn();
-        } else if (event === "SIGNED_OUT") {
-          setUser(null);
-        }
+    const handleAuthStateChange = async (event: string, session: any) => {
+      if (event === "SIGNED_IN" && session) {
+        handleUserSignedIn();
+      } else if (event === "SIGNED_OUT") {
+        setUser(null);
+        sessionStorage.removeItem('user');
+        router.push('/login');
       }
-    );
+    };
 
-    // Initial user fetch
+    const { data: authListener } = supabase.auth.onAuthStateChange(handleAuthStateChange);
+
     const fetchUserData = async () => {
       try {
         const { data } = await supabase.auth.getSession();
@@ -149,6 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (response.ok) {
             const res = await response.json();
             setUser({ ...res.data });
+            sessionStorage.setItem('user', JSON.stringify(res.data));
           }
         }
         setInitialized(true); // Mark initialization as complete
@@ -158,13 +163,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    fetchUserData();
+    // Check for user in session storage
+    const storedUser = sessionStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+      setInitialized(true); // Mark initialization as complete
+    } else {
+      fetchUserData();
+    }
 
     // Cleanup subscription on unmount
     return () => {
       authListener.subscription.unsubscribe();
     };
-  }, [handleUserSignedIn]);
+  }, [handleUserSignedIn, router]);
 
   useEffect(() => {
     if (initialized) {
