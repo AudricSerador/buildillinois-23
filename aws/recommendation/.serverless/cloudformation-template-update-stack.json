@@ -162,7 +162,7 @@
           "S3Bucket": {
             "Ref": "ServerlessDeploymentBucket"
           },
-          "S3Key": "serverless/recommendation-service/dev/1721268577290-2024-07-18T02:09:37.290Z/recommendation-service.zip"
+          "S3Key": "serverless/recommendation-service/dev/1721278622335-2024-07-18T04:57:02.335Z/recommendation-service.zip"
         },
         "Handler": "lambda_function.lambda_handler",
         "Runtime": "python3.8",
@@ -171,7 +171,7 @@
         "Timeout": 6,
         "Environment": {
           "Variables": {
-            "SUPABASE_URL": "https://wwtceflcyqqdgqrynvxe.supabase.co/",
+            "SUPABASE_URL": "https://wwtceflcyqqdgqrynvxe.supabase.co",
             "SUPABASE_SERVICE_ROLE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3dGNlZmxjeXFxZGdxcnludnhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDQ3OTI4ODMsImV4cCI6MjAyMDM2ODg4M30.dSkzIATRnYneCPbUXpo7_qQdKoB1UHk7LqIYbal8wgQ"
           }
         },
@@ -186,14 +186,14 @@
         "GenerateRecommendationsLogGroup"
       ]
     },
-    "GenerateRecommendationsLambdaVersion5k5FJz7qTR9bH75cwSCpVD8BWJehsq8veQSh4scGQY": {
+    "GenerateRecommendationsLambdaVersionDaT2BPpKnbZm3QfV1ETaA8Yl9aktJLkFrHk5chjDqg": {
       "Type": "AWS::Lambda::Version",
       "DeletionPolicy": "Retain",
       "Properties": {
         "FunctionName": {
           "Ref": "GenerateRecommendationsLambdaFunction"
         },
-        "CodeSha256": "cqEJ17f0Dyx0Bo7NgA47Zc60rUkITohU9wso5sJHD9c="
+        "CodeSha256": "I480HCSAZgxjh07GLmc/aThyzoU8fxzj1Yqg0A+YCxc="
       }
     },
     "ApiGatewayRestApi": {
@@ -269,7 +269,7 @@
         "GenerateRecommendationsLambdaPermissionApiGateway"
       ]
     },
-    "ApiGatewayDeployment1721268543370": {
+    "ApiGatewayDeployment1721278586786": {
       "Type": "AWS::ApiGateway::Deployment",
       "Properties": {
         "RestApiId": {
@@ -331,7 +331,7 @@
     "GenerateRecommendationsLambdaFunctionQualifiedArn": {
       "Description": "Current Lambda function version",
       "Value": {
-        "Ref": "GenerateRecommendationsLambdaVersion5k5FJz7qTR9bH75cwSCpVD8BWJehsq8veQSh4scGQY"
+        "Ref": "GenerateRecommendationsLambdaVersionDaT2BPpKnbZm3QfV1ETaA8Yl9aktJLkFrHk5chjDqg"
       },
       "Export": {
         "Name": "sls-recommendation-service-dev-GenerateRecommendationsLambdaFunctionQualifiedArn"

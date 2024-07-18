@@ -7,6 +7,17 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model Review {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  userId    String
+  foodId    String
+  rating    Int
+  text      String?
+
+  @@unique([userId, foodId])
+}
+
 model Recommendation {
   userId    String
   type      String
@@ -17,13 +28,13 @@ model Recommendation {
 }
 
 model Favorite {
-  userId     String
-  foodId     String
-  FoodInfo   FoodInfo? @relation(fields: [foodInfoId], references: [id])
-  foodInfoId String?
-  User       User      @relation(fields: [userId], references: [id])
+  userId    String
+  foodId    String
 
-  @@unique([userId, foodId])
+  user      User     @relation(fields: [userId], references: [id])
+  food      FoodInfo     @relation(fields: [foodId], references: [id])
+
+  @@id([userId, foodId])
 }
 
 model FoodInfo {

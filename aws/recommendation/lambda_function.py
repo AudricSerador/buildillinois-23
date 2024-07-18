@@ -3,6 +3,11 @@ import pandas as pd
 from supabase import create_client, Client
 from datetime import datetime
 import os
+import logging
+
+# Initialize logging
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 # Initialize Supabase client
 SUPABASE_URL = os.getenv("SUPABASE_URL")
@@ -88,27 +93,60 @@ def calculate_location_score(df, user):
         return df['diningFacility'].apply(lambda x: 1 if x in user['locations'] else 0 if x else 0)
     return pd.Series(1, index=df.index)  # If no location preference, all locations are equally good
 
-def lambda_handler(event, context):
-    user_id = event['user_id']
-    recommendations_str = generate_recommendations(user_id)
-    
-    supabase.table('Recommendation').upsert({
-        'userId': user_id,
-        'foodIds': recommendations_str,
-        'createdAt': datetime.now().isoformat(),
-        'type': 'dashboard'
-    }, on_conflict=['userId', 'type']).execute()
 
-    origin = event['headers'].get('Origin', '*')
-    if origin not in ALLOWED_ORIGINS:
-        origin = '*'
-    
-    return {
-        'statusCode': 200,
-        'headers': {
-            'Access-Control-Allow-Origin': origin,
-            'Access-Control-Allow-Methods': 'POST, OPTIONS',
-            'Access-Control-Allow-Headers': 'Content-Type, X-Amz-Date, Authorization, X-Api-Key, X-Amz-Security-Token'
-        },
-        'body': json.dumps('Recommendations updated successfully')
-    }
+def lambda_handler(event, context):
+    logger.info("Received event: " + json.dumps(event, indent=2))
+
+    try:
+        if event['httpMethod'] == 'OPTIONS':
+            origin = event['headers'].get('origin', '*')
+            if origin not in ALLOWED_ORIGINS:
+                origin = '*'
+            return {
+                'statusCode': 200,
+                'headers': {
+                    'Access-Control-Allow-Origin': origin,
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                    'Access-Control-Allow-Headers': 'Content-Type, X-Amz-Date, Authorization, X-Api-Key, X-Amz-Security-Token'
+                },
+                'body': ''
+            }
+        
+        body = json.loads(event['body'])
+        user_id = body['user_id']
+        recommendations_str = generate_recommendations(user_id)
+        
+        supabase.table('Recommendation').upsert({
+            'userId': user_id,
+            'foodIds': recommendations_str,
+            'createdAt': datetime.now().isoformat(),
+            'type': 'dashboard'
+        }, on_conflict='userId,type').execute()
+
+        origin = event['headers'].get('origin', '*')
+        if origin not in ALLOWED_ORIGINS:
+            origin = '*'
+        
+        response = {
+            'statusCode': 200,
+            'headers': {
+                'Access-Control-Allow-Origin': origin,
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, X-Amz-Date, Authorization, X-Api-Key, X-Amz-Security-Token'
+            },
+            'body': json.dumps('Recommendations updated successfully')
+        }
+
+        logger.info("Response: " + json.dumps(response, indent=2))
+        return response
+    except Exception as e:
+        logger.error(f"Error in lambda_handler: {e}")
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, X-Amz-Date, Authorization, X-Api-Key, X-Amz-Security-Token'
+            },
+            'body': json.dumps(f"Internal server error: {e}")
+        }

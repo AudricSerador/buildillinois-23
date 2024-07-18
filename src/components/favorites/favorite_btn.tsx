@@ -22,15 +22,15 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
       if (userId) {
         const res = await fetch(`/api/favorite/get_favorite?userId=${userId}&foodId=${foodId}`);
         const data = await res.json();
-        setIsFavorited(data.success && data.data.length > 0);
+        setIsFavorited(data.success && data.data !== null);
       }
     };
-  
+
     fetchFavorite();
   }, [userId, foodId]);
 
   const handleFavorite = async () => {
-    if (userId === "") {
+    if (!userId) {
       setShowModal(true);
       return;
     }
@@ -52,7 +52,7 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
     }
 
     setIsCooldown(true); // Set cooldown
-    setTimeout(() => setIsCooldown(false), 1000); // Reset cooldown after 2 seconds
+    setTimeout(() => setIsCooldown(false), 1000); // Reset cooldown after 1 second
 
     const response = await fetch("/api/favorite/create_favorite", {
       method: "POST",
@@ -73,8 +73,8 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
         </>,
         {
           icon: (
-            <span role="img" aria-label="star" style={{ fontSize: "20px" }}>
-              🌟
+            <span role="img" aria-label="heart" style={{ fontSize: "20px" }}>
+              ❤️
             </span>
           ),
         }
@@ -91,7 +91,7 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
     }
 
     setIsCooldown(true); // Set cooldown
-    setTimeout(() => setIsCooldown(false), 2000); // Reset cooldown after 2 seconds
+    setTimeout(() => setIsCooldown(false), 1000); // Reset cooldown after 1 second
 
     const response = await fetch("/api/favorite/delete_favorite", {
       method: "DELETE",
@@ -112,7 +112,7 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
         </>,
         {
           icon: (
-            <span role="img" aria-label="star" style={{ fontSize: "20px" }}>
+            <span role="img" aria-label="trash" style={{ fontSize: "20px" }}>
               🗑️
             </span>
           ),
@@ -124,21 +124,48 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
     }
   };
 
+  const handleToggle = () => {
+    if (isFavorited) {
+      handleUnfavorite();
+    } else {
+      handleFavorite();
+    }
+  };
+
   return (
     <div className="relative">
-      <button
-        onClick={isFavorited ? handleUnfavorite : handleFavorite}
-        className={`star-btn text-5xl transition-colors duration-200 ${
-          isFavorited
-            ? "text-yellow-500 hover:text-yellow-600"
-            : "text-gray-500 hover:text-gray-600"
-        }`}
-        title={isFavorited ? "Remove from favorites" : "Add to favorites"}
-        disabled={isCooldown} // Disable button during cooldown
-      >
-        {isFavorited ? "★" : "☆"}
-      </button>
-      {showModal && <FavOnClickModal onClose={() => setShowModal(false)} />}
+      <label className="swap">
+        <input type="checkbox" checked={isFavorited} onChange={handleToggle} disabled={isCooldown} />
+
+        {/* Heart full icon */}
+        <svg
+          className="swap-on fill-current w-10 h-10 text-red-500"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+        >
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+        </svg>
+
+        {/* Heart empty icon */}
+        <svg
+          className="swap-off fill-current w-10 h-10 text-gray-500"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+        >
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35zM7.5 5c2 0 3.5 1.5 3.5 3.5 0 1.33-1.24 2.67-3.5 4.5-2.26-1.83-3.5-3.17-3.5-4.5C4 6.5 5.5 5 7.5 5z" />
+        </svg>
+      </label>
+      {showModal && (
+        <div className="modal modal-open">
+          <div className="modal-box">
+            <h2 className="font-bold text-lg">Log In Required</h2>
+            <p>You need to log in to favorite items.</p>
+            <div className="modal-action">
+              <button className="btn" onClick={() => setShowModal(false)}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

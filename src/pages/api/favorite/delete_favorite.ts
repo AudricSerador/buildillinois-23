@@ -6,10 +6,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     const { userId, foodId } = req.body;
 
     try {
-      const deletedFavorite = await prisma.favorite.deleteMany({
+      const deletedFavorite = await prisma.favorite.delete({
         where: {
-          userId: userId,
-          foodId: foodId,
+          userId_foodId: {
+            userId: userId,
+            foodId: foodId,
+          },
         },
       });
 
