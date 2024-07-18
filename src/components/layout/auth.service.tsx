@@ -8,6 +8,7 @@ import {
 } from "react";
 import { supabase } from "@/auth/supabase_client";
 import { useRouter } from "next/router";
+import { generateRecommendations } from "@/utils/create_recommendation";
 
 interface DiningUser {
   id: string;
@@ -88,6 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (res.data.isNew) {
             router.push("/user/onboarding");
           } else {
+            generateRecommendations(res.data.id);
             router.push("/user/dashboard");
           }
         }

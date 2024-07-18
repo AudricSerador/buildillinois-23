@@ -1,0 +1,28 @@
+service: recommendation-service
+
+provider:
+  name: aws
+  runtime: python3.8
+  environment:
+    SUPABASE_URL: https://wwtceflcyqqdgqrynvxe.supabase.co/
+    SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind3dGNlZmxjeXFxZGdxcnludnhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDQ3OTI4ODMsImV4cCI6MjAyMDM2ODg4M30.dSkzIATRnYneCPbUXpo7_qQdKoB1UHk7LqIYbal8wgQ
+
+functions:
+  generateRecommendations:
+    handler: lambda_function.lambda_handler
+    events:
+      - http:
+          path: generate
+          method: post
+
+package:
+  include:
+    - lambda_function.py
+    - requirements.txt
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
