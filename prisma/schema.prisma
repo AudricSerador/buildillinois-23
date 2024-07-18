@@ -15,7 +15,11 @@ model Review {
   rating    Int
   text      String?
 
-  @@unique([userId, foodId])
+  user      User     @relation(fields: [userId], references: [id])
+  food      Food     @relation(fields: [foodId], references: [id])
+
+  @@index([userId])
+  @@index([foodId])
 }
 
 model Recommendation {
