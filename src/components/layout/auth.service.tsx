@@ -52,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const handleUserSignedIn = useCallback(async () => {
     try {
+      console.log('Fetching session data...');
       const { data, error } = await supabase.auth.getSession();
       if (error) throw error;
       
@@ -79,7 +80,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const new_user = await new_res.json();
             setUser({ ...new_user.data });
             sessionStorage.setItem('user', JSON.stringify(new_user.data));
-            router.push("/user/dashboard");
+            console.log('User signed in and session stored in session storage.');
+            if (router.pathname === '/') {
+              router.push("/user/dashboard");
+            }
           } else {
             const errorData = await createUserResponse.json();
             console.error(errorData.error);
@@ -88,9 +92,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const res = await response.json();
           setUser({ ...res.data });
           sessionStorage.setItem('user', JSON.stringify(res.data));
+          console.log('User session restored from server.');
           if (res.data.isNew) {
             router.push("/user/onboarding");
-          } else {
+          } else if (router.pathname === '/') {
             generateRecommendations(res.data.id);
             router.push("/user/dashboard");
           }
@@ -132,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const handleAuthStateChange = async (event: string, session: any) => {
+      console.log('Auth state change detected:', event);
       if (event === "SIGNED_IN" && session) {
         handleUserSignedIn();
       } else if (event === "SIGNED_OUT") {
@@ -154,6 +160,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const res = await response.json();
             setUser({ ...res.data });
             sessionStorage.setItem('user', JSON.stringify(res.data));
+            console.log('User data fetched and session stored in session storage.');
           }
         }
         setInitialized(true); // Mark initialization as complete
@@ -168,6 +175,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (storedUser) {
       setUser(JSON.parse(storedUser));
       setInitialized(true); // Mark initialization as complete
+      console.log('User session restored from session storage.');
     } else {
       fetchUserData();
     }
@@ -181,8 +189,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (initialized) {
       if (!user && isProtectedRoute(router.pathname)) {
+        console.log('Redirecting to login...');
         router.push('/login'); 
       } else if (user && user.isNew && router.pathname !== '/user/onboarding') {
+        console.log('Redirecting to onboarding...');
         router.push('/user/onboarding'); 
       }
     }
