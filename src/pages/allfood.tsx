@@ -180,7 +180,7 @@ export default function AllFood(): JSX.Element {
         }}
       ></div>
       {isLoading ? (
-        <LoadingSpinner />
+        <LoadingSpinner text="Loading food data" />
       ) : error ? (
         <p className="font-custom text-center my-6">
           Error loading dining hall data: {error}

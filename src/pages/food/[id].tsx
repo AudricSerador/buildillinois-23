@@ -5,6 +5,7 @@ import { EntriesDisplay } from "@/components/entries_display";
 import LoadingSpinner from "@/components/loading_spinner";
 import { useAuth } from "@/components/layout/auth.service";
 import FavoriteBtn from "@/components/favorites/favorite_btn";
+import ReviewSection from "@/components/review_section";
 
 export interface FoodItem {
   id: string;
@@ -74,8 +75,7 @@ export default function FoodItemPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
-        <LoadingSpinner />
-        <p className="mt-4 font-custom text-xl">Loading food data...</p>
+        <LoadingSpinner text="Loading food data"/>
       </div>
     );
   }
@@ -110,6 +110,7 @@ export default function FoodItemPage() {
           )}
         </div>
       </div>
+      {foodItem && <ReviewSection foodId={foodItem.id} />}
     </div>
   );
 }

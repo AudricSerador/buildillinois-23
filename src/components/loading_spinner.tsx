@@ -1,6 +1,10 @@
 import React from 'react';
 
-const LoadingSpinner: React.FC = () => {
+interface LoadingSpinnerProps {
+    text: string;
+}
+
+const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({ text }) => {
     return (
         <div role="status" className="flex flex-col justify-center font-custombold items-center h-full">
             <svg
@@ -19,7 +23,7 @@ const LoadingSpinner: React.FC = () => {
                     fill="currentFill"
                 />
             </svg>
-            <span className="mt-2">Loading food data</span>
+            <span className="mt-2">{text}</span>
         </div>
     );
 };

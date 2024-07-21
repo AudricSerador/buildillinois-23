@@ -13,10 +13,12 @@ model Review {
   userId    String
   foodId    String
   rating    Int
+  location  String
+  meal      String
   text      String?
 
-  user      User     @relation(fields: [userId], references: [id])
-  food      Food     @relation(fields: [foodId], references: [id])
+  user User     @relation(fields: [userId], references: [id])
+  food FoodInfo @relation(fields: [foodId], references: [id])
 
   @@index([userId])
   @@index([foodId])
@@ -32,11 +34,11 @@ model Recommendation {
 }
 
 model Favorite {
-  userId    String
-  foodId    String
+  userId String
+  foodId String
 
-  user      User     @relation(fields: [userId], references: [id])
-  food      FoodInfo     @relation(fields: [foodId], references: [id])
+  user User     @relation(fields: [userId], references: [id])
+  food FoodInfo @relation(fields: [foodId], references: [id])
 
   @@id([userId, foodId])
 }
@@ -66,6 +68,7 @@ model FoodInfo {
   protein            Int           @default(0)
   calciumDV          Int           @default(0)
   ironDV             Int           @default(0)
+  Review             Review[]
 }
 
 model mealDetails {
@@ -88,4 +91,5 @@ model User {
   locations   String     @default("")
   goal        String     @default("")
   favorites   Favorite[]
+  Review      Review[]
 }
