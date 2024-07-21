@@ -38,6 +38,7 @@ export const diningTags: { [key: string]: string } = {
 };
 
 const MAX_REVIEW_LENGTH = 200;
+const REVIEWS_PER_PAGE = 10;
 
 const getValidDiningHalls = (mealEntries: any) => {
   if (!mealEntries || mealEntries.length === 0) {
@@ -86,6 +87,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId, mealEntries }) =>
   const [location, setLocation] = useState(null);
   const [meal, setMeal] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const validDiningHalls = getValidDiningHalls(mealEntries);
   const availableMeals = getAvailableMeals(mealEntries, location?.value);
@@ -204,6 +206,29 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId, mealEntries }) =>
     }
   };
 
+  const calculateReviewStats = () => {
+    const totalReviews = reviews.length;
+    const ratingCounts = [0, 0, 0, 0, 0];
+    let totalRating = 0;
+
+    reviews.forEach((review) => {
+      ratingCounts[review.rating - 1]++;
+      totalRating += review.rating;
+    });
+
+    const overallRating = totalReviews > 0 ? (totalRating / totalReviews).toFixed(1) : "0.0";
+
+    return { totalReviews, ratingCounts, overallRating };
+  };
+
+  const { totalReviews, ratingCounts, overallRating } = calculateReviewStats();
+
+  const totalPages = Math.ceil(totalReviews / REVIEWS_PER_PAGE);
+  const currentReviews = reviews.slice(
+    (currentPage - 1) * REVIEWS_PER_PAGE,
+    currentPage * REVIEWS_PER_PAGE
+  );
+
   return (
     <div className="mt-8">
       <h2 className="text-2xl font-custombold mb-2">Reviews</h2>
@@ -299,8 +324,39 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId, mealEntries }) =>
               </div>
             )}
           </div>
-          {reviews && reviews.length > 0 ? (
-            reviews.map((review) => (
+          <div className="mb-4 p-4 border rounded-lg">
+            <h3 className="text-xl font-custombold mb-4">Overall rating</h3>
+            <div className="flex items-center mb-2">
+              <div className="rating mr-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <input
+                    key={star}
+                    type="radio"
+                    name={`overall-rating`}
+                    className="mask mask-star-2 bg-orange-400"
+                    checked={Math.round(parseFloat(overallRating)) === star}
+                    readOnly
+                  />
+                ))}
+              </div>
+              <div className="text-xl font-custombold ml-2">{overallRating}</div>
+              <div className="text-sm text-gray-500 ml-2">({totalReviews} reviews)</div>
+            </div>
+            {[5, 4, 3, 2, 1].map((star) => (
+              <div key={star} className="flex items-center">
+                <span className="mr-2">{star} stars</span>
+                <div className="flex-1 h-2 bg-gray-200 rounded">
+                  <div
+                    className="h-2 bg-orange-400 rounded"
+                    style={{ width: `${(ratingCounts[star - 1] / totalReviews) * 100}%` }}
+                  ></div>
+                </div>
+                <span className="ml-2">{ratingCounts[star - 1]}</span>
+              </div>
+            ))}
+          </div>
+          {currentReviews && currentReviews.length > 0 ? (
+            currentReviews.map((review) => (
               <div key={review.id} className="mb-4 p-4 border rounded">
                 <div className="flex items-center mb-2">
                   <MdPerson size={24} className="mr-2" />
@@ -340,6 +396,21 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId, mealEntries }) =>
             ))
           ) : (
             <p>No reviews yet. Be the first to add one!</p>
+          )}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-4">
+              <div className="btn-group">
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <button
+                    key={i + 1}
+                    className={`btn ${currentPage === i + 1 ? "btn-active" : ""}`}
+                    onClick={() => setCurrentPage(i + 1)}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       )}
