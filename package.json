@@ -27,6 +27,7 @@
     "react-select": "^5.8.0",
     "react-toastify": "^10.0.4",
     "tailwindcss": "^3.4.0",
+    "timeago.js": "^4.0.2",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

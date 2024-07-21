@@ -3,6 +3,9 @@ import Select from "react-select";
 import { useAuth } from "@/components/layout/auth.service";
 import { toast } from "react-toastify";
 import LoadingSpinner from "@/components/loading_spinner";
+import { FaInfoCircle, FaThumbsUp } from "react-icons/fa";
+import { MdPerson } from "react-icons/md";
+import * as timeago from "timeago.js";
 
 interface Review {
   id: number;
@@ -13,81 +16,91 @@ interface Review {
   location: string;
   meal: string;
   createdAt: string;
+  likes: number;
+  userName?: string;
 }
 
 interface ReviewSectionProps {
   foodId: string;
+  mealEntries: any;
 }
+
+export const diningTags: { [key: string]: string } = {
+  "Ikenberry Dining Center (Ike)": "Ikenberry",
+  "Illinois Street Dining Center (ISR)": "ISR",
+  "Pennsylvania Avenue Dining Hall (PAR)": "PAR",
+  "Lincoln Avenue Dining Hall (Allen)": "Allen",
+  "Field of Greens (LAR)": "LAR",
+  "InfiniTEA": "InfiniTEA",
+  "Urbana South Market": "South Market (PAR)",
+  "57 North": "57 North (Ike)",
+  "TerraByte": "TerraByte (ISR)",
+};
 
 const MAX_REVIEW_LENGTH = 200;
 
-const diningHalls = [
-    { value: "Ikenberry Dining Center (Ike)", label: "Ikenberry Dining Center (Ike)" },
-    { value: "Illinois Street Dining Center (ISR)", label: "Illinois Street Dining Center (ISR)" },
-    { value: "Pennsylvania Avenue Dining Hall (PAR)", label: "Pennsylvania Avenue Dining Hall (PAR)" },
-    { value: "Lincoln Avenue Dining Hall (Allen)", label: "Lincoln Avenue Dining Hall (Allen)" },
-    { value: "Field of Greens (LAR)", label: "Field of Greens (LAR)" },
-    { value: "InfiniTEA", label: "InfiniTEA" },
-    { value: "Urbana South Market", label: "Urbana South Market" },
-    { value: "57 North", label: "57 North" },
-    { value: "TerraByte", label: "TerraByte" },
-  ];
-  
-  const mealOptions = {
-    "Ikenberry Dining Center (Ike)": [
-      { value: "Breakfast", label: "Breakfast" },
-      { value: "Lunch", label: "Lunch" },
-      { value: "Light Lunch", label: "Light Lunch" },
-      { value: "Dinner", label: "Dinner" },
-    ],
-    "Illinois Street Dining Center (ISR)": [
-      { value: "Breakfast", label: "Breakfast" },
-      { value: "Lunch", label: "Lunch" },
-      { value: "Dinner", label: "Dinner" },
-    ],
-    "Pennsylvania Avenue Dining Hall (PAR)": [
-      { value: "Breakfast", label: "Breakfast" },
-      { value: "Lunch", label: "Lunch" },
-      { value: "Dinner", label: "Dinner" },
-    ],
-    "Lincoln Avenue Dining Hall (Allen)": [
-      { value: "Breakfast", label: "Breakfast" },
-      { value: "Lunch", label: "Lunch" },
-      { value: "Kosher Lunch", label: "Kosher Lunch" },
-      { value: "Dinner", label: "Dinner" },
-      { value: "Kosher Dinner", label: "Kosher Dinner" },
-    ],
-    "Field of Greens (LAR)": [
-      { value: "Lunch", label: "Lunch" },
-    ],
-    "InfiniTEA": [
-      { value: "a la Carte", label: "A la Carte" },
-    ],
-    "Urbana South Market": [
-      { value: "a la Carte", label: "A la Carte" },
-    ],
-    "57 North": [
-      { value: "a la Carte", label: "A la Carte" },
-    ],
-    "TerraByte": [
-      { value: "a la Carte", label: "A la Carte" },
-    ],
-  };
+const getValidDiningHalls = (mealEntries: any) => {
+  if (!mealEntries || mealEntries.length === 0) {
+    return [];
+  }
 
-const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
+  const validDiningHalls = new Set();
+  mealEntries.forEach((entry: any) => {
+    validDiningHalls.add(entry.diningHall);
+  });
+  return Array.from(validDiningHalls).map((hall) => ({
+    value: hall,
+    label: hall,
+  }));
+};
+
+const getAvailableMeals = (mealEntries: any, selectedDiningHall: string) => {
+  if (!selectedDiningHall || !mealEntries || mealEntries.length === 0) {
+    return [];
+  }
+
+  const availableMeals = new Set();
+  mealEntries
+    .filter((entry: any) => entry.diningHall === selectedDiningHall)
+    .forEach((entry: any) => {
+      availableMeals.add(entry.mealType);
+    });
+
+  return Array.from(availableMeals).map((meal) => ({
+    value: meal,
+    label: meal,
+  }));
+};
+
+const fetchUserName = async (userId: string) => {
+  const res = await fetch(`/api/user/get_user?id=${userId}`);
+  const data = await res.json();
+  return data.success ? data.data.name : "Unknown";
+};
+
+const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId, mealEntries }) => {
   const { user } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [rating, setRating] = useState(0);
+  const [rating, setRating] = useState<number | null>(null);
   const [text, setText] = useState("");
   const [location, setLocation] = useState(null);
   const [meal, setMeal] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const validDiningHalls = getValidDiningHalls(mealEntries);
+  const availableMeals = getAvailableMeals(mealEntries, location?.value);
+
   useEffect(() => {
     const fetchReviews = async () => {
-      const res = await fetch(`/api/review/get_reviews?foodId=${foodId}`);
+      const res = await fetch(`/api/review/get_review?foodId=${foodId}`);
       const data = await res.json();
-      setReviews(data.data);
+      const reviewsWithUserNames = await Promise.all(
+        data.data.map(async (review: Review) => {
+          const userName = await fetchUserName(review.userId);
+          return { ...review, userName };
+        })
+      );
+      setReviews(reviewsWithUserNames);
       setIsLoading(false);
     };
 
@@ -102,6 +115,21 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
 
     if (text.length > MAX_REVIEW_LENGTH) {
       toast.error("Review text exceeds the character limit.");
+      return;
+    }
+
+    const today = new Date().toISOString().split('T')[0];
+
+    const existingReview = reviews.find(
+      (review) =>
+        review.userId === user.id &&
+        review.location === location?.value &&
+        review.meal === meal?.value &&
+        review.createdAt.split('T')[0] === today
+    );
+
+    if (existingReview) {
+      toast.error("You have already submitted a review for this meal, dining hall, and day.");
       return;
     }
 
@@ -123,8 +151,9 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
     if (res.ok) {
       toast.success("Review submitted successfully!");
       const newReview = await res.json();
-      setReviews([newReview.data, ...reviews]);
-      setRating(0);
+      const userName = await fetchUserName(user.id);
+      setReviews([{ ...newReview.data, userName, likes: 0 }, ...reviews]);
+      setRating(null);
       setText("");
       setLocation(null);
       setMeal(null);
@@ -133,20 +162,69 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
     }
   };
 
+  const handleLikeReview = async (reviewId: number) => {
+    if (!user) {
+      toast.error("You need to log in to like a review.");
+      return;
+    }
+
+    // Check if the user has already liked the review
+    const likedReviews = JSON.parse(localStorage.getItem('likedReviews') || '[]');
+    if (likedReviews.includes(reviewId)) {
+      toast.error("You have already liked this review.");
+      return;
+    }
+
+    const res = await fetch("/api/review/like_review", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        reviewId,
+      }),
+    });
+
+    if (res.ok) {
+      const updatedReview = await res.json();
+      setReviews((prevReviews) =>
+        prevReviews.map((review) =>
+          review.id === reviewId ? { ...review, likes: updatedReview.data.likes } : review
+        )
+      );
+
+      // Update the liked reviews in local storage
+      likedReviews.push(reviewId);
+      localStorage.setItem('likedReviews', JSON.stringify(likedReviews));
+
+      toast.success("Review liked successfully!");
+    } else {
+      toast.error("Failed to like review.");
+    }
+  };
+
   return (
     <div className="mt-8">
       <h2 className="text-2xl font-custombold mb-2">Reviews</h2>
       {isLoading ? (
-        <LoadingSpinner text="loading reviews"/>
+        <LoadingSpinner text="Loading reviews" />
       ) : (
         <div>
           <div className="mb-4">
-            {user && (
-              <div className="mb-4">
+            {user && validDiningHalls.length > 0 ? (
+              <div className="mb-4 bg-base-200 p-4 rounded-lg shadow-lg">
                 <h3 className="text-xl font-custombold">Add Your Review</h3>
                 <div className="flex items-center mb-2">
                   <label className="mr-2">Rating:</label>
                   <div className="rating rating-lg">
+                    <input
+                      type="radio"
+                      name="rating-8"
+                      className="rating-hidden"
+                      checked={rating === null}
+                      onChange={() => setRating(null)}
+                    />
                     {[1, 2, 3, 4, 5].map((star) => (
                       <input
                         key={star}
@@ -162,9 +240,12 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
                 <div className="mb-2">
                   <label className="mr-2">Dining Hall:</label>
                   <Select
-                    options={diningHalls}
+                    options={validDiningHalls}
                     value={location}
-                    onChange={setLocation}
+                    onChange={(selectedOption) => {
+                      setLocation(selectedOption);
+                      setMeal(null); // Reset meal selection when dining hall changes
+                    }}
                     placeholder="Select dining hall"
                   />
                 </div>
@@ -172,7 +253,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
                   <div className="mb-2">
                     <label className="mr-2">Meal:</label>
                     <Select
-                      options={mealOptions[location.value]}
+                      options={availableMeals}
                       value={meal}
                       onChange={setMeal}
                       placeholder="Select meal"
@@ -191,24 +272,43 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
                 </div>
                 <button
                   onClick={handleReviewSubmit}
-                  className="btn mt-2"
-                  disabled={text.length > MAX_REVIEW_LENGTH}
+                  className="btn btn-secondary mt-2"
+                  disabled={
+                    text.length > MAX_REVIEW_LENGTH ||
+                    !location ||
+                    !meal ||
+                    rating === null
+                  }
                 >
                   Submit Review
                 </button>
               </div>
-            )}
-            {!user && (
-              <div className="alert alert-info">
-                Please log in to submit a review.
+            ) : user ? (
+              <div className="alert alert-warning shadow-lg">
+                <FaInfoCircle size={20} />
+                <span>
+                  Food is not being served at any dining hall right now. Check back later to submit a review.
+                </span>
+              </div>
+            ) : (
+              <div className="alert alert-info shadow-lg">
+                <FaInfoCircle size={20} />
+                <span>
+                  You need to log in to submit a review.
+                </span>
               </div>
             )}
           </div>
-          {reviews.length > 0 ? (
+          {reviews && reviews.length > 0 ? (
             reviews.map((review) => (
               <div key={review.id} className="mb-4 p-4 border rounded">
-                <div className="flex justify-between items-center mb-2">
-                  <div className="rating rating-lg">
+                <div className="flex items-center mb-2">
+                  <MdPerson size={24} className="mr-2" />
+                  <p className="font-bold">{review.userName}</p>
+                </div>
+                <div className="flex items-center mb-2">
+                  <div className="rating mr-2">
+                    <input type="radio" name={`rating-${review.id}`} className="rating-hidden" checked={review.rating === null} readOnly />
                     {[1, 2, 3, 4, 5].map((star) => (
                       <input
                         key={star}
@@ -220,12 +320,21 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
                       />
                     ))}
                   </div>
+                  <div className="badge badge-primary mr-2">{diningTags[review.location]}</div>
+                  <div className="badge badge-secondary mr-2">{review.meal}</div>
                   <div className="text-sm text-gray-500">
-                    {new Date(review.createdAt).toLocaleDateString()}
+                    {timeago.format(new Date(review.createdAt))}
+                  </div>
+                  <div className="ml-auto">
+                    <button
+                      onClick={() => handleLikeReview(review.id)}
+                      className="flex items-center text-gray-600 hover:text-gray-800"
+                    >
+                      <FaThumbsUp className="mr-1" />
+                      <span>{review.likes}</span>
+                    </button>
                   </div>
                 </div>
-                <p>Location: {review.location}</p>
-                <p>Meal: {review.meal}</p>
                 <p>{review.text}</p>
               </div>
             ))

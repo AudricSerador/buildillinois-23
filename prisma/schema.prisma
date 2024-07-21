@@ -16,6 +16,7 @@ model Review {
   location  String
   meal      String
   text      String?
+  likes     Int      @default(0)
 
   user User     @relation(fields: [userId], references: [id])
   food FoodInfo @relation(fields: [foodId], references: [id])

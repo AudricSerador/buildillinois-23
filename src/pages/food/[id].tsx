@@ -110,7 +110,7 @@ export default function FoodItemPage() {
           )}
         </div>
       </div>
-      {foodItem && <ReviewSection foodId={foodItem.id} />}
+      {foodItem && <ReviewSection foodId={foodItem.id} mealEntries={foodItem.mealEntries}/>}
     </div>
   );
 }
