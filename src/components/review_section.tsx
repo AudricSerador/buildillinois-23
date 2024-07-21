@@ -236,6 +236,14 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId, mealEntries }) =>
         <LoadingSpinner text="Loading reviews" />
       ) : (
         <div>
+          {user && validDiningHalls.length > 0 && (
+            <div className="alert alert-warning shadow-lg mb-4">
+              <FaInfoCircle size={20} />
+              <span>
+                Your NetID will be recorded when you submit a review. Please be respectful and do not post inappropriate content.
+              </span>
+            </div>
+          )}
           <div className="mb-4">
             {user && validDiningHalls.length > 0 ? (
               <div className="mb-4 bg-base-200 p-4 rounded-lg shadow-lg">
