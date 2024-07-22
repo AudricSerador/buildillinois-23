@@ -6,6 +6,8 @@ import LoadingSpinner from "@/components/loading_spinner";
 import { useAuth } from "@/components/layout/auth.service";
 import FavoriteBtn from "@/components/favorites/favorite_btn";
 import ReviewSection from "@/components/review_section";
+import ImageCarousel from "@/components/image_carousel";
+import ImageUpload from "@/components/image_upload";
 
 export interface FoodItem {
   id: string;
@@ -30,11 +32,18 @@ export interface FoodItem {
   mealEntries: string[];
 }
 
+export interface Image {
+  id: string;
+  url: string;
+  author: string;
+}
+
 export default function FoodItemPage() {
   const router = useRouter();
   const { id: foodId } = router.query;
   const [userId, setUserId] = useState("");
   const [foodItem, setFoodItem] = useState<FoodItem | null>(null);
+  const [images, setImages] = useState<Image[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
 
@@ -65,17 +74,27 @@ export default function FoodItemPage() {
       }
     };
 
+    const fetchImages = async () => {
+      if (foodId) {
+        const res = await fetch(`/api/images?foodId=${foodId}`);
+        const data = await res.json();
+        setImages(data.images);
+      }
+    };
+
     if (user) {
       setUserId(user.id);
     }
 
     fetchFoodItem();
+    fetchImages();
   }, [foodId, router, user]);
 
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
-        <LoadingSpinner text="Loading food data"/>
+        <LoadingSpinner />
+        <p className="mt-4 font-custom text-xl">Loading food data...</p>
       </div>
     );
   }
@@ -89,6 +108,7 @@ export default function FoodItemPage() {
           foodId={foodId as string}
           foodName={foodItem?.name as string}
         />
+        <ImageUpload foodId={foodId as string} />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 items-start justify-items-center sm:justify-items-start">
         {foodItem && <NutritionFacts foodItem={foodItem} />}
@@ -110,7 +130,11 @@ export default function FoodItemPage() {
           )}
         </div>
       </div>
-      {foodItem && <ReviewSection foodId={foodItem.id} mealEntries={foodItem.mealEntries}/>}
+      <div className="mt-8">
+        <h2 className="text-2xl font-custombold mb-4">Food Images</h2>
+        <ImageCarousel images={images} />
+      </div>
+      <ReviewSection foodId={foodId as string} mealEntries={foodItem?.mealEntries} />
     </div>
   );
 }
