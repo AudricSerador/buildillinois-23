@@ -7,7 +7,7 @@ import { useAuth } from "@/components/layout/auth.service";
 import FavoriteBtn from "@/components/favorites/favorite_btn";
 import ReviewSection from "@/components/review_section";
 import ImageCarousel from "@/components/image_carousel";
-import ImageUpload from "@/components/image_upload";
+import UploadImageModal from "@/components/image_upload";
 
 export interface FoodItem {
   id: string;
@@ -41,10 +41,10 @@ export interface Image {
 export default function FoodItemPage() {
   const router = useRouter();
   const { id: foodId } = router.query;
-  const [userId, setUserId] = useState("");
   const [foodItem, setFoodItem] = useState<FoodItem | null>(null);
   const [images, setImages] = useState<Image[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -82,19 +82,14 @@ export default function FoodItemPage() {
       }
     };
 
-    if (user) {
-      setUserId(user.id);
-    }
-
     fetchFoodItem();
     fetchImages();
-  }, [foodId, router, user]);
+  }, [foodId, router]);
 
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen">
-        <LoadingSpinner />
-        <p className="mt-4 font-custom text-xl">Loading food data...</p>
+        <LoadingSpinner text="Loading food data" />
       </div>
     );
   }
@@ -104,21 +99,23 @@ export default function FoodItemPage() {
       <div className="flex items-center space-x-4 mb-4">
         <h1 className="text-4xl font-custombold">{foodItem?.name}</h1>
         <FavoriteBtn
-          userId={userId}
+          userId={user?.id || ''}
           foodId={foodId as string}
           foodName={foodItem?.name as string}
         />
-        <ImageUpload foodId={foodId as string} />
+        {user && (
+          <button className="btn" onClick={() => setShowUploadModal(true)}>
+            Upload Image
+          </button>
+        )}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 items-start justify-items-center sm:justify-items-start">
         {foodItem && <NutritionFacts foodItem={foodItem} />}
         <div>
           <p className="mb-4 font-custombold">
-            Ingredients:{" "}
-            <span className="font-custom">{foodItem?.ingredients}</span>
+            Ingredients: <span className="font-custom">{foodItem?.ingredients}</span>
             <br />
-            Allergens:{" "}
-            <span className="font-custom">{foodItem?.allergens}</span>
+            Allergens: <span className="font-custom">{foodItem?.allergens}</span>
           </p>
           <h2 className="text-2xl font-custombold mb-2">Dates Served</h2>
           {foodItem?.mealEntries && foodItem.mealEntries.length > 0 ? (
@@ -130,11 +127,16 @@ export default function FoodItemPage() {
           )}
         </div>
       </div>
-      <div className="mt-8">
-        <h2 className="text-2xl font-custombold mb-4">Food Images</h2>
-        <ImageCarousel images={images} />
-      </div>
-      <ReviewSection foodId={foodId as string} mealEntries={foodItem?.mealEntries} />
+      {foodItem && <ReviewSection foodId={foodItem.id} mealEntries={foodItem.mealEntries} />}
+      {foodItem && <ImageCarousel foodId={foodItem.id} />}
+      {user && (
+        <UploadImageModal
+          isOpen={showUploadModal}
+          onClose={() => setShowUploadModal(false)}
+          foodId={foodItem.id}
+          userId={user.id}
+        />
+      )}
     </div>
   );
-}
+};

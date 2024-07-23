@@ -7,6 +7,19 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model FoodImage {
+  id     Int      @id @default(autoincrement())
+  userId String
+  foodId String
+  url    String
+
+  user User     @relation(fields: [userId], references: [id])
+  food FoodInfo @relation(fields: [foodId], references: [id])
+
+  @@index([userId])
+  @@index([foodId])
+}
+
 model Review {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
@@ -70,6 +83,7 @@ model FoodInfo {
   calciumDV          Int           @default(0)
   ironDV             Int           @default(0)
   Review             Review[]
+  FoodImage          FoodImage[]
 }
 
 model mealDetails {
@@ -83,14 +97,15 @@ model mealDetails {
 }
 
 model User {
-  id          String     @id
-  email       String     @unique
-  name        String     @default("")
-  isNew       Boolean    @default(true)
-  preferences String     @default("")
-  allergies   String     @default("")
-  locations   String     @default("")
-  goal        String     @default("")
+  id          String      @id
+  email       String      @unique
+  name        String      @default("")
+  isNew       Boolean     @default(true)
+  preferences String      @default("")
+  allergies   String      @default("")
+  locations   String      @default("")
+  goal        String      @default("")
   favorites   Favorite[]
   Review      Review[]
+  FoodImage   FoodImage[]
 }

@@ -1,85 +1,77 @@
-import { useState } from "react";
-import imageCompression from "browser-image-compression";
-import { toast } from "react-toastify";
+import { useState } from 'react';
+import axios from 'axios';
+import Compressor from 'compressorjs';
+import { toast } from 'react-toastify';
 
-interface ImageUploadProps {
+interface UploadImageModalProps {
+  isOpen: boolean;
+  onClose: () => void;
   foodId: string;
+  userId: string;
 }
 
-const ImageUpload: React.FC<ImageUploadProps> = ({ foodId }) => {
-  const [file, setFile] = useState<File | null>(null);
+const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, foodId, userId }) => {
+  const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
-  const [isOpen, setIsOpen] = useState(false);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const imageFile = e.target.files[0];
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 800,
-        useWebWorker: true,
-      };
-
-      try {
-        const compressedFile = await imageCompression(imageFile, options);
-        setFile(compressedFile);
-        setPreview(URL.createObjectURL(compressedFile));
-      } catch (error) {
-        console.error("Error compressing image:", error);
-        toast.error("Failed to compress image");
-      }
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setImage(file);
+      setPreview(URL.createObjectURL(file));
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file) {
-      toast.error("Please select a file to upload");
+  const handleUpload = () => {
+    if (!image) {
+      toast.error('Please select an image to upload.');
       return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("food_id", foodId);
+    new Compressor(image, {
+      quality: 0.8,
+      success: async (compressedImage) => {
+        const formData = new FormData();
+        formData.append('file', compressedImage);
+        formData.append('userId', userId);
+        formData.append('foodId', foodId);
 
-    const res = await fetch("/api/upload_image", {
-      method: "POST",
-      body: formData,
+        try {
+          const response = await axios.post('/api/image/upload_image', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+
+          if (response.data.success) {
+            toast.success('Image uploaded successfully!');
+            onClose();
+          } else {
+            toast.error('Failed to upload image.');
+          }
+        } catch (error) {
+          toast.error('Error uploading image: ' + error.message);
+        }
+      },
+      error(err) {
+        toast.error('Compression failed: ' + err.message);
+      },
     });
-
-    const data = await res.json();
-    if (data.success) {
-      toast.success("Image uploaded successfully");
-      setFile(null);
-      setPreview(null);
-      setIsOpen(false);
-    } else {
-      toast.error(data.error || "Failed to upload image");
-    }
   };
 
   return (
-    <div>
-      <button className="btn" onClick={() => setIsOpen(true)}>
-        Upload Image
-      </button>
-      <div className={`modal ${isOpen ? "modal-open" : ""}`}>
-        <div className="modal-box">
-          <h3 className="text-lg font-bold">Upload Image</h3>
-          <input type="file" onChange={handleFileChange} className="my-4" />
-          {preview && <img src={preview} alt="Image preview" className="w-full h-auto my-4" />}
-          <div className="modal-action">
-            <button className="btn btn-primary" onClick={handleSubmit}>
-              Upload
-            </button>
-            <button className="btn" onClick={() => setIsOpen(false)}>
-              Close
-            </button>
-          </div>
+    <div className={`modal ${isOpen ? 'modal-open' : ''}`}>
+      <div className="modal-box">
+        <h2 className="font-bold text-lg">Upload Image</h2>
+        {preview && <img src={preview} alt="Preview" className="mb-4" />}
+        <input type="file" accept="image/*" onChange={handleImageChange} className="mb-4" />
+        <div className="modal-action">
+          <button className="btn btn-primary" onClick={handleUpload}>Upload</button>
+          <button className="btn" onClick={onClose}>Close</button>
         </div>
       </div>
     </div>
   );
 };
 
-export default ImageUpload;
+export default UploadImageModal;
