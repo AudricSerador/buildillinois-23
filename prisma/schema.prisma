@@ -9,9 +9,12 @@ generator client {
 
 model FoodImage {
   id     Int      @id @default(autoincrement())
+  created_at DateTime @default(now())
   userId String
   foodId String
   url    String
+  description String?
+  likes     Int      @default(0)
 
   user User     @relation(fields: [userId], references: [id])
   food FoodInfo @relation(fields: [foodId], references: [id])

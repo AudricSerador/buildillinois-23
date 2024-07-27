@@ -183,7 +183,6 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId, mealEntries }) =>
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        userId: user.id,
         reviewId,
       }),
     });
