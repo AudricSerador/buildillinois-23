@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { FoodItemDisplay } from "../components/allfood/food_item_display";
+import { FoodItemCard } from "@/components/food_card_display";
 import { useRouter } from "next/router";
 import LoadingSpinner from "../components/loading_spinner";
 import { Filters } from "../components/allfood/filters";
@@ -190,10 +190,9 @@ export default function AllFood(): JSX.Element {
           <ul>
             {food.length > 0 ? (
               food.map((foodItem: any) => (
-                <FoodItemDisplay
+                <FoodItemCard
                   key={foodItem.id}
                   foodItem={foodItem}
-                  includeEntries={true}
                 />
               ))
             ) : (

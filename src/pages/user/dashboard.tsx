@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAuth } from "@/components/layout/auth.service";
 import { useRouter } from 'next/router';
 import { FaInfo } from "react-icons/fa";
-import { FoodItemDisplay } from '@/components/allfood/food_item_display';
+import { FoodItemCard } from "@/components/food_card_display";
 import { FoodItem } from '@/pages/food/[id]';
 import { generateRecommendations } from "@/utils/create_recommendation";
 
@@ -87,7 +87,7 @@ export default function Dashboard(): JSX.Element {
                     <h2 className="text-xl font-semibold mb-2">Recommendations</h2>
                     {recommendations && recommendations.length > 0 ? (
                         recommendations.map((recommendation: FoodItem) => (
-                        <FoodItemDisplay key={recommendation.id} foodItem={recommendation} includeEntries={false} />
+                        <FoodItemCard key={recommendation.id} foodItem={recommendation} />
                         ))
                     ) : (
                         <p>You have no recommendations at this time.</p>

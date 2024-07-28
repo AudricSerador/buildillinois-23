@@ -1,6 +1,6 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { FoodItemDisplay } from "@/components/allfood/food_item_display";
+import { FoodItemCard } from "@/components/food_card_display";
 import { diningHallTimes } from "@/components/entries_display";
 import { IconLegend } from "@/components/icon_legend";
 import LoadingSpinner from "@/components/loading_spinner";
@@ -358,10 +358,9 @@ export default function HallFoodPage({
                     <div className="grid grid-cols-1 md:grid-cols-2 px-2 py-2 lg:grid-cols-3 gap-x-4">
                       {foodItems &&
                         (foodItems as any[]).map((foodItem: any) => (
-                          <FoodItemDisplay
+                          <FoodItemCard
                             key={foodItem.id}
                             foodItem={foodItem}
-                            includeEntries={false}
                           />
                         ))}
                     </div>

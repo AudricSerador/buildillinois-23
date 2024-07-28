@@ -19,7 +19,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             },
           },
           include: {
-            food: true,
+            food: {
+              include: {
+                mealEntries: true,
+              },
+            },
           },
         });
 
@@ -34,7 +38,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             userId: userId as string,
           },
           include: {
-            food: true,
+            food: {
+              include: {
+                mealEntries: true,
+              },
+            },
           },
         });
 

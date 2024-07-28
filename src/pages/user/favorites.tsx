@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/components/layout/auth.service';
-import { FoodItemDisplay } from '@/components/allfood/food_item_display';
+import { FoodItemCard } from '@/components/food_card_display';
 import { FoodItem } from '@/pages/food/[id]';
 import { useRouter } from 'next/router';
 
@@ -27,11 +27,11 @@ function FavoritesPage() {
   return (
     <div className="px-4 sm:px-8 font-custom md:px-16 lg:px-64 mt-4">
       <p className="text-4xl font-custombold mt-4 mb-4">
-        My Favorites
+        My Favorites ({favorites.length})
       </p>
       {favorites && favorites.length > 0 ? (
         favorites.map((favorite: { foodId: string; food: FoodItem }) => (
-          <FoodItemDisplay key={favorite.foodId} foodItem={favorite.food} includeEntries={false} />
+          <FoodItemCard key={favorite.foodId} foodItem={favorite.food} />
         ))
       ) : (
         <p className="text-center text-lg">No favorites yet.</p>

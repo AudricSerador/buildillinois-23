@@ -27,6 +27,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
               in: foodIds,
             },
           },
+          include: {
+            mealEntries: true,
+          },
         });
 
         res.status(200).json({ success: true, data: foodInfoList });

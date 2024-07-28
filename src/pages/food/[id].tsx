@@ -29,7 +29,7 @@ export interface FoodItem {
   ingredients: string;
   allergens: string;
   preferences: string;
-  mealEntries: string[];
+  mealEntries: any[];
 }
 
 export interface Image {
