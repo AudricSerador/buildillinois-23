@@ -86,9 +86,13 @@ export default function Dashboard(): JSX.Element {
                 <div className="p-4 bg-white shadow-md rounded-lg">
                     <h2 className="text-xl font-semibold mb-2">Recommendations</h2>
                     {recommendations && recommendations.length > 0 ? (
-                        recommendations.map((recommendation: FoodItem) => (
-                        <FoodItemCard key={recommendation.id} foodItem={recommendation} />
-                        ))
+                        <div className="flex overflow-x-auto space-x-4 pb-4">
+                            {recommendations.map((recommendation: FoodItem) => (
+                                <div key={recommendation.id} className="flex-none">
+                                    <FoodItemCard foodItem={recommendation} loading={false} horizontal={true} />
+                                </div>
+                            ))}
+                        </div>
                     ) : (
                         <p>You have no recommendations at this time.</p>
                     )}

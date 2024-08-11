@@ -6,12 +6,12 @@ import { FaSmile, FaMeh, FaFrown } from "react-icons/fa";
 import { FaFaceMehBlank } from "react-icons/fa6";
 import { diningHallTimes } from "./entries_display";
 
-interface FoodItemCardProps {
+interface FoodItemCardBigProps {
   foodItem: FoodItem;
   loading: boolean;
 }
 
-export interface ImageData {
+interface ImageData {
   id: number;
   url: string;
   likes: number;
@@ -32,7 +32,7 @@ export const diningTags: { [key: string]: string } = {
   "TerraByte": "TerraByte (ISR)",
 };
 
-export interface ReviewData {
+interface ReviewData {
   rating: 'bad' | 'mid' | 'good';
 }
 
@@ -59,7 +59,7 @@ const isNowBetween = (startTime: string, endTime: string, currentTime: Date): bo
   return currentTime >= start && currentTime <= end;
 };
 
-export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading }) => {
+export const FoodItemCardBig: React.FC<FoodItemCardBigProps> = ({ foodItem, loading }) => {
   const [topImage, setTopImage] = useState<ImageData | null>(null);
   const [reviews, setReviews] = useState<ReviewData[]>([]);
   const [scorePercentage, setScorePercentage] = useState(0);
@@ -135,17 +135,17 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
     return (
       <div className="flex items-center">
         {reviews.length === 0 ? (
-          <FaFaceMehBlank className={`text-2xl text-gray-500`} />
+          <FaFaceMehBlank className="text-2xl text-gray-500" />
         ) : scorePercentage >= 70 ? (
-          <FaSmile className={`text-2xl text-green-500`} />
+          <FaSmile className="text-2xl text-green-500" />
         ) : scorePercentage >= 40 ? (
-          <FaMeh className={`text-2xl text-yellow-500`} />
+          <FaMeh className="text-2xl text-yellow-500" />
         ) : (
-          <FaFrown className={`text-2xl text-red-500`} />
+          <FaFrown className="text-2xl text-red-500" />
         )}
-        <div className={`ml-2`}>
-          <div className={`text-lg font-medium`}>{reviews.length === 0 ? "n/a" : `${scorePercentage}%`}</div>
-          <div className={`text-sm text-gray-500`}>({reviews.length})</div>
+        <div className="ml-2">
+          <div className="text-lg font-medium">{reviews.length === 0 ? "n/a" : `${scorePercentage}%`}</div>
+          <div className="text-sm text-gray-500">({reviews.length})</div>
         </div>
       </div>
     );
@@ -158,72 +158,69 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
     return (
       <>
         {Array.from(mealTypes).map((mealType) => (
-          <div key={mealType} className={`badge badge-sm badge-secondary mr-1 mb-1`}>{mealType}</div>
+          <div key={mealType} className="badge badge-secondary mr-1 mb-1">{mealType}</div>
         ))}
         {Array.from(diningHalls).map((diningHall) => (
-          <div key={diningHall} className={`badge badge-sm badge-primary mr-1 mb-1`}>{diningHall}</div>
+          <div key={diningHall} className="badge badge-primary mr-1 mb-1">{diningHall}</div>
         ))}
         {(!foodItem.mealEntries || foodItem.mealEntries.length === 0) && 
-          <div className={`badge badge-sm badge-error mr-1 mb-1`}>Not Available</div>
+          <div className="badge badge-error mr-1 mb-1">Not Available</div>
         }
+        {isServingNow && <div className="badge badge-success mr-1 mb-1">Now</div>}
+        {!isServingNow && isServingLater && <div className="badge badge-warning mr-1 mb-1">Later</div>}
       </>
     );
   };
 
   return (
     <Link href={`/food/${foodItem.id}`}>
-      <div className="card bg-base-100 shadow-xl cursor-pointer overflow-hidden
-                      flex flex-row h-24 mb-2 
-                      md:flex-col md:w-80 md:h-80 md:mb-4">
-        <figure className="w-24 h-full md:w-full md:h-32 bg-gray-100">
+      <div className="card bg-base-100 w-96 shadow-xl">
+        <figure className={`${loading || !imageLoaded ? 'bg-gray-200 animate-pulse' : ''}`}>
           {!loading && imageLoaded && topImage ? (
-            <img src={topImage.url} alt={foodItem.name} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-gray-500 text-xs md:text-sm">No Image</span>
+            <img src={topImage.url} alt={foodItem.name} className="w-full h-48 object-cover" />
+          ) : !loading && imageLoaded ? (
+            <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+              <span className="text-gray-500">No Image</span>
             </div>
-          )}
+          ) : null}
         </figure>
-        <div className="card-body p-2 flex flex-col justify-between flex-grow md:p-3 md:h-48">
-          <div>
-            <div className="flex justify-between items-start mb-1">
-              <h2 className="card-title text-xs font-bold truncate w-3/4 md:text-sm">
-                {loading ? <div className="bg-gray-200 animate-pulse h-4 w-full"></div> : foodItem.name}
-              </h2>
-              <div className={`${loading ? 'bg-gray-200 animate-pulse w-6 h-6 md:w-8 md:h-8 rounded-full' : ''}`}>
-                {!loading && renderRating()}
-              </div>
-            </div>
-            <div className="h-4 md:h-6">
-              {!loading && (
-                <PreferenceIcons
-                  preferences={foodItem.preferences}
-                  allergens={foodItem.allergens}
-                />
-              )}
-            </div>
-          </div>
-          <div className="text-xs md:text-sm">
-            {loading ? (
-              <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
-            ) : (
-              <span>
-                {foodItem.calories} Cal | {foodItem.protein}g Protein | {foodItem.totalCarbohydrates}g Carbs | {foodItem.totalFat}g Fat
-              </span>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-1">
-            {loading ? (
-              [1, 2].map((i) => (
-                <div key={i} className="h-4 bg-gray-200 rounded w-10 animate-pulse"></div>
+        <div className="card-body">
+          <h2 className={`card-title ${loading || !dataLoaded ? 'bg-gray-200 animate-pulse h-8 w-3/4' : ''}`}>
+            {!loading && dataLoaded ? foodItem.name : ''}
+            {isServingNow && <div className="badge badge-secondary">NOW</div>}
+          </h2>
+          {!loading && dataLoaded && (
+            <p className="text-sm">
+              {foodItem.calories} Cal | {foodItem.protein}g Protein | {foodItem.totalCarbohydrates}g Carbs | {foodItem.totalFat}g Fat
+            </p>
+          )}
+          <div className="card-actions justify-end">
+            {loading || !dataLoaded ? (
+              [1, 2, 3].map((i) => (
+                <div key={i} className="h-6 bg-gray-200 rounded w-20 animate-pulse"></div>
               ))
             ) : (
               <>
-                {renderBadges()}
-                {isServingNow && <div className="badge badge-xs md:badge-sm badge-success">Now</div>}
-                {!isServingNow && isServingLater && <div className="badge badge-xs md:badge-sm badge-warning">Later</div>}
+                {Array.from(new Set(foodItem.mealEntries?.map((entry: any) => entry.mealType) || [])).map((mealType) => (
+                  <div key={mealType} className="badge badge-outline">{mealType}</div>
+                ))}
+                {Array.from(new Set(foodItem.mealEntries?.map((entry: any) => diningTags[entry.diningHall] || entry.diningHall) || [])).map((diningHall) => (
+                  <div key={diningHall} className="badge badge-outline">{diningHall}</div>
+                ))}
               </>
             )}
+          </div>
+          {!loading && dataLoaded && (
+            <div className="mt-2">
+              <PreferenceIcons
+                preferences={foodItem.preferences}
+                allergens={foodItem.allergens}
+              />
+            </div>
+          )}
+          <div className="card-actions justify-between items-center mt-4">
+            {!loading && dataLoaded && renderRating()}
+            <button className="btn btn-primary btn-sm">View Details</button>
           </div>
         </div>
       </div>

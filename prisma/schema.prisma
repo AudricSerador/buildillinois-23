@@ -28,9 +28,7 @@ model Review {
   createdAt DateTime @default(now())
   userId    String
   foodId    String
-  rating    Int
-  location  String
-  meal      String
+  rating    String
   text      String?
   likes     Int      @default(0)
 

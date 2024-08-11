@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
-import Select from "react-select";
 import { useAuth } from "@/components/layout/auth.service";
 import { toast } from "react-toastify";
 import LoadingSpinner from "@/components/loading_spinner";
-import { FaInfoCircle, FaThumbsUp } from "react-icons/fa";
+import { FaInfoCircle, FaThumbsUp, FaFrown, FaMeh, FaSmile, } from "react-icons/fa";
+import { FaFaceMehBlank } from "react-icons/fa6";
 import { MdPerson } from "react-icons/md";
 import * as timeago from "timeago.js";
 
@@ -11,10 +11,8 @@ interface Review {
   id: number;
   userId: string;
   foodId: string;
-  rating: number;
+  rating: 'bad' | 'mid' | 'good';
   text?: string;
-  location: string;
-  meal: string;
   createdAt: string;
   likes: number;
   userName?: string;
@@ -22,56 +20,10 @@ interface Review {
 
 interface ReviewSectionProps {
   foodId: string;
-  mealEntries: any;
 }
 
-export const diningTags: { [key: string]: string } = {
-  "Ikenberry Dining Center (Ike)": "Ikenberry",
-  "Illinois Street Dining Center (ISR)": "ISR",
-  "Pennsylvania Avenue Dining Hall (PAR)": "PAR",
-  "Lincoln Avenue Dining Hall (Allen)": "Allen",
-  "Field of Greens (LAR)": "LAR",
-  "InfiniTEA": "InfiniTEA",
-  "Urbana South Market": "South Market (PAR)",
-  "57 North": "57 North (Ike)",
-  "TerraByte": "TerraByte (ISR)",
-};
-
 const MAX_REVIEW_LENGTH = 200;
-const REVIEWS_PER_PAGE = 10;
-
-const getValidDiningHalls = (mealEntries: any) => {
-  if (!mealEntries || mealEntries.length === 0) {
-    return [];
-  }
-
-  const validDiningHalls = new Set();
-  mealEntries.forEach((entry: any) => {
-    validDiningHalls.add(entry.diningHall);
-  });
-  return Array.from(validDiningHalls).map((hall) => ({
-    value: hall,
-    label: hall,
-  }));
-};
-
-const getAvailableMeals = (mealEntries: any, selectedDiningHall: string) => {
-  if (!selectedDiningHall || !mealEntries || mealEntries.length === 0) {
-    return [];
-  }
-
-  const availableMeals = new Set();
-  mealEntries
-    .filter((entry: any) => entry.diningHall === selectedDiningHall)
-    .forEach((entry: any) => {
-      availableMeals.add(entry.mealType);
-    });
-
-  return Array.from(availableMeals).map((meal) => ({
-    value: meal,
-    label: meal,
-  }));
-};
+const REVIEWS_PER_PAGE = 5;
 
 const fetchUserName = async (userId: string) => {
   const res = await fetch(`/api/user/get_user?id=${userId}`);
@@ -79,18 +31,15 @@ const fetchUserName = async (userId: string) => {
   return data.success ? data.data.name : "Unknown";
 };
 
-const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId, mealEntries }) => {
+const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
   const { user } = useAuth();
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [rating, setRating] = useState<number | null>(null);
+  const [rating, setRating] = useState<'bad' | 'mid' | 'good' | null>(null);
   const [text, setText] = useState("");
-  const [location, setLocation] = useState(null);
-  const [meal, setMeal] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-
-  const validDiningHalls = getValidDiningHalls(mealEntries);
-  const availableMeals = getAvailableMeals(mealEntries, location?.value);
+  const [sortBy, setSortBy] = useState<'likes' | 'recent'>('likes');
+  const [filterRating, setFilterRating] = useState<'all' | 'bad' | 'mid' | 'good'>('all');
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -124,14 +73,12 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId, mealEntries }) =>
 
     const existingReview = reviews.find(
       (review) =>
-        review.userId === user.id &&
-        review.location === location?.value &&
-        review.meal === meal?.value &&
+        review.userId !== user.id &&
         review.createdAt.split('T')[0] === today
     );
 
     if (existingReview) {
-      toast.error("You have already submitted a review for this meal, dining hall, and day.");
+      toast.error("You have already submitted a review for this food item today.");
       return;
     }
 
@@ -145,8 +92,6 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId, mealEntries }) =>
         foodId,
         rating,
         text,
-        location: location?.value,
-        meal: meal?.value,
       }),
     });
 
@@ -157,8 +102,6 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId, mealEntries }) =>
       setReviews([{ ...newReview.data, userName, likes: 0 }, ...reviews]);
       setRating(null);
       setText("");
-      setLocation(null);
-      setMeal(null);
     } else {
       toast.error("Failed to submit review.");
     }
@@ -207,26 +150,48 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId, mealEntries }) =>
 
   const calculateReviewStats = () => {
     const totalReviews = reviews.length;
-    const ratingCounts = [0, 0, 0, 0, 0];
-    let totalRating = 0;
+    const ratingCounts = { bad: 0, mid: 0, good: 0 };
+    let totalScore = 0;
 
     reviews.forEach((review) => {
-      ratingCounts[review.rating - 1]++;
-      totalRating += review.rating;
+      ratingCounts[review.rating]++;
+      totalScore += review.rating === 'bad' ? -1 : review.rating === 'mid' ? 1 : 2;
     });
 
-    const overallRating = totalReviews > 0 ? (totalRating / totalReviews).toFixed(1) : "0.0";
+    const overallScore = totalReviews > 0 ? Math.round(totalScore / totalReviews) : 0;
 
-    return { totalReviews, ratingCounts, overallRating };
+    return { totalReviews, ratingCounts, overallScore };
   };
 
-  const { totalReviews, ratingCounts, overallRating } = calculateReviewStats();
+  const { totalReviews, ratingCounts, overallScore } = calculateReviewStats();
 
-  const totalPages = Math.ceil(totalReviews / REVIEWS_PER_PAGE);
-  const currentReviews = reviews.slice(
+  const reviewsWithText = reviews.filter(review => review.text && review.text.trim() !== '');
+  
+  const sortedAndFilteredReviews = reviewsWithText
+    .filter(review => filterRating === 'all' || review.rating === filterRating)
+    .sort((a, b) => {
+      if (sortBy === 'likes') {
+        return b.likes - a.likes;
+      } else {
+        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      }
+    });
+
+  const totalPages = Math.ceil(sortedAndFilteredReviews.length / REVIEWS_PER_PAGE);
+  const currentReviews = sortedAndFilteredReviews.slice(
     (currentPage - 1) * REVIEWS_PER_PAGE,
     currentPage * REVIEWS_PER_PAGE
   );
+
+  const getScorePercentage = () => {
+    if (totalReviews === 0) return 0;
+    const totalScore = reviews.reduce((sum, review) => {
+      return sum + (review.rating === 'good' ? 100 : review.rating === 'mid' ? 50 : 0);
+    }, 0);
+    return Math.round(totalScore / totalReviews);
+  };
+
+  const scorePercentage = getScorePercentage();
 
   return (
     <div className="mt-8">
@@ -235,156 +200,158 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId, mealEntries }) =>
         <LoadingSpinner text="Loading reviews" />
       ) : (
         <div>
-          {user && validDiningHalls.length > 0 && (
-            <div className="alert alert-warning shadow-lg mb-4">
+          {user && (
+            <div className="alert alert-warning border mb-4">
               <FaInfoCircle size={20} />
               <span>
-                Your NetID will be recorded when you submit a review. Please be respectful and do not post inappropriate content.
+                Your NetID will be recorded when you submit a review.
               </span>
             </div>
           )}
-          <div className="mb-4">
-            {user && validDiningHalls.length > 0 ? (
-              <div className="mb-4 bg-base-200 p-4 rounded-lg shadow-lg">
-                <h3 className="text-xl font-custombold">Add Your Review</h3>
-                <div className="flex items-center mb-2">
-                  <label className="mr-2">Rating:</label>
-                  <div className="rating rating-lg">
-                    <input
-                      type="radio"
-                      name="rating-8"
-                      className="rating-hidden"
-                      checked={rating === null}
-                      onChange={() => setRating(null)}
-                    />
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <input
-                        key={star}
-                        type="radio"
-                        name="rating-8"
-                        className="mask mask-star-2 bg-orange-400"
-                        checked={rating === star}
-                        onChange={() => setRating(star)}
-                      />
-                    ))}
+          <div className="mb-4 flex flex-col lg:flex-row lg:space-x-4">
+            <div className="lg:w-1/2 mb-4 lg:mb-0 lg:h-full">
+              {user ? (
+                <div className="mb-4 bg-base-100 p-4 rounded-lg border shadow-md h-full">
+                  <h3 className="text-xl font-custombold">How was the food?</h3>
+                  <div className="flex items-center mb-2">
+                    <div className="flex space-x-4 justify-center items-center w-full">
+                      <button
+                        className={`btn btn-ghost ${rating === 'bad' ? 'btn-active' : ''}`}
+                        onClick={() => setRating('bad')}
+                      >
+                        <FaFrown className="text-4xl text-red-500" />
+                      </button>
+                      <button
+                        className={`btn btn-ghost ${rating === 'mid' ? 'btn-active' : ''}`}
+                        onClick={() => setRating('mid')}
+                      >
+                        <FaMeh className="text-4xl text-yellow-500" />
+                      </button>
+                      <button
+                        className={`btn btn-ghost ${rating === 'good' ? 'btn-active' : ''}`}
+                        onClick={() => setRating('good')}
+                      >
+                        <FaSmile className="text-4xl text-green-500" />
+                      </button>
+                    </div>
+                  </div>
+                  <textarea
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    placeholder="Share your thoughts (optional)"
+                    className="textarea textarea-bordered w-full textarea-base-200"
+                    maxLength={MAX_REVIEW_LENGTH}
+                  />
+                  <div className={`text-right ${text.length > MAX_REVIEW_LENGTH ? 'text-red-500' : ''}`}>
+                    {MAX_REVIEW_LENGTH - text.length} characters left
+                  </div>
+                  <button
+                    onClick={handleReviewSubmit}
+                    className="btn btn-secondary mt-2"
+                    disabled={
+                      text.length > MAX_REVIEW_LENGTH ||
+                      rating === null
+                    }
+                  >
+                    Submit Review
+                  </button>
+                </div>
+              ) : (
+                <div className="alert alert-info shadow-lg h-full">
+                  <FaInfoCircle size={20} />
+                  <span>
+                    You need to log in to submit a review.
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="lg:w-1/2 lg:h-full">
+              <div className="mb-4 p-4 border rounded-lg bg-base-100 shadow-md h-full">
+                <h3 className="text-xl font-custombold mb-4 lg:mb-6">Overall rating</h3>
+                <div className="flex items-center mb-4 lg:mb-9">
+                  <div className="text-5xl mr-4">
+                    {totalReviews === 0 ? (
+                      <FaFaceMehBlank className="text-gray-500" />
+                    ) : scorePercentage >= 70 ? (
+                      <FaSmile className="text-green-500" />
+                    ) : scorePercentage >= 40 ? (
+                      <FaMeh className="text-yellow-500" />
+                    ) : (
+                      <FaFrown className="text-red-500" />
+                    )}
+                  </div>
+                  <div>
+                    <div className="text-4xl font-custombold">{totalReviews === 0 ? "n/a" : `${scorePercentage}%`}</div>
+                    <div className="text-sm text-gray-500">({totalReviews} reviews)</div>
                   </div>
                 </div>
-                <div className="mb-2">
-                  <label className="mr-2">Dining Hall:</label>
-                  <Select
-                    options={validDiningHalls}
-                    value={location}
-                    onChange={(selectedOption) => {
-                      setLocation(selectedOption);
-                      setMeal(null); // Reset meal selection when dining hall changes
-                    }}
-                    placeholder="Select dining hall"
-                  />
-                </div>
-                {location && (
-                  <div className="mb-2">
-                    <label className="mr-2">Meal:</label>
-                    <Select
-                      options={availableMeals}
-                      value={meal}
-                      onChange={setMeal}
-                      placeholder="Select meal"
-                    />
+                {['good', 'mid', 'bad'].map((rating) => (
+                  <div key={rating} className="flex items-center mb-2">
+                    <span className="mr-2 capitalize w-10">{rating}</span>
+                    <div className="flex-1 h-2 bg-gray-200 rounded">
+                      <div
+                        className={`h-2 rounded ${rating === 'good' ? 'bg-green-400' : rating === 'mid' ? 'bg-yellow-400' : 'bg-red-400'}`}
+                        style={{ width: `${(ratingCounts[rating as keyof typeof ratingCounts] / totalReviews) * 100}%` }}
+                      ></div>
+                    </div>
                   </div>
-                )}
-                <textarea
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder="Write your review..."
-                  className="textarea textarea-bordered w-full"
-                  maxLength={MAX_REVIEW_LENGTH}
-                />
-                <div className={`text-right ${text.length > MAX_REVIEW_LENGTH ? 'text-red-500' : ''}`}>
-                  {MAX_REVIEW_LENGTH - text.length} characters left
-                </div>
-                <button
-                  onClick={handleReviewSubmit}
-                  className="btn btn-secondary mt-2"
-                  disabled={
-                    text.length > MAX_REVIEW_LENGTH ||
-                    !location ||
-                    !meal ||
-                    rating === null
-                  }
-                >
-                  Submit Review
-                </button>
-              </div>
-            ) : user ? (
-              <div className="alert alert-warning shadow-lg">
-                <FaInfoCircle size={20} />
-                <span>
-                  Food is not being served at any dining hall right now. Check back later to submit a review.
-                </span>
-              </div>
-            ) : (
-              <div className="alert alert-info shadow-lg">
-                <FaInfoCircle size={20} />
-                <span>
-                  You need to log in to submit a review.
-                </span>
-              </div>
-            )}
-          </div>
-          <div className="mb-4 p-4 border rounded-lg">
-            <h3 className="text-xl font-custombold mb-4">Overall rating</h3>
-            <div className="flex items-center mb-2">
-              <div className="rating mr-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <input
-                    key={star}
-                    type="radio"
-                    name={`overall-rating`}
-                    className="mask mask-star-2 bg-orange-400"
-                    checked={Math.round(parseFloat(overallRating)) === star}
-                    readOnly
-                  />
                 ))}
               </div>
-              <div className="text-xl font-custombold ml-2">{overallRating}</div>
-              <div className="text-sm text-gray-500 ml-2">({totalReviews} reviews)</div>
             </div>
-            {[5, 4, 3, 2, 1].map((star) => (
-              <div key={star} className="flex items-center">
-                <span className="mr-2">{star} stars</span>
-                <div className="flex-1 h-2 bg-gray-200 rounded">
-                  <div
-                    className="h-2 bg-orange-400 rounded"
-                    style={{ width: `${(ratingCounts[star - 1] / totalReviews) * 100}%` }}
-                  ></div>
-                </div>
-                <span className="ml-2">{ratingCounts[star - 1]}</span>
-              </div>
-            ))}
+          </div>
+          <div className="mb-4 flex justify-between items-center">
+            <div className="btn-group">
+              <button
+                className={`btn btn-sm ${sortBy === 'likes' ? 'btn-active' : ''}`}
+                onClick={() => setSortBy('likes')}
+              >
+                Most Likes
+              </button>
+              <button
+                className={`btn btn-sm ${sortBy === 'recent' ? 'btn-active' : ''}`}
+                onClick={() => setSortBy('recent')}
+              >
+                Most Recent
+              </button>
+            </div>
+            <div className="btn-group">
+              <button
+                className={`btn btn-sm ${filterRating === 'all' ? 'btn-active' : ''}`}
+                onClick={() => setFilterRating('all')}
+              >
+                All
+              </button>
+              <button
+                className={`btn btn-sm ${filterRating === 'bad' ? 'btn-active' : ''}`}
+                onClick={() => setFilterRating('bad')}
+              >
+                Bad
+              </button>
+              <button
+                className={`btn btn-sm ${filterRating === 'mid' ? 'btn-active' : ''}`}
+                onClick={() => setFilterRating('mid')}
+              >
+                Mid
+              </button>
+              <button
+                className={`btn btn-sm ${filterRating === 'good' ? 'btn-active' : ''}`}
+                onClick={() => setFilterRating('good')}
+              >
+                Good
+              </button>
+            </div>
           </div>
           {currentReviews && currentReviews.length > 0 ? (
             currentReviews.map((review) => (
-              <div key={review.id} className="mb-4 p-4 border rounded">
+              <div key={review.id} className="mb-2 p-4 border bg-base-100">
                 <div className="flex items-center mb-2">
                   <MdPerson size={24} className="mr-2" />
                   <p className="font-bold">{review.userName}</p>
                 </div>
                 <div className="flex items-center mb-2">
-                  <div className="rating mr-2">
-                    <input type="radio" name={`rating-${review.id}`} className="rating-hidden" checked={review.rating === null} readOnly />
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <input
-                        key={star}
-                        type="radio"
-                        name={`rating-${review.id}`}
-                        className="mask mask-star-2 bg-orange-400"
-                        checked={review.rating === star}
-                        readOnly
-                      />
-                    ))}
+                  <div className={`badge ${review.rating === 'good' ? 'badge-success' : review.rating === 'mid' ? 'badge-warning' : 'badge-error'} mr-2`}>
+                    {review.rating}
                   </div>
-                  <div className="badge badge-primary mr-2">{diningTags[review.location]}</div>
-                  <div className="badge badge-secondary mr-2">{review.meal}</div>
                   <div className="text-sm text-gray-500">
                     {timeago.format(new Date(review.createdAt))}
                   </div>
@@ -402,15 +369,15 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId, mealEntries }) =>
               </div>
             ))
           ) : (
-            <p>No reviews yet. Be the first to add one!</p>
+            <p>No reviews with text yet. Be the first to add one!</p>
           )}
           {totalPages > 1 && (
             <div className="flex justify-center mt-4">
-              <div className="btn-group">
+              <div className="join">
                 {Array.from({ length: totalPages }, (_, i) => (
                   <button
                     key={i + 1}
-                    className={`btn ${currentPage === i + 1 ? "btn-active" : ""}`}
+                    className={`join-item btn ${currentPage === i + 1 ? "btn-active" : ""}`}
                     onClick={() => setCurrentPage(i + 1)}
                   >
                     {i + 1}

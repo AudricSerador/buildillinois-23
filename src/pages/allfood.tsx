@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { FoodItemCard } from "@/components/food_card_display";
 import { useRouter } from "next/router";
-import LoadingSpinner from "../components/loading_spinner";
 import { Filters } from "../components/allfood/filters";
 import { IconLegend } from "@/components/icon_legend";
 
@@ -159,11 +158,11 @@ export default function AllFood(): JSX.Element {
         />
       </div>
 
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center mb-4">
         <p className="text-4xl font-custombold mt-4">All Food ({foodCount})</p>
         <input
           type="text"
-          className="w-48 md:w-64 lg:w-96 xl:w-128 sm:w-auto ml-auto mt-4 block bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          className="input input-bordered w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl ml-auto mt-4"
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
@@ -172,36 +171,34 @@ export default function AllFood(): JSX.Element {
           placeholder="Search food..."
         />
       </div>
-      <div
-        style={{
-          paddingBottom: "1rem",
-          borderBottom: "4px solid black",
-          marginBottom: "1rem",
-        }}
-      ></div>
       {isLoading ? (
-        <LoadingSpinner text="Loading food data" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+          {[...Array(10)].map((_, index) => (
+            <FoodItemCard key={index} foodItem={{} as any} loading={true} />
+          ))}
+        </div>
       ) : error ? (
         <p className="font-custom text-center my-6">
           Error loading dining hall data: {error}
         </p>
       ) : (
         <>
-          <ul>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {food.length > 0 ? (
               food.map((foodItem: any) => (
                 <FoodItemCard
                   key={foodItem.id}
                   foodItem={foodItem}
+                  loading={false}
                 />
               ))
             ) : (
-              <p className="font-custom text-center my-6">
+              <p className="font-custom text-center my-6 col-span-full">
                 No results found. Please try again with a different filter
                 query.
               </p>
             )}
-          </ul>
+          </div>
           <div className="flex items-center justify-center space-x-2 mt-4 mb-8">
             <button
               onClick={() => handlePageChange(pageNumber - 1)}

@@ -55,15 +55,46 @@ def generate_recommendations(user_id):
     df_food['nutritional_score'] = calculate_nutritional_score(df_food, user)
     df_food['location_score'] = calculate_location_score(df_food, user)
     
-    # Calculate final score (you can adjust weights as needed)
-    df_food['final_score'] = (
-        df_food['preference_score'] * 0.4 + 
-        df_food['nutritional_score'] * 0.4 + 
-        df_food['location_score'] * 0.2
-    )
+    # Calculate final score with adjusted weights based on user's goal
+    if 'goal' in user and user['goal']:
+        if user['goal'] == 'lose_weight':
+            df_food['final_score'] = (
+                df_food['preference_score'] * 0.3 + 
+                df_food['nutritional_score'] * 0.5 + 
+                df_food['location_score'] * 0.2
+            )
+            df_food = df_food.sort_values(['final_score', 'calories'], ascending=[False, True])
+        elif user['goal'] == 'bulk':
+            df_food['final_score'] = (
+                df_food['preference_score'] * 0.2 + 
+                df_food['nutritional_score'] * 0.6 + 
+                df_food['location_score'] * 0.2
+            )
+            df_food = df_food.sort_values(['final_score', 'protein', 'calories'], ascending=[False, False, True])
+        elif user['goal'] == 'eat_healthy':
+            df_food['final_score'] = (
+                df_food['preference_score'] * 0.3 + 
+                df_food['nutritional_score'] * 0.5 + 
+                df_food['location_score'] * 0.2
+            )
+            df_food = df_food.sort_values(['final_score', 'nutritional_score'], ascending=[False, False])
+        else:
+            df_food['final_score'] = (
+                df_food['preference_score'] * 0.4 + 
+                df_food['nutritional_score'] * 0.4 + 
+                df_food['location_score'] * 0.2
+            )
+            df_food = df_food.sort_values('final_score', ascending=False)
+    else:
+        df_food['final_score'] = (
+            df_food['preference_score'] * 0.4 + 
+            df_food['nutritional_score'] * 0.4 + 
+            df_food['location_score'] * 0.2
+        )
+        df_food = df_food.sort_values('final_score', ascending=False)
     
-    # Sort by final score and get top 20 recommendations
-    top_recommendations = df_food.sort_values('final_score', ascending=False).head(20)
+    # Get top 20 recommendations
+    top_recommendations = df_food.head(20)
     top_food_ids = top_recommendations['id'].astype(str).tolist()
     recommendations_str = ",".join(top_food_ids)
     
@@ -81,7 +112,7 @@ def calculate_nutritional_score(df, user):
         if user['goal'] == 'lose_weight':
             score += (500 - df['calories']) / 500  # Lower calories are better
         elif user['goal'] == 'bulk':
-            score += df['protein'] / 50  # Higher protein is better
+            score += df['protein'] / 5  # Higher protein is better
         elif user['goal'] == 'eat_healthy':
             pass
         # Add more goals as needed
@@ -92,7 +123,6 @@ def calculate_location_score(df, user):
     if 'locations' in user and user['locations']:
         return df['diningFacility'].apply(lambda x: 1 if x in user['locations'] else 0 if x else 0)
     return pd.Series(1, index=df.index)  # If no location preference, all locations are equally good
-
 
 def lambda_handler(event, context):
     logger.info("Received event: " + json.dumps(event, indent=2))

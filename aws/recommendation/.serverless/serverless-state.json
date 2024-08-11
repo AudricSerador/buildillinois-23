@@ -178,7 +178,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/recommendation-service/dev/1721278622335-2024-07-18T04:57:02.335Z/recommendation-service.zip"
+                "S3Key": "serverless/recommendation-service/dev/1723343084814-2024-08-11T02:24:44.814Z/recommendation-service.zip"
               },
               "Handler": "lambda_function.lambda_handler",
               "Runtime": "python3.8",
@@ -202,14 +202,14 @@
               "GenerateRecommendationsLogGroup"
             ]
           },
-          "GenerateRecommendationsLambdaVersionDaT2BPpKnbZm3QfV1ETaA8Yl9aktJLkFrHk5chjDqg": {
+          "GenerateRecommendationsLambdaVersion5H0bvYBd8IKzuHGMoEUd480yoooIzWHaxd7ZDUpiDU": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "GenerateRecommendationsLambdaFunction"
               },
-              "CodeSha256": "I480HCSAZgxjh07GLmc/aThyzoU8fxzj1Yqg0A+YCxc="
+              "CodeSha256": "KN3gP0WKmIK8TTJkbA/dgUN4xbk49M+6RhlW1vWxjNM="
             }
           },
           "ApiGatewayRestApi": {
@@ -285,7 +285,7 @@
               "GenerateRecommendationsLambdaPermissionApiGateway"
             ]
           },
-          "ApiGatewayDeployment1721278586786": {
+          "ApiGatewayDeployment1723343052343": {
             "Type": "AWS::ApiGateway::Deployment",
             "Properties": {
               "RestApiId": {
@@ -347,7 +347,7 @@
           "GenerateRecommendationsLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "GenerateRecommendationsLambdaVersionDaT2BPpKnbZm3QfV1ETaA8Yl9aktJLkFrHk5chjDqg"
+              "Ref": "GenerateRecommendationsLambdaVersion5H0bvYBd8IKzuHGMoEUd480yoooIzWHaxd7ZDUpiDU"
             },
             "Export": {
               "Name": "sls-recommendation-service-dev-GenerateRecommendationsLambdaFunctionQualifiedArn"
@@ -492,7 +492,7 @@
         "timeout": 6,
         "runtime": "python3.8",
         "vpc": {},
-        "versionLogicalId": "GenerateRecommendationsLambdaVersionDaT2BPpKnbZm3QfV1ETaA8Yl9aktJLkFrHk5chjDqg"
+        "versionLogicalId": "GenerateRecommendationsLambdaVersion5H0bvYBd8IKzuHGMoEUd480yoooIzWHaxd7ZDUpiDU"
       }
     },
     "configValidationMode": "warn",
@@ -512,7 +512,7 @@
         ],
         "artifactsS3KeyDirname": "serverless/recommendation-service/dev/code-artifacts",
         "artifact": "C:\\Users\\theep\\Documents\\GitHub\\uiuc-dining-buddy\\aws\\recommendation\\.serverless\\recommendation-service.zip",
-        "artifactDirectoryName": "serverless/recommendation-service/dev/1721278622335-2024-07-18T04:57:02.335Z"
+        "artifactDirectoryName": "serverless/recommendation-service/dev/1723343084814-2024-08-11T02:24:44.814Z"
       },
       "plugins": {
         "$ref": "$[\"service\"][\"plugins\"]"
@@ -526,7 +526,7 @@
     "artifact": "C:\\Users\\theep\\Documents\\GitHub\\uiuc-dining-buddy\\aws\\recommendation\\.serverless\\recommendation-service.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/recommendation-service/dev/1721278622335-2024-07-18T04:57:02.335Z",
+    "artifactDirectoryName": "serverless/recommendation-service/dev/1723343084814-2024-08-11T02:24:44.814Z",
     "artifact": "recommendation-service.zip"
   }
 }

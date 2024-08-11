@@ -48,15 +48,46 @@ def generate_recommendations(user_id):
     df_food['nutritional_score'] = calculate_nutritional_score(df_food, user)
     df_food['location_score'] = calculate_location_score(df_food, user)
     
-    # Calculate final score (you can adjust weights as needed)
-    df_food['final_score'] = (
-        df_food['preference_score'] * 0.4 + 
-        df_food['nutritional_score'] * 0.4 + 
-        df_food['location_score'] * 0.2
-    )
+    # Calculate final score with adjusted weights based on user's goal
+    if 'goal' in user and user['goal']:
+        if user['goal'] == 'lose_weight':
+            df_food['final_score'] = (
+                df_food['preference_score'] * 0.3 + 
+                df_food['nutritional_score'] * 0.5 + 
+                df_food['location_score'] * 0.2
+            )
+            df_food = df_food.sort_values(['final_score', 'calories'], ascending=[False, True])
+        elif user['goal'] == 'bulk':
+            df_food['final_score'] = (
+                df_food['preference_score'] * 0.2 + 
+                df_food['nutritional_score'] * 0.6 + 
+                df_food['location_score'] * 0.2
+            )
+            df_food = df_food.sort_values(['final_score', 'protein', 'calories'], ascending=[False, False, True])
+        elif user['goal'] == 'eat_healthy':
+            df_food['final_score'] = (
+                df_food['preference_score'] * 0.3 + 
+                df_food['nutritional_score'] * 0.5 + 
+                df_food['location_score'] * 0.2
+            )
+            df_food = df_food.sort_values(['final_score', 'nutritional_score'], ascending=[False, False])
+        else:
+            df_food['final_score'] = (
+                df_food['preference_score'] * 0.4 + 
+                df_food['nutritional_score'] * 0.4 + 
+                df_food['location_score'] * 0.2
+            )
+            df_food = df_food.sort_values('final_score', ascending=False)
+    else:
+        df_food['final_score'] = (
+            df_food['preference_score'] * 0.4 + 
+            df_food['nutritional_score'] * 0.4 + 
+            df_food['location_score'] * 0.2
+        )
+        df_food = df_food.sort_values('final_score', ascending=False)
     
-    # Sort by final score and get top 20 recommendations
-    top_recommendations = df_food.sort_values('final_score', ascending=False).head(20)
+    # Get top 20 recommendations
+    top_recommendations = df_food.head(20)
     top_food_ids = top_recommendations['id'].astype(str).tolist()
     recommendations_str = ",".join(top_food_ids)
     

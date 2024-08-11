@@ -1,53 +1,45 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from 'next/image';
 
 export default function Home(): JSX.Element {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
+
   return (
-    <div className="relative h-screen flex flex-col items-stretch m-0 p-0 mb-[-25px]">
-      <Image
-        src="/images/dininghall.jpg"
-        alt="Dining Hall"
-        layout="fill"
-        objectFit="cover"
-        quality={100}
-      />
-      <div className="relative m-0 p-0 text-white flex-grow"
+    <div className="flex flex-col items-stretch">
+      <div
+        className="hero h-[60vh]"
         style={{
-          background: `linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7))`,
-        }}
-      >
-        <div className="flex justify-center items-start mt-20 text-center px-4 sm:px-0">
-          <p className="text-uiucorange font-custombold text-6xl">
-            Find your favorite dining
-            <br />
-            hall food in <i>seconds</i>.
-          </p>
-        </div>
-        <div className="mt-4 justify-center items-start text-center px-4 sm:px-0">
-          <div className="container mx-auto max-w-2xl">
-            <p className="font-custom text-xl">
+          backgroundImage: "url(/images/dininghall.jpg)",
+        }}>
+        <div className="hero-overlay bg-opacity-70 bg-black"></div>
+        <div className="hero-content text-neutral-content text-center">
+          <div className="max-w-2xl">
+            <h1 className={`mb-4 text-4xl sm:text-6xl font-custombold text-uiucorange transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              Find your favorite dining hall food in <i>seconds</i>.
+            </h1>
+            <p className={`mb-4 text-md sm:text-xl font-custom transition-all duration-700 ease-out delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               Tired of going to dining halls and finding nothing you like?
-              Annoyed at having to check the menus of every dining hall to find
-              something you want to eat? Find food that YOU want to eat with
-              IllinEats. Search for your favorite items across all UIUC
-              dining halls and get personalized recommendations based on your
-              dietary preferences.
+              Find food that YOU want to eat with IllinEats. Search across all UIUC
+              dining halls and get personalized recommendations.
             </p>
+            <div className={`flex justify-center mt-6 transition-all duration-700 ease-out delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+              <Link href="/login">
+                <button className="btn btn-accent font-custombold mr-4">
+                  Login with your NetID
+                </button>
+              </Link>
+              <button
+                className="btn btn-warning text-black font-custombold"
+                onClick={() => window.open('https://buymeacoffee.com/audricserador', '_blank', 'noopener,noreferrer')}
+              >
+                ☕ Support the project
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="flex justify-center mt-8 px-4 sm:px-0">
-          <Link href="/login">
-            <button className="bg-uiucblue text-white font-custombold py-2 px-4 rounded mr-4 transition duration-500 ease-in-out transform hover:scale-105">
-              Sign Up
-            </button>
-          </Link>
-          <button
-            className="bg-yellow-300 text-black font-custombold py-2 px-4 rounded mr-4 transition duration-500 ease-in-out transform hover:scale-105"
-            onClick={() => window.open('https://buymeacoffee.com/audricserador', '_blank', 'noopener,noreferrer')}
-          >
-            ☕ Buy me a Coffee
-          </button>
         </div>
       </div>
     </div>

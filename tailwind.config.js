@@ -20,6 +20,7 @@ module.exports = {
         'clouddark': '#E8E9EB',
         'clouddarker': '#DDDEDE',
         'clouddarkest': '#D2D2D2',
+        'background': '#F4F4F2',
       },
       boxShadow: {
         'glow': '0 0 10px 2px #F5821E',

@@ -96,7 +96,7 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, fo
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
-                    <div className="alert alert-warning text-sm shadow-lg mb-4">
+                    <div className="alert alert-warning text-sm border mb-4">
               <FaInfoCircle size={15} />
               <span>
                 Your NetID will be recorded. Please ensure that the image is appropriate and relevant to the food item.
