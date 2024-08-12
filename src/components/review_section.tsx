@@ -43,16 +43,27 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
 
   useEffect(() => {
     const fetchReviews = async () => {
-      const res = await fetch(`/api/review/get_review?foodId=${foodId}`);
-      const data = await res.json();
-      const reviewsWithUserNames = await Promise.all(
-        data.data.map(async (review: Review) => {
-          const userName = await fetchUserName(review.userId);
-          return { ...review, userName };
-        })
-      );
-      setReviews(reviewsWithUserNames);
-      setIsLoading(false);
+      try {
+        const res = await fetch(`/api/review/get_review?foodId=${foodId}`);
+        const data = await res.json();
+        if (data.success && Array.isArray(data.data)) {
+          const reviewsWithUserNames = await Promise.all(
+            data.data.map(async (review: Review) => {
+              const userName = await fetchUserName(review.userId);
+              return { ...review, userName };
+            })
+          );
+          setReviews(reviewsWithUserNames);
+        } else {
+          console.error("Failed to fetch reviews or invalid data format");
+          setReviews([]);
+        }
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+        setReviews([]);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchReviews();

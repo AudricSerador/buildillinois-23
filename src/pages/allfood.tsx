@@ -135,10 +135,10 @@ export default function AllFood(): JSX.Element {
   );
 
   return (
-    <div className="px-4 sm:px-8 md:px-16 lg:px-64 mt-4">
+    <div className="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 mt-4">
       <IconLegend />
       <p className="text-4xl font-custombold mt-4 mb-4">Filters</p>
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 font-custom">        
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 font-custom">        
       <Filters
           sortField={sortField}
           setSortField={setSortField}
@@ -158,11 +158,11 @@ export default function AllFood(): JSX.Element {
         />
       </div>
 
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
         <p className="text-4xl font-custombold mt-4">All Food ({foodCount})</p>
         <input
           type="text"
-          className="input input-bordered w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl ml-auto mt-4"
+          className="input input-bordered w-full sm:w-64 md:w-80 lg:w-96 mt-4 sm:mt-0"
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
@@ -172,9 +172,11 @@ export default function AllFood(): JSX.Element {
         />
       </div>
       {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-y-4 sm:gap-x-4">
           {[...Array(10)].map((_, index) => (
-            <FoodItemCard key={index} foodItem={{} as any} loading={true} />
+            <div key={index} className="flex">
+              <FoodItemCard foodItem={{} as any} loading={true} />
+            </div>
           ))}
         </div>
       ) : error ? (
@@ -186,11 +188,12 @@ export default function AllFood(): JSX.Element {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {food.length > 0 ? (
               food.map((foodItem: any) => (
-                <FoodItemCard
-                  key={foodItem.id}
-                  foodItem={foodItem}
-                  loading={false}
-                />
+                <div key={foodItem.id} className="flex">
+                  <FoodItemCard
+                    foodItem={foodItem}
+                    loading={false}
+                  />
+                </div>
               ))
             ) : (
               <p className="font-custom text-center my-6 col-span-full">

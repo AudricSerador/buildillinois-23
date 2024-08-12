@@ -171,20 +171,23 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
   };
 
   return (
-    <Link href={`/food/${foodItem.id}`}>
-      <div className="card bg-base-100 shadow-xl cursor-pointer overflow-hidden
-                      flex flex-row h-24 mb-2 
-                      md:flex-col md:w-80 md:h-80 md:mb-4">
-        <figure className="w-24 h-full md:w-full md:h-32 bg-gray-100">
+    <Link href={`/food/${foodItem.id}`} className="w-full">
+      <div className="card bg-base-100 border cursor-pointer overflow-hidden
+                      flex flex-row sm:flex-col h-full">
+        <figure className="w-1/3 sm:w-full h-32 sm:h-32 bg-gray-100 overflow-hidden">
           {!loading && imageLoaded && topImage ? (
-            <img src={topImage.url} alt={foodItem.name} className="w-full h-full object-cover" />
+            <img 
+              src={topImage.url} 
+              alt={foodItem.name} 
+              className="w-full h-full object-cover object-center"
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <span className="text-gray-500 text-xs md:text-sm">No Image</span>
+              <span className="text-gray-500 text-sm">No Image</span>
             </div>
           )}
         </figure>
-        <div className="card-body p-2 flex flex-col justify-between flex-grow md:p-3 md:h-48">
+        <div className="card-body p-3 flex flex-col justify-between flex-grow w-2/3 sm:w-full">
           <div>
             <div className="flex justify-between items-start mb-1">
               <h2 className="card-title text-xs font-bold truncate w-3/4 md:text-sm">
@@ -194,7 +197,7 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
                 {!loading && renderRating()}
               </div>
             </div>
-            <div className="h-4 md:h-6">
+            <div className="h-4 md:h-6 mb-1">
               {!loading && (
                 <PreferenceIcons
                   preferences={foodItem.preferences}
@@ -203,13 +206,16 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
               )}
             </div>
           </div>
-          <div className="text-xs md:text-sm">
+          <div className="text-[0.6rem] md:text-xs mb-1">
             {loading ? (
               <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
             ) : (
-              <span>
-                {foodItem.calories} Cal | {foodItem.protein}g Protein | {foodItem.totalCarbohydrates}g Carbs | {foodItem.totalFat}g Fat
-              </span>
+              <div className="flex flex-wrap gap-1">
+                <div className="badge badge-sm sm:badge-md badge-outline whitespace-nowrap">{foodItem.calories} Cal</div>
+                <div className="badge badge-sm sm:badge-md badge-outline whitespace-nowrap">{foodItem.protein}g Protein</div>
+                <div className="badge badge-sm sm:badge-md badge-outline whitespace-nowrap">{foodItem.totalCarbohydrates}g Carbs</div>
+                <div className="badge badge-sm sm:badge-md badge-outline whitespace-nowrap">{foodItem.totalFat}g Fat</div>
+              </div>
             )}
           </div>
           <div className="flex flex-wrap gap-1">
