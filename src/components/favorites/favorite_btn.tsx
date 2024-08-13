@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import FavOnClickModal from "./fav_onclick_modal";
 
 interface FavoriteBtnProps {
   userId: string;

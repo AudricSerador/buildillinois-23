@@ -9,7 +9,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const images = await prisma.FoodImage.findMany({
+    const images = await prisma.foodImage.findMany({
       where: {
         foodId,
       },

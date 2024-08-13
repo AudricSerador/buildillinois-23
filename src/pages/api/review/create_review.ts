@@ -10,14 +10,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     try {
-      const newReview = await prisma.Review.create({
+      const newReview = await prisma.review.create({
         data: {
           userId,
           foodId,
           rating,
           text,
-          location,
-          meal
         },
       });
 

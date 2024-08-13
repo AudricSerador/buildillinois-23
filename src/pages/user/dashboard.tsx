@@ -89,7 +89,7 @@ export default function Dashboard(): JSX.Element {
                         <div className="flex overflow-x-auto space-x-4 pb-4">
                             {recommendations.map((recommendation: FoodItem) => (
                                 <div key={recommendation.id} className="flex-none">
-                                    <FoodItemCard foodItem={recommendation} loading={false} horizontal={true} />
+                                    <FoodItemCard foodItem={recommendation} loading={false} />
                                 </div>
                             ))}
                         </div>

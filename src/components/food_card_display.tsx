@@ -175,7 +175,7 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
   return (
     <Link href={`/food/${foodItem.id}`} className="w-full">
       <Card className="overflow-hidden flex flex-row sm:flex-col h-full">
-        <div className="w-1/3 sm:w-full h-32 sm:h-32 bg-gray-100 overflow-hidden">
+        <div className="w-1/3 sm:w-full h-full sm:h-32 bg-gray-100 overflow-hidden">
           {!loading && imageLoaded && topImage ? (
             <img 
               src={topImage.url} 
@@ -192,7 +192,7 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
           <div>
             <CardHeader className="p-0 mb-1">
               <div className="flex justify-between items-start">
-                <CardTitle className="text-xs font-bold truncate w-3/4 md:text-sm">
+                <CardTitle className="text-sm font-bold truncate w-3/4 md:text-sm">
                   {loading ? <div className="bg-gray-200 animate-pulse h-4 w-full"></div> : foodItem.name}
                 </CardTitle>
                 <div className={`${loading ? 'bg-gray-200 animate-pulse w-6 h-6 md:w-8 md:h-8 rounded-full' : ''}`}>
@@ -200,7 +200,7 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
                 </div>
               </div>
             </CardHeader>
-            <div className="h-4 md:h-6 mb-1">
+            <div className="h-4 md:h-6 mb-4">
               {!loading && (
                 <PreferenceIcons
                   preferences={foodItem.preferences}
@@ -214,10 +214,10 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
               <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
             ) : (
               <div className="flex flex-wrap gap-1">
-                <Badge variant="outline" className="whitespace-nowrap">{foodItem.calories} Cal</Badge>
-                <Badge variant="outline" className="whitespace-nowrap">{foodItem.protein}g Protein</Badge>
-                <Badge variant="outline" className="whitespace-nowrap">{foodItem.totalCarbohydrates}g Carbs</Badge>
-                <Badge variant="outline" className="whitespace-nowrap">{foodItem.totalFat}g Fat</Badge>
+                <Badge variant="outline" className="whitespace-nowrap py-0 px-1 sm:py-0 sm:px-1">{foodItem.calories} Cal</Badge>
+                <Badge variant="outline" className="whitespace-nowrap py-0 px-1 sm:py-0 sm:px-1">{foodItem.protein}g Protein</Badge>
+                <Badge variant="outline" className="whitespace-nowrap py-0 px-1 sm:py-0 sm:px-1">{foodItem.totalCarbohydrates}g Carbs</Badge>
+                <Badge variant="outline" className="whitespace-nowrap py-0 px-1 sm:py-0 sm:px-1">{foodItem.totalFat}g Fat</Badge>
               </div>
             )}
           </div>

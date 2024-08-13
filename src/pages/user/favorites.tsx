@@ -31,7 +31,7 @@ function FavoritesPage() {
       </p>
       {favorites && favorites.length > 0 ? (
         favorites.map((favorite: { foodId: string; food: FoodItem }) => (
-          <FoodItemCard key={favorite.foodId} foodItem={favorite.food} />
+          <FoodItemCard key={favorite.foodId} foodItem={favorite.food} loading={false} />
         ))
       ) : (
         <p className="text-center text-lg">No favorites yet.</p>

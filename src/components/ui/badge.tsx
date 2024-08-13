@@ -9,16 +9,18 @@ const badgeVariants = cva(
     variants: {
       variant: {
         default:
-          "border-transparent bg-primary text-primary-foreground shadow",
+          "border-transparent bg-uiucblue text-primary-foreground shadow",
         secondary:
           "border-transparent bg-secondary text-secondary-foreground",
         destructive:
-          "border-transparent bg-destructive text-destructive-foreground shadow",
+          "border-transparent bg-red-500 text-destructive-foreground shadow",
         outline: "text-foreground",
         warning:
           "border-transparent bg-warning text-warning-foreground",
         success:
           "border-transparent bg-success text-success-foreground",
+        black:
+          "border-transparent bg-gray-800 text-white",
       },
     },
     defaultVariants: {

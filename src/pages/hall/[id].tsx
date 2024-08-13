@@ -2,7 +2,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { FoodItemCard } from "@/components/food_card_display";
 import { diningHallTimes } from "@/components/entries_display";
-import { IconLegend } from "@/components/icon_legend";
 import LoadingSpinner from "@/components/loading_spinner";
 import { GetServerSideProps } from "next";
 import prisma from "../../../lib/prisma";
@@ -134,9 +133,6 @@ export default function HallFoodPage({
   return (
     <div className="px-4 sm:px-8 font-custom md:px-16 lg:px-64 mt-4">
       <p className="text-4xl font-custombold mt-4 mb-4">{id}</p>
-      <div className="mb-4">
-        <IconLegend />
-      </div>
       <div className="bg-cloud p-2">
         <div className="flex items-center justify-center space-x-4 mb-4">
           <button
@@ -361,6 +357,7 @@ export default function HallFoodPage({
                           <FoodItemCard
                             key={foodItem.id}
                             foodItem={foodItem}
+                            loading={false}
                           />
                         ))}
                     </div>

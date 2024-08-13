@@ -10,7 +10,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     try {
-      const reviews = await prisma.Review.findMany({
+      const reviews = await prisma.review.findMany({
         where: {
           ...(userId ? { userId: userId as string } : {}),
           ...(foodId ? { foodId: foodId as string } : {}),

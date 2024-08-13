@@ -1,8 +1,12 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FoodItemCard } from "@/components/food_card_display";
 import { useRouter } from "next/router";
-import { Filters } from "../components/allfood/filters";
-import { IconLegend } from "@/components/icon_legend";
+import { FilterBar } from "@/components/FilterBar";
+import { useAtom } from 'jotai';
+import {
+  sortFieldAtom, sortOrderAtom, diningHallAtom, mealTypeAtom,
+  searchTermAtom, dateServedAtom, allergensAtom, preferencesAtom, datesAtom
+} from '@/atoms/filterAtoms';
 
 function debounce(fn: Function, delay: number) {
   let timer: NodeJS.Timeout;
@@ -20,18 +24,20 @@ export default function AllFood(): JSX.Element {
   const pageNumber = router.query.page
     ? parseInt(router.query.page as string)
     : 1;
-  const [sortField, setSortField] = useState("");
-  const [sortOrder, setSortOrder] = useState("");
-  const [diningHall, setDiningHall] = useState("");
-  const [mealType, setMealType] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [dateServed, setDateServed] = useState("");
-  const [allergens, setAllergens] = useState<string[]>([]);
-  const [preferences, setPreferences] = useState("");
+
+  const [sortField] = useAtom(sortFieldAtom);
+  const [sortOrder] = useAtom(sortOrderAtom);
+  const [diningHall] = useAtom(diningHallAtom);
+  const [mealType] = useAtom(mealTypeAtom);
+  const [searchTerm, setSearchTerm] = useAtom(searchTermAtom);
+  const [dateServed] = useAtom(dateServedAtom);
+  const [allergens] = useAtom(allergensAtom);
+  const [preferences] = useAtom(preferencesAtom);
+  const [dates, setDates] = useAtom(datesAtom);
+
   const [isLoading, setIsLoading] = useState(false);
   const [food, setFood] = useState([]);
   const [foodCount, setFoodCount] = useState(0);
-  const [dates, setDates] = useState<string[]>([]);
   const [error, setError] = useState(null);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
@@ -41,38 +47,6 @@ export default function AllFood(): JSX.Element {
     }, 500),
     [setDebouncedSearchTerm]
   );
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setSortField(localStorage.getItem("sortField") || "");
-      setSortOrder(localStorage.getItem("sortOrder") || "");
-      setDiningHall(localStorage.getItem("diningHall") || "");
-      setMealType(localStorage.getItem("mealType") || "");
-      setSearchTerm(localStorage.getItem("searchTerm") || "");
-      setDateServed(localStorage.getItem("dateServed") || "");
-      setPreferences(localStorage.getItem("preferences") || "");
-
-      const allergensFromLocalStorage = localStorage.getItem("allergens");
-      if (allergensFromLocalStorage) {
-        setAllergens(JSON.parse(allergensFromLocalStorage));
-      } else {
-        setAllergens([]);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("sortField", sortField);
-      localStorage.setItem("sortOrder", sortOrder);
-      localStorage.setItem("diningHall", diningHall);
-      localStorage.setItem("mealType", mealType);
-      localStorage.setItem("searchTerm", searchTerm);
-      localStorage.setItem("dateServed", dateServed);
-      localStorage.setItem("preferences", preferences);
-      localStorage.setItem("allergens", JSON.stringify(allergens));
-    }
-  }, [sortField, sortOrder, diningHall, mealType, searchTerm, dateServed, preferences, allergens]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -136,28 +110,7 @@ export default function AllFood(): JSX.Element {
 
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 mt-4">
-      <IconLegend />
-      <p className="text-4xl font-custombold mt-4 mb-4">Filters</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 font-custom">        
-      <Filters
-          sortField={sortField}
-          setSortField={setSortField}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-          selectedAllergens={allergens}
-          setSelectedAllergens={setAllergens}
-          diningHall={diningHall}
-          setDiningHall={setDiningHall}
-          mealType={mealType}
-          setMealType={setMealType}
-          selectedPreference={preferences}
-          setSelectedPreference={setPreferences}
-          dateServed={dateServed}
-          setDateServed={setDateServed}
-          dates={dates}
-        />
-      </div>
-
+      <FilterBar />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
         <p className="text-4xl font-custombold mt-4">All Food ({foodCount})</p>
         <input

@@ -11,7 +11,6 @@ interface UploadImageModalProps {
   foodId: string;
   userId: string;
 }
-
 const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, foodId, userId }) => {
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -54,7 +53,11 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, fo
             toast.error('Failed to upload image.');
           }
         } catch (error) {
-          toast.error('Error uploading image: ' + error.message);
+          if (error instanceof Error) {
+            toast.error('Error uploading image: ' + error.message);
+          } else {
+            toast.error('An unknown error occurred while uploading the image.');
+          }
         }
       },
       error(err) {

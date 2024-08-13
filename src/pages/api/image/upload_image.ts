@@ -55,7 +55,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const { data, error } = await supabase.storage
         .from('food-images')
         .upload(fileName, fileBuffer, {
-          contentType: file.mimetype,
+          contentType: file.mimetype ?? 'application/octet-stream',
         });
 
       if (error) {

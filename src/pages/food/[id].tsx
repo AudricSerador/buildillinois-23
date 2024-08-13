@@ -127,13 +127,13 @@ export default function FoodItemPage() {
           )}
         </div>
       </div>
-      {foodItem && <ReviewSection foodId={foodItem.id} mealEntries={foodItem.mealEntries} />}
+      {foodItem && <ReviewSection foodId={foodItem.id} />}
       {foodItem && <ImageCarousel foodId={foodItem.id} />}
       {user && (
         <UploadImageModal
           isOpen={showUploadModal}
           onClose={() => setShowUploadModal(false)}
-          foodId={foodItem.id}
+          foodId={foodItem?.id ?? ''}
           userId={user.id}
         />
       )}
