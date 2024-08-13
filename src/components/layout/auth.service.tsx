@@ -81,9 +81,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser({ ...new_user.data });
             sessionStorage.setItem('user', JSON.stringify(new_user.data));
             console.log('User signed in and session stored in session storage.');
-            if (router.pathname === '/') {
-              router.push("/user/dashboard");
-            }
           } else {
             const errorData = await createUserResponse.json();
             console.error(errorData.error);
@@ -95,9 +92,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.log('User session restored from server.');
           if (res.data.isNew) {
             router.push("/user/onboarding");
-          } else if (router.pathname === '/') {
-            generateRecommendations(res.data.id);
-            router.push("/user/dashboard");
           }
         }
       } else {

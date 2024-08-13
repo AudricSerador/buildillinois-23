@@ -3,13 +3,14 @@
 const defaultTheme = require('tailwindcss/defaultTheme');
 
 module.exports = {
-  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}",],
+  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
       fontFamily: {
-        'custom': ['Source Sans Pro', ...defaultTheme.fontFamily.sans],
-        'custombold': ['Source Sans Pro Bold', ...defaultTheme.fontFamily.sans],
-        'customlight': ['Source Sans Pro Light', ...defaultTheme.fontFamily.sans],
+        'custom': ['Source Sans Pro', 'sans-serif'],
+        'custombold': ['Source Sans Pro Bold', 'sans-serif'],
+        'customlight': ['Source Sans Pro Light', 'sans-serif'],
+        'sans': ['Source Sans Pro', 'sans-serif'],
       },
       colors: {
         'uiucblue': '#13294B',
@@ -20,7 +21,47 @@ module.exports = {
         'clouddark': '#E8E9EB',
         'clouddarker': '#DDDEDE',
         'clouddarkest': '#D2D2D2',
-        'background': '#F4F4F2',
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "#ff5724",
+          foreground: "#ffffff",
+        },
+        muted: {
+          DEFAULT: "#C8C6C7",
+          foreground: "#ffffff",
+        },
+        accent: {
+          DEFAULT: "#1D58A7",
+          foreground: "#ffffff",
+        },
+        popover: {
+          DEFAULT: "#F8FAFC",
+          foreground: "#000000",
+        },
+        card: {
+          DEFAULT: "#F8FAFC",
+          foreground: "#000000",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+        },
       },
       boxShadow: {
         'glow': '0 0 10px 2px #F5821E',
@@ -30,6 +71,7 @@ module.exports = {
   plugins: [
     require('daisyui'),
     require('@tailwindcss/typography'),
+    require("tailwindcss-animate"),
   ],
   daisyui: {
     themes: [
@@ -76,4 +118,3 @@ module.exports = {
     ],
   },
 }
-

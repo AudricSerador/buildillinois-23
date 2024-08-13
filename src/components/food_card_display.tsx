@@ -5,6 +5,8 @@ import { FoodItem } from "@/pages/food/[id]";
 import { FaSmile, FaMeh, FaFrown } from "react-icons/fa";
 import { FaFaceMehBlank } from "react-icons/fa6";
 import { diningHallTimes } from "./entries_display";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface FoodItemCardProps {
   foodItem: FoodItem;
@@ -158,13 +160,13 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
     return (
       <>
         {Array.from(mealTypes).map((mealType) => (
-          <div key={mealType} className={`badge badge-sm badge-secondary mr-1 mb-1`}>{mealType}</div>
+          <Badge key={mealType} variant="secondary" className="mr-1 mb-1">{mealType}</Badge>
         ))}
         {Array.from(diningHalls).map((diningHall) => (
-          <div key={diningHall} className={`badge badge-sm badge-primary mr-1 mb-1`}>{diningHall}</div>
+          <Badge key={diningHall} variant="default" className="mr-1 mb-1">{diningHall}</Badge>
         ))}
         {(!foodItem.mealEntries || foodItem.mealEntries.length === 0) && 
-          <div className={`badge badge-sm badge-error mr-1 mb-1`}>Not Available</div>
+          <Badge variant="destructive" className="mr-1 mb-1">Not Available</Badge>
         }
       </>
     );
@@ -172,9 +174,8 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
 
   return (
     <Link href={`/food/${foodItem.id}`} className="w-full">
-      <div className="card bg-base-100 border cursor-pointer overflow-hidden
-                      flex flex-row sm:flex-col h-full">
-        <figure className="w-1/3 sm:w-full h-32 sm:h-32 bg-gray-100 overflow-hidden">
+      <Card className="overflow-hidden flex flex-row sm:flex-col h-full">
+        <div className="w-1/3 sm:w-full h-32 sm:h-32 bg-gray-100 overflow-hidden">
           {!loading && imageLoaded && topImage ? (
             <img 
               src={topImage.url} 
@@ -186,17 +187,19 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
               <span className="text-gray-500 text-sm">No Image</span>
             </div>
           )}
-        </figure>
-        <div className="card-body p-3 flex flex-col justify-between flex-grow w-2/3 sm:w-full">
+        </div>
+        <CardContent className="p-3 flex flex-col justify-between flex-grow w-2/3 sm:w-full">
           <div>
-            <div className="flex justify-between items-start mb-1">
-              <h2 className="card-title text-xs font-bold truncate w-3/4 md:text-sm">
-                {loading ? <div className="bg-gray-200 animate-pulse h-4 w-full"></div> : foodItem.name}
-              </h2>
-              <div className={`${loading ? 'bg-gray-200 animate-pulse w-6 h-6 md:w-8 md:h-8 rounded-full' : ''}`}>
-                {!loading && renderRating()}
+            <CardHeader className="p-0 mb-1">
+              <div className="flex justify-between items-start">
+                <CardTitle className="text-xs font-bold truncate w-3/4 md:text-sm">
+                  {loading ? <div className="bg-gray-200 animate-pulse h-4 w-full"></div> : foodItem.name}
+                </CardTitle>
+                <div className={`${loading ? 'bg-gray-200 animate-pulse w-6 h-6 md:w-8 md:h-8 rounded-full' : ''}`}>
+                  {!loading && renderRating()}
+                </div>
               </div>
-            </div>
+            </CardHeader>
             <div className="h-4 md:h-6 mb-1">
               {!loading && (
                 <PreferenceIcons
@@ -211,10 +214,10 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
               <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
             ) : (
               <div className="flex flex-wrap gap-1">
-                <div className="badge badge-sm sm:badge-md badge-outline whitespace-nowrap">{foodItem.calories} Cal</div>
-                <div className="badge badge-sm sm:badge-md badge-outline whitespace-nowrap">{foodItem.protein}g Protein</div>
-                <div className="badge badge-sm sm:badge-md badge-outline whitespace-nowrap">{foodItem.totalCarbohydrates}g Carbs</div>
-                <div className="badge badge-sm sm:badge-md badge-outline whitespace-nowrap">{foodItem.totalFat}g Fat</div>
+                <Badge variant="outline" className="whitespace-nowrap">{foodItem.calories} Cal</Badge>
+                <Badge variant="outline" className="whitespace-nowrap">{foodItem.protein}g Protein</Badge>
+                <Badge variant="outline" className="whitespace-nowrap">{foodItem.totalCarbohydrates}g Carbs</Badge>
+                <Badge variant="outline" className="whitespace-nowrap">{foodItem.totalFat}g Fat</Badge>
               </div>
             )}
           </div>
@@ -226,13 +229,13 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
             ) : (
               <>
                 {renderBadges()}
-                {isServingNow && <div className="badge badge-xs md:badge-sm badge-success">Now</div>}
-                {!isServingNow && isServingLater && <div className="badge badge-xs md:badge-sm badge-warning">Later</div>}
+                {isServingNow && <Badge variant="success">Now</Badge>}
+                {!isServingNow && isServingLater && <Badge variant="warning">Later</Badge>}
               </>
             )}
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </Link>
   );
 };

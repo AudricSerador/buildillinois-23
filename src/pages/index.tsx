@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/components/layout/auth.service";
 
 export default function Home(): JSX.Element {
   const [isVisible, setIsVisible] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     setIsVisible(true);
@@ -11,7 +13,7 @@ export default function Home(): JSX.Element {
   return (
     <div className="flex flex-col items-stretch">
       <div
-        className="hero h-[60vh]"
+        className="hero h-[40vh]"
         style={{
           backgroundImage: "url(/images/dininghall.jpg)",
         }}>
@@ -27,11 +29,13 @@ export default function Home(): JSX.Element {
               dining halls and get personalized recommendations.
             </p>
             <div className={`flex justify-center mt-6 transition-all duration-700 ease-out delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <Link href="/login">
-                <button className="btn btn-accent font-custombold mr-4">
-                  Login with your NetID
-                </button>
-              </Link>
+              {!user && (
+                <Link href="/login">
+                  <button className="btn btn-accent font-custombold mr-4">
+                    Login with your NetID
+                  </button>
+                </Link>
+              )}
               <button
                 className="btn btn-warning text-black font-custombold"
                 onClick={() => window.open('https://buymeacoffee.com/audricserador', '_blank', 'noopener,noreferrer')}
