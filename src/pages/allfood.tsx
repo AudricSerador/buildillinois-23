@@ -4,8 +4,8 @@ import { useRouter } from "next/router";
 import { FilterBar } from "@/components/FilterBar";
 import { useAtom } from 'jotai';
 import {
-  sortFieldAtom, sortOrderAtom, diningHallAtom, mealTypeAtom,
-  searchTermAtom, dateServedAtom, allergensAtom, preferencesAtom, datesAtom
+  sortFieldsAtom, diningHallAtom, mealTypeAtom,
+  searchTermAtom, dateServedAtom, allergensAtom, preferencesAtom, datesAtom, servingAtom
 } from '@/atoms/filterAtoms';
 
 function debounce(fn: Function, delay: number) {
@@ -25,8 +25,7 @@ export default function AllFood(): JSX.Element {
     ? parseInt(router.query.page as string)
     : 1;
 
-  const [sortField] = useAtom(sortFieldAtom);
-  const [sortOrder] = useAtom(sortOrderAtom);
+  const [sortFields] = useAtom(sortFieldsAtom);
   const [diningHall] = useAtom(diningHallAtom);
   const [mealType] = useAtom(mealTypeAtom);
   const [searchTerm, setSearchTerm] = useAtom(searchTermAtom);
@@ -34,6 +33,8 @@ export default function AllFood(): JSX.Element {
   const [allergens] = useAtom(allergensAtom);
   const [preferences] = useAtom(preferencesAtom);
   const [dates, setDates] = useAtom(datesAtom);
+  const [serving] = useAtom(servingAtom);
+  const [futureDates, setFutureDates] = useState([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [food, setFood] = useState([]);
@@ -53,9 +54,10 @@ export default function AllFood(): JSX.Element {
       setIsLoading(true);
       try {
         const allergensString = allergens.join(",");
+        const sortFieldsString = JSON.stringify(sortFields);
 
         const res = await fetch(
-          `/api/get_allfood?page=${pageNumber}&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${encodeURIComponent(mealType)}&searchTerm=${debouncedSearchTerm}&dateServed=${dateServed}&allergens=${allergensString}&preferences=${preferences}`
+          `/api/get_allfood?page=${pageNumber}&sortFields=${encodeURIComponent(sortFieldsString)}&diningHall=${diningHall}&mealType=${encodeURIComponent(mealType)}&searchTerm=${debouncedSearchTerm}&dateServed=${dateServed}&allergens=${allergensString}&preferences=${preferences}&serving=${serving}`
         );
 
         if (!res.ok) {
@@ -65,6 +67,7 @@ export default function AllFood(): JSX.Element {
         setFood(data.food);
         setFoodCount(data.foodCount);
         setDates(data.dates);
+        setFutureDates(data.futureDates);
         setIsLoading(false);
       } catch (error) {
         setError(error as null);
@@ -74,14 +77,14 @@ export default function AllFood(): JSX.Element {
     fetchData();
   }, [
     pageNumber,
-    sortField,
-    sortOrder,
+    sortFields,
     diningHall,
     mealType,
     debouncedSearchTerm,
     dateServed,
     allergens,
     preferences,
+    serving,
   ]);
 
   const handlePageChange = (newPageNumber: number) => {
@@ -89,8 +92,7 @@ export default function AllFood(): JSX.Element {
       pathname: "/allfood",
       query: {
         page: newPageNumber,
-        sortField: sortField,
-        sortOrder: sortOrder,
+        sortFields: JSON.stringify(sortFields),
         diningHall: diningHall,
         mealType: mealType,
         searchTerm: searchTerm,
@@ -110,7 +112,7 @@ export default function AllFood(): JSX.Element {
 
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 mt-4">
-      <FilterBar />
+      <FilterBar futureDates={futureDates} />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
         <p className="text-4xl font-custombold mt-4">All Food ({foodCount})</p>
         <input

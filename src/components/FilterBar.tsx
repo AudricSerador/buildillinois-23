@@ -2,121 +2,330 @@ import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { FaCheck, FaChevronDown, FaTimes } from 'react-icons/fa';
+import { FaCheck, FaChevronDown, FaTimes, FaArrowUp, FaArrowDown, FaSearch } from 'react-icons/fa';
 import { useAtom } from 'jotai';
 import {
-  sortFieldAtom, sortOrderAtom, diningHallAtom, mealTypeAtom,
-  dateServedAtom, allergensAtom, preferencesAtom
+  sortFieldsAtom, diningHallAtom, mealTypeAtom,
+  dateServedAtom, allergensAtom, preferencesAtom,
+  servingAtom
 } from '@/atoms/filterAtoms';
-import { 
-  sortFields, sortOrders, allergenOptions, 
-  preferenceOptions, diningOptions, mealTypeOptions 
+import {
+  sortFields as sortFieldOptions, allergenOptions, 
+  preferenceOptions, diningOptions, mealTypeOptions,
+  servingOptions
 } from "./allfood/filter_options";
 
-export function FilterBar() {
-  const [sortField, setSortField] = useAtom(sortFieldAtom);
-  const [sortOrder, setSortOrder] = useAtom(sortOrderAtom);
+export function FilterBar({ futureDates }) {
+  const [sortFields, setSortFields] = useAtom(sortFieldsAtom);
   const [diningHall, setDiningHall] = useAtom(diningHallAtom);
   const [mealType, setMealType] = useAtom(mealTypeAtom);
   const [dateServed, setDateServed] = useAtom(dateServedAtom);
   const [allergens, setAllergens] = useAtom(allergensAtom);
   const [preferences, setPreferences] = useAtom(preferencesAtom);
+  const [serving, setServing] = useAtom(servingAtom);
 
-  const [isAllFiltersOpen, setIsAllFiltersOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  const clearAllFilters = () => {
-    setSortField('');
-    setSortOrder('');
-    setDiningHall('');
-    setMealType('');
-    setDateServed('');
-    setAllergens([]);
-    setPreferences('');
+  const toggleSort = (field: string) => {
+    setSortFields(prevSortFields => {
+      const existingSort = prevSortFields.find(s => s.field === field);
+      if (existingSort) {
+        if (existingSort.order === 'asc') {
+          return prevSortFields.map(s => s.field === field ? {...s, order: 'desc'} : s);
+        } else {
+          return prevSortFields.filter(s => s.field !== field);
+        }
+      } else {
+        return [...prevSortFields, { field, order: 'asc' }];
+      }
+    });
   };
 
-  const renderFilterBadges = () => {
-    const badges = [];
-    if (sortField) badges.push({ label: `Sort: ${sortField} ${sortOrder}`, onRemove: () => { setSortField(''); setSortOrder(''); } });
-    if (diningHall) badges.push({ label: `Dining Hall: ${diningHall}`, onRemove: () => setDiningHall('') });
-    if (mealType) badges.push({ label: `Meal Type: ${mealType}`, onRemove: () => setMealType('') });
-    if (dateServed) badges.push({ label: `Date: ${dateServed}`, onRemove: () => setDateServed('') });
-    allergens.forEach(allergen => badges.push({ label: `Allergen: ${allergen}`, onRemove: () => setAllergens(allergens.filter(a => a !== allergen)) }));
-    if (preferences) badges.push({ label: `Preference: ${preferences}`, onRemove: () => setPreferences('') });
-
-    return badges.map((badge, index) => (
-      <Badge key={index} variant="secondary" className="mr-2 mb-2">
-        {badge.label}
-        <Button variant="ghost" size="sm" className="ml-2 h-auto p-0" onClick={badge.onRemove}>
-          <FaTimes className="h-3 w-3" />
-        </Button>
-      </Badge>
-    ));
+  const removeSort = (field: string) => {
+    setSortFields(prevSortFields => prevSortFields.filter(s => s.field !== field));
   };
 
-  const renderFilterPopover = (title: string, options: any[], currentValue: string | string[], onChange: (value: string | string[]) => void, isMulti = false) => (
+  const renderSortPopover = () => (
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" className="mr-2 mb-2">
-          {title} <FaChevronDown className="ml-2 h-4 w-4" />
+          Sort by Nutrients <FaChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-56">
-        {options.map((option) => (
-          <div key={option.value} className="flex items-center">
-            <Button
-              variant="ghost"
-              className="justify-start"
-              onClick={() => {
-                if (isMulti) {
-                  onChange(currentValue.includes(option.value)
-                    ? (currentValue as string[]).filter(v => v !== option.value)
-                    : [...currentValue as string[], option.value]);
-                } else {
-                  onChange(option.value);
-                }
-              }}
-            >
-              {isMulti ? (
-                <input
-                  type="checkbox"
-                  checked={(currentValue as string[]).includes(option.value)}
-                  readOnly
-                  className="mr-2"
-                />
-              ) : (
-                currentValue === option.value && <FaCheck className="mr-2 h-4 w-4" />
-              )}
-              {option.label}
-            </Button>
-          </div>
+      <PopoverContent className="w-64">
+        {sortFieldOptions.map((field) => (
+          <Button
+            key={field.value}
+            variant="ghost"
+            className="w-full justify-between mb-2"
+            onClick={() => toggleSort(field.value)}
+          >
+            <span>{field.label}</span>
+            {sortFields.some(s => s.field === field.value) ? 
+              (sortFields.find(s => s.field === field.value)?.order === 'asc' ? <FaArrowUp /> : <FaArrowDown />) : 
+              <FaChevronDown className="opacity-0" />}
+          </Button>
         ))}
       </PopoverContent>
     </Popover>
   );
 
+  const renderFilterPopover = (
+    title: string, 
+    options: { value: string; label: string }[] | { label: string; options: { value: string; label: string }[] }[], 
+    currentValue: string | string[], 
+    onChange: (value: string | string[]) => void, 
+    isMulti = false
+  ) => {
+    const [localSearchTerm, setLocalSearchTerm] = useState('');
+
+    if (title === "Dining Hall") {
+      const diningHalls = options.flatMap(group => group.options).filter(option => 
+        ['Ikenberry Dining Center (Ike)', 'Illinois Street Dining Center (ISR)', 
+         'Pennsylvania Avenue Dining Hall (PAR)', 'Lincoln Avenue Dining Hall (Allen)', 
+         'Field of Greens (LAR)'].includes(option.label)
+      );
+      const diningShops = options.flatMap(group => group.options).filter(option => !diningHalls.includes(option) && option.value !== '');
+
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="mr-2 mb-2">
+              {title} <FaChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-0">
+            <div className="grid grid-cols-1 gap-1 p-2 max-h-[75vh] overflow-y-auto">
+              {/* All Dining Places option */}
+              <Button
+                variant="ghost"
+                className="justify-start w-full text-left py-2"
+                onClick={() => onChange('')}
+              >
+                <div className="flex items-center w-full">
+                  {currentValue === '' && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
+                  <span className="text-sm font-bold">All Dining Places</span>
+                </div>
+              </Button>
+
+              {/* Dining Halls */}
+              <div className="font-bold text-sm mt-2 mb-1">Dining Halls</div>
+              <Button
+                variant="ghost"
+                className="justify-start w-full text-left py-2"
+                onClick={() => onChange('all_dining_halls')}
+              >
+                <div className="flex items-center w-full">
+                  {currentValue === 'all_dining_halls' && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
+                  <span className="text-sm">All Dining Halls</span>
+                </div>
+              </Button>
+              {diningHalls.map((option) => (
+                <Button
+                  key={option.value}
+                  variant="ghost"
+                  className="justify-start w-full text-left py-2 pl-6"
+                  onClick={() => onChange(option.value)}
+                >
+                  <div className="flex items-center w-full">
+                    {currentValue === option.value && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
+                    <span className="text-sm">{option.label}</span>
+                  </div>
+                </Button>
+              ))}
+
+              {/* Dining Shops */}
+              <div className="font-bold text-sm mt-2 mb-1">Dining Shops (D$)</div>
+              <Button
+                variant="ghost"
+                className="justify-start w-full text-left py-2"
+                onClick={() => onChange('all_dining_shops')}
+              >
+                <div className="flex items-center w-full">
+                  {currentValue === 'all_dining_shops' && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
+                  <span className="text-sm">All Dining Shops</span>
+                </div>
+              </Button>
+              {diningShops.map((option) => (
+                <Button
+                  key={option.value}
+                  variant="ghost"
+                  className="justify-start w-full text-left py-2 pl-6"
+                  onClick={() => onChange(option.value)}
+                >
+                  <div className="flex items-center w-full">
+                    {currentValue === option.value && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
+                    <span className="text-sm">{option.label}</span>
+                  </div>
+                </Button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+      );
+    } else if (title === "Meal Type") {
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="mr-2 mb-2">
+              {title} <FaChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-0">
+            <div className="grid grid-cols-1 gap-1 p-2 max-h-[75vh] overflow-y-auto">
+              {(options as { label: string; options: { value: string; label: string }[] }[]).map((group, groupIndex) => (
+                <div key={groupIndex}>
+                  <div className="font-bold text-sm mt-2 mb-1">{group.label}</div>
+                  {group.options.map((option) => (
+                    <Button
+                      key={option.value}
+                      variant="ghost"
+                      className="justify-start w-full text-left py-2 pl-6"
+                      onClick={() => onChange(option.value)}
+                    >
+                      <div className="flex items-center w-full">
+                        {currentValue === option.value && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
+                        <span className="text-sm">{option.label}</span>
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+      );
+    } else if (title === "Allergens") {
+      const filteredOptions = (options as { value: string; label: string }[]).filter(option => 
+        option.label.toLowerCase().includes(localSearchTerm.toLowerCase())
+      );
+
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="mr-2 mb-2">
+              {title} <FaChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64">
+            <div className="max-h-[75vh] overflow-y-auto">
+              <div className="mb-2 relative">
+                <input
+                  type="text"
+                  placeholder="Search allergens..."
+                  value={localSearchTerm}
+                  onChange={(e) => setLocalSearchTerm(e.target.value)}
+                  className="w-full p-2 pr-8 border rounded"
+                />
+                <FaSearch className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              </div>
+              {filteredOptions.map((option) => (
+                <Button
+                  key={option.value}
+                  variant="ghost"
+                  className="w-full justify-between mb-2"
+                  onClick={() => {
+                    const currentValues = currentValue as string[];
+                    const newValue = currentValues.includes(option.value)
+                      ? currentValues.filter(v => v !== option.value)
+                      : [...currentValues, option.value];
+                    onChange(newValue);
+                  }}
+                >
+                  <div className="flex items-center w-full">
+                    <input
+                      type="checkbox"
+                      checked={(currentValue as string[]).includes(option.value)}
+                      readOnly
+                      className="mr-2"
+                    />
+                    <span>{option.label}</span>
+                  </div>
+                </Button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+      );
+    }
+
+    // Default rendering for other filters
+    return (
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="mr-2 mb-2">
+            {title} <FaChevronDown className="ml-2 h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-64">
+          <div className="max-h-[75vh] overflow-y-auto">
+            {(options as { value: string; label: string }[]).map((option) => (
+              <Button
+                key={option.value}
+                variant="ghost"
+                className="w-full justify-between mb-2"
+                onClick={() => onChange(option.value)}
+              >
+                <div className="flex items-center w-full">
+                  {currentValue === option.value && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
+                  <span>{option.label}</span>
+                </div>
+              </Button>
+            ))}
+          </div>
+        </PopoverContent>
+      </Popover>
+    );
+  };
+
+  const renderFilterBadges = () => {
+    const badges = [
+      ...sortFields.map(s => ({ 
+        label: `Sort: ${s.field} ${s.order === 'asc' ? '▲' : '▼'}`, 
+        onRemove: () => removeSort(s.field) 
+      })),
+      diningHall ? { label: `Dining Hall: ${diningHall}`, onRemove: () => setDiningHall('') } : null,
+      mealType ? { label: `Meal Type: ${mealType}`, onRemove: () => setMealType('') } : null,
+      dateServed ? { label: `Date: ${dateServed}`, onRemove: () => setDateServed('') } : null,
+      ...allergens.map(allergen => ({ label: `Allergen: ${allergen}`, onRemove: () => setAllergens(allergens.filter(a => a !== allergen)) })),
+      preferences ? { label: `Preference: ${preferences}`, onRemove: () => setPreferences('') } : null,
+      serving ? { label: `Serving: ${serving}`, onRemove: () => setServing('') } : null
+    ];
+
+    return badges.filter((badge): badge is NonNullable<typeof badge> => badge !== null).map((badge, index) => (
+      <Badge key={index} variant="secondary" className="mr-2 mb-2">
+        {badge.label}
+        <Button variant="ghost" size="sm" className="ml-2 h-auto p-0" onClick={badge.onRemove}>
+          <FaTimes className="h-3 w-4" />
+        </Button>
+      </Badge>
+    ));
+  };
+
   return (
     <div className="mb-4">
       <div className="flex flex-wrap items-center mb-2">
-        {renderFilterPopover('Sort', sortFields, sortField, (value) => setSortField(value as string))}
+        {renderSortPopover()}
         {renderFilterPopover('Dining Hall', diningOptions, diningHall, (value) => setDiningHall(value as string))}
         {renderFilterPopover('Meal Type', mealTypeOptions, mealType, (value) => setMealType(value as string))}
+        {renderFilterPopover('Serving', servingOptions, serving, (value) => setServing(value as string))}
         {renderFilterPopover('Allergens', allergenOptions, allergens, (value) => setAllergens(value as string[]), true)}
         {renderFilterPopover('Preferences', preferenceOptions, preferences, (value) => setPreferences(value as string))}
-        <Button variant="outline" className="mr-2 mb-2" onClick={() => setIsAllFiltersOpen(!isAllFiltersOpen)}>
-          All Filters
-        </Button>
-        <Button variant="secondary" className="mb-2" onClick={clearAllFilters}>
+        <Button variant="secondary" className="mb-2" onClick={() => {
+          setSortFields([]);
+          setDiningHall('');
+          setMealType('');
+          setDateServed('');
+          setAllergens([]);
+          setPreferences('');
+          setServing('');
+        }}>
           Clear All
         </Button>
       </div>
       <div className="flex flex-wrap">
         {renderFilterBadges()}
       </div>
-      {isAllFiltersOpen && (
-        <div className="mt-4 p-4 border rounded-md">
-          {/* Add more complex filter options here */}
-        </div>
-      )}
     </div>
   );
 }

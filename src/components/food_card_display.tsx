@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 interface FoodItemCardProps {
   foodItem: FoodItem;
   loading: boolean;
+  futureDates: string[];
 }
 
 export interface ImageData {
@@ -61,7 +62,7 @@ const isNowBetween = (startTime: string, endTime: string, currentTime: Date): bo
   return currentTime >= start && currentTime <= end;
 };
 
-export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading }) => {
+export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, futureDates }) => {
   const [topImage, setTopImage] = useState<ImageData | null>(null);
   const [reviews, setReviews] = useState<ReviewData[]>([]);
   const [scorePercentage, setScorePercentage] = useState(0);
@@ -165,11 +166,21 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
         {Array.from(diningHalls).map((diningHall) => (
           <Badge key={diningHall} variant="default" className="mr-1 mb-1">{diningHall}</Badge>
         ))}
-        {(!foodItem.mealEntries || foodItem.mealEntries.length === 0) && 
-          <Badge variant="destructive" className="mr-1 mb-1">Not Available</Badge>
-        }
       </>
     );
+  };
+
+  const renderServingStatus = () => {
+    switch (foodItem.servingStatus) {
+      case 'now':
+        return <span className="serving-status bg-green-500 text-white">Serving Now</span>;
+      case 'later':
+        return <span className="serving-status bg-yellow-500 text-white">Serving Later Today</span>;
+      case 'not_available':
+        return <span className="serving-status bg-gray-500 text-white">Not Available</span>;
+      default:
+        return <span className="serving-status bg-blue-500 text-white">Serving on {new Date(foodItem.servingStatus).toLocaleDateString()}</span>;
+    }
   };
 
   return (
@@ -229,8 +240,9 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading })
             ) : (
               <>
                 {renderBadges()}
-                {isServingNow && <Badge variant="success">Now</Badge>}
-                {!isServingNow && isServingLater && <Badge variant="warning">Later</Badge>}
+                {foodItem.isServedNow && <Badge variant="success">Served Now</Badge>}
+                {foodItem.isServedLater && <Badge variant="warning">Served Later</Badge>}
+                {renderServingStatus()}
               </>
             )}
           </div>
