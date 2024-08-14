@@ -9,6 +9,8 @@ import time
 import re
 import traceback
 from datetime import datetime, timedelta
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from functools import partial
 
 NON_VEGAN_INGREDIENTS = {'gelatin', 'fish', 'tuna', 'salmon', 'tilapia', 'rennet', 'carmine', 'isenglass', 'fish sauce', 'anchovies', 'suet', 'lard', 'cochineal', 'shellac', 'cysteine', 'tyrosine', 'enzymes', 'collagen', 'bone char', 'whey', 'casein', 'fish oil', 'omega-3', 'confectioner', 'beeswax', 'oleic acid', 'stearic acid', 'vitamin d3', 'lanolin', 'lecithin', 'glycerides', 'glycerin', 'lactic acid', 'squalane', 'squalene', 'tallow', 'glyceryl stearate', 'vitamin a', 'vitamin b12', 'vitamin d2', 'vitamin d3', 'xanthan gum', 'zinc stearate', 'meat', 'poultry', 'chicken', 'beef', 'pork', 'lamb', 'venison', 'rabbit', 'duck', 'goose', 'turkey', 'veal', 'organ meat', 'wild game', 'seafood', 'shellfish', 'clams', 'crab', 'lobster', 'shrimp', 'oysters', 'mussels', 'eggs', 'egg white', 'egg yolk', 'egg albumen', 'mayonnaise', 'aioli', 'milk', 'butter', 'cheese', 'cream', 'yogurt', 'honey'}
 NON_VEGETARIAN_INGREDIENTS = {'gelatin', 'rennet', 'carmine', 'isinglass', 'fish', 'tuna', 'salmon', 'tilapia', 'fish sauce', 'anchovies', 'suet', 'lard', 'cochineal', 'shellac', 'cysteine', 'tyrosine', 'enzymes', 'collagen', 'bone char', 'whey', 'casein', 'fish oil', 'omega-3', 'confectioner', 'beeswax', 'oleic acid', 'stearic acid', 'vitamin d3', 'lanolin', 'lecithin', 'glycerides', 'glycerin', 'lactic acid', 'squalane', 'squalene', 'tallow', 'glyceryl stearate', 'vitamin a', 'vitamin b12', 'vitamin d2', 'vitamin d3', 'xanthan gum', 'zinc stearate', 'meat', 'poultry', 'chicken', 'beef', 'pork', 'lamb', 'venison', 'rabbit', 'duck', 'goose', 'turkey', 'veal', 'organ meat', 'wild game', 'seafood', 'shellfish', 'clams', 'crab', 'lobster', 'shrimp', 'oysters', 'mussels'}
@@ -113,21 +115,19 @@ def scrape_nutrition_facts(food_id, driver):
     except:
         data['allergens'] = "N/A"
     
-    nutrition_data = nutrition_modal.find_elements(By.XPATH, './/span[@class="cbo_nn_SecondaryNutrient" or @class="cbo_nn_LabelPrimaryDetailIncomplete"]')
+    # Use a single XPath query to get all nutrition data
+    nutrition_data = nutrition_modal.find_elements(By.XPATH, './/span[contains(@class, "cbo_nn_SecondaryNutrient") or contains(@class, "cbo_nn_LabelPrimaryDetailIncomplete")]')
+    
     keys = [
         "calories", "caloriesFat", "totalFat", "saturatedFat", "transFat",
         "polyFat", "monoFat", "cholesterol", "sodium", "potassium",
         "totalCarbohydrates", "fiber", "sugars", "protein"
     ]
-    for key, nutrition in zip(keys, nutrition_data):
-        text = nutrition.text
-        if text.strip().isdigit():
-            data[key] = int(text)
-        elif 'mg' in text or 'g' in text:
-            value = ''.join(filter(str.isdigit, text))
-            data[key] = int(value) if value else 0
-        else:
-            data[key] = 0
+    
+    # Use a dictionary comprehension for faster assignment
+    nutrition_values = {key: int(''.join(filter(str.isdigit, nutrition.text))) if nutrition.text.strip() else 0 
+                        for key, nutrition in zip(keys, nutrition_data)}
+    data.update(nutrition_values)
     
     secondary_rows = nutrition_modal.find_elements(By.XPATH, './/table[@class="cbo_nn_LabelSecondaryTable"]/tbody/tr')
     for row in secondary_rows:
@@ -162,11 +162,17 @@ def get_food_nutrition(title, info, driver, food_data):
     elements_present = EC.presence_of_element_located((By.XPATH, '//a[starts-with(@id, "showNutrition_")]'))
     WebDriverWait(driver, 10).until(elements_present)
 
-    food_ids = [food.get_attribute('id') for food in driver.find_elements(By.XPATH, '//a[starts-with(@id, "showNutrition_")]')]
-    for food_id in food_ids:
-        parsed_id = food_id.split('_')[-1]
-        data_to_add = scrape_nutrition_facts(parsed_id, driver)
-        
+    # Use a list comprehension for faster processing
+    food_ids = [food.get_attribute('id').split('_')[-1] for food in driver.find_elements(By.XPATH, '//a[starts-with(@id, "showNutrition_")]')]
+    
+    # Use a partial function to avoid repeating arguments
+    scrape_func = partial(scrape_nutrition_facts, driver=driver)
+    
+    # Use ThreadPoolExecutor for parallel processing
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        data_to_add_list = list(executor.map(scrape_func, food_ids))
+    
+    for data_to_add in data_to_add_list:
         meal_details = {}
         meal_details['diningFacility'] = title
         meal_details['diningHall'] = get_dining_hall_name(title)
@@ -225,21 +231,19 @@ def scrape(date_to_scrape, meal_to_scrape):
 
         restaurant_meals = []
         restaurant_groups = main_lists.find_elements(By.XPATH, '//ul[@class="list-group"]')
-        for meal in restaurant_groups:
-            meal_nav = [nav.get_attribute('onclick') for nav in meal.find_elements(By.XPATH, './/li[@class="list-group-item"]')]
-            meal_dates = [date.text for date in meal.find_elements(By.XPATH, './/div')]
-            filtered_meals = []
-            
-            for nav, date in zip(meal_nav, meal_dates):
-                date_part = date.split('-', 1)[0].strip()
-                meal_part = date.split('-', 1)[1].strip()
-                if date_part == date_to_scrape and meal_part == meal_to_scrape:
-                    filtered_meals.append((nav, date))
-                    
-            restaurant_meals.append(filtered_meals)
-
-        # zip meals and titles together and make them into a dictionary
-        restaurant_data = dict(zip(restaurant_titles, restaurant_meals))
+        
+        # Use a dictionary comprehension for faster processing
+        restaurant_data = {
+            title: [
+                (nav.get_attribute('onclick'), date.text)
+                for nav, date in zip(
+                    meal.find_elements(By.XPATH, './/li[@class="list-group-item"]'),
+                    meal.find_elements(By.XPATH, './/div')
+                )
+                if date.text.split('-', 1)[0].strip() == date_to_scrape and date.text.split('-', 1)[1].strip() == meal_to_scrape
+            ]
+            for title, meal in zip(restaurant_titles, restaurant_groups)
+        }
         print(f'restaurant data scraped. {len(restaurant_data)} menu options found.')
 
         ### GET FOOD DATA ###
@@ -261,41 +265,23 @@ def scrape(date_to_scrape, meal_to_scrape):
         raise e
     
 
-from concurrent import futures
-
 def scrape_all():
     tasks = [(date, meal) for date in DATES_TO_SCRAPE for meal in MEALS_TO_SCRAPE]
     scraped_data = []
 
-    with futures.ThreadPoolExecutor(max_workers=4) as executor:
-        future_results = {}
-        for task in tasks:
-            future = executor.submit(scrape, *task)
-            future_results[future] = task
-            time.sleep(5)
-
-        failed_tasks = tasks
-        max_retries = 100
-        for i in range(max_retries):
-            if not failed_tasks:
-                break
-            print(f"========<Retrying failed tasks... Attempt {i+1}/{max_retries}>========")
-            current_failed_tasks = []
-            for future in futures.as_completed(future_results):
-                date, meal = future_results[future]
-                try:
-                    result_data = future.result()
-                    scraped_data.extend(result_data)
-                except Exception as e:
-                    print(f'An error occurred while scraping {date} - {meal}: {e}')
-                    current_failed_tasks.append((date, meal))
-            failed_tasks = current_failed_tasks
-            # Retry the failed tasks concurrently
-            future_results = {}
-            for task in failed_tasks:
-                future = executor.submit(scrape, *task)
-                future_results[future] = task
-                time.sleep(5)
+    with ThreadPoolExecutor(max_workers=4) as executor:
+        future_to_task = {executor.submit(scrape, date, meal): (date, meal) for date, meal in tasks}
+        
+        for future in as_completed(future_to_task):
+            date, meal = future_to_task[future]
+            try:
+                result_data = future.result()
+                scraped_data.extend(result_data)
+            except Exception as e:
+                print(f'An error occurred while scraping {date} - {meal}: {e}')
+                # Retry immediately instead of waiting
+                future = executor.submit(scrape, date, meal)
+                future_to_task[future] = (date, meal)
 
     return scraped_data
 
