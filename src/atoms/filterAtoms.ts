@@ -10,3 +10,5 @@ export const allergensAtom = atom<string[]>([]);
 export const preferencesAtom = atom('');
 export const datesAtom = atom<string[]>([]);
 export const servingAtom = atom('');
+export const availableDatesAtom = atom<string[]>([]);
+export const ratingFilterAtom = atom<string>('');

@@ -12,6 +12,7 @@ interface FoodItemCardProps {
   foodItem: FoodItem;
   loading: boolean;
   futureDates: string[];
+  sortFields?: { field: string; order: 'asc' | 'desc' }[];
 }
 
 export interface ImageData {
@@ -62,7 +63,19 @@ const isNowBetween = (startTime: string, endTime: string, currentTime: Date): bo
   return currentTime >= start && currentTime <= end;
 };
 
-export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, futureDates }) => {
+const nutrientLabels: { [key: string]: string } = {
+  calories: "Cal",
+  protein: "Protein",
+  totalCarbohydrates: "Carbs",
+  totalFat: "Fat",
+  sodium: "Sodium",
+  cholesterol: "Cholesterol",
+  sugars: "Sugars",
+  fiber: "Fiber",
+  // Add any other nutrient fields here
+};
+
+export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, futureDates, sortFields }) => {
   const [topImage, setTopImage] = useState<ImageData | null>(null);
   const [reviews, setReviews] = useState<ReviewData[]>([]);
   const [scorePercentage, setScorePercentage] = useState(0);
@@ -171,16 +184,43 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, f
   };
 
   const renderServingStatus = () => {
-    switch (foodItem.servingStatus) {
-      case 'now':
-        return <span className="serving-status bg-green-500 text-white">Serving Now</span>;
-      case 'later':
-        return <span className="serving-status bg-yellow-500 text-white">Serving Later Today</span>;
-      case 'not_available':
-        return <span className="serving-status bg-gray-500 text-white">Not Available</span>;
-      default:
-        return <span className="serving-status bg-blue-500 text-white">Serving on {new Date(foodItem.servingStatus).toLocaleDateString()}</span>;
+    if (isServingNow) {
+      return <Badge variant="success">Serving Now</Badge>;
+    } else if (isServingLater) {
+      return <Badge variant="warning">Serving Later Today</Badge>;
+    } else if (foodItem.mealEntries && foodItem.mealEntries.length > 0) {
+      const futureDates = foodItem.mealEntries
+        .map(entry => entry.dateServed)
+        .filter(date => new Date(date) > new Date())
+        .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+      
+      if (futureDates.length > 0) {
+        return <Badge variant="info">Serving on {futureDates[0]}</Badge>;
+      }
     }
+    return <Badge variant="destructive">Not Available</Badge>;
+  };
+
+  const renderNutrientBadges = () => {
+    const mainNutrients = ['calories', 'protein', 'totalCarbohydrates', 'totalFat'];
+    const additionalNutrients = sortFields
+      ?.map(sf => sf.field)
+      .filter(field => !mainNutrients.includes(field) && foodItem[field as keyof FoodItem] !== undefined);
+
+    return (
+      <div className="flex flex-wrap gap-1">
+        {mainNutrients.map(nutrient => (
+          <Badge key={nutrient} variant="outline" className="whitespace-nowrap py-0 px-1 sm:py-0 sm:px-1">
+            {foodItem[nutrient as keyof FoodItem] }{nutrient === 'calories' ? '' : 'g'} {nutrientLabels[nutrient]}
+          </Badge>
+        ))}
+        {additionalNutrients && additionalNutrients.map(nutrient => (
+          <Badge key={nutrient} variant="outline" className="whitespace-nowrap py-0 px-1 sm:py-0 sm:px-1">
+            {foodItem[nutrient as keyof FoodItem] }{nutrient === 'calories' ? '' : 'g'} {nutrientLabels[nutrient]}
+          </Badge>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -224,12 +264,7 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, f
             {loading ? (
               <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
             ) : (
-              <div className="flex flex-wrap gap-1">
-                <Badge variant="outline" className="whitespace-nowrap py-0 px-1 sm:py-0 sm:px-1">{foodItem.calories} Cal</Badge>
-                <Badge variant="outline" className="whitespace-nowrap py-0 px-1 sm:py-0 sm:px-1">{foodItem.protein}g Protein</Badge>
-                <Badge variant="outline" className="whitespace-nowrap py-0 px-1 sm:py-0 sm:px-1">{foodItem.totalCarbohydrates}g Carbs</Badge>
-                <Badge variant="outline" className="whitespace-nowrap py-0 px-1 sm:py-0 sm:px-1">{foodItem.totalFat}g Fat</Badge>
-              </div>
+              renderNutrientBadges()
             )}
           </div>
           <div className="flex flex-wrap gap-1">
@@ -240,8 +275,6 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, f
             ) : (
               <>
                 {renderBadges()}
-                {foodItem.isServedNow && <Badge variant="success">Served Now</Badge>}
-                {foodItem.isServedLater && <Badge variant="warning">Served Later</Badge>}
                 {renderServingStatus()}
               </>
             )}

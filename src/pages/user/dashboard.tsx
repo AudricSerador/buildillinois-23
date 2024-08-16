@@ -9,6 +9,7 @@ import { generateRecommendations } from "@/utils/create_recommendation";
 export default function Dashboard(): JSX.Element {
     const [name, setName] = useState('');
     const [recommendations, setRecommendations] = useState([]);
+    const [futureDates, setFutureDates] = useState<string[]>([]);
     const router = useRouter();
     const { user } = useAuth();
 
@@ -20,6 +21,7 @@ export default function Dashboard(): JSX.Element {
         } else {
             setName(user.name);
             fetchRecommendations(user.id);
+            fetchFutureDates();
         }
     }, [user, router]);
 
@@ -38,6 +40,20 @@ export default function Dashboard(): JSX.Element {
             }
         } catch (error) {
             console.error('Error fetching recommendations:', error);
+        }
+    };
+
+    const fetchFutureDates = async () => {
+        try {
+            const response = await fetch('/api/get_future_dates');
+            const data = await response.json();
+            if (data.success) {
+                setFutureDates(data.futureDates);
+            } else {
+                console.error('Error fetching future dates:', data.message);
+            }
+        } catch (error) {
+            console.error('Error fetching future dates:', error);
         }
     };
 
@@ -89,7 +105,11 @@ export default function Dashboard(): JSX.Element {
                         <div className="flex overflow-x-auto space-x-4 pb-4">
                             {recommendations.map((recommendation: FoodItem) => (
                                 <div key={recommendation.id} className="flex-none">
-                                    <FoodItemCard foodItem={recommendation} loading={false} />
+                                    <FoodItemCard 
+                                        foodItem={recommendation} 
+                                        loading={false} 
+                                        futureDates={futureDates}
+                                    />
                                 </div>
                             ))}
                         </div>

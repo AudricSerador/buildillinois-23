@@ -70,6 +70,12 @@ export default function Onboarding(): JSX.Element {
   const [showAdditionalText, setShowAdditionalText] = useState(false);
 
   useEffect(() => {
+    if (user && user.email !== "asera3@illinois.edu") {
+      router.push("/");
+    }
+  }, [user, router]);
+
+  useEffect(() => {
     if (user && !user.isNew) {
       router.push("/user/dashboard");
     } else if (!user) {

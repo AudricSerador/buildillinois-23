@@ -2,6 +2,38 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/layout/auth.service";
 
+const subscribeToNotifications = async (userId: string | undefined) => {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    alert("Push notifications are not supported in your browser.");
+    return;
+  }
+
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      alert("Notification permission denied. You won't receive push notifications.");
+      return;
+    }
+
+    const registration = await navigator.serviceWorker.ready;
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+    });
+    
+    await fetch('/api/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId, subscription }),
+    });
+
+    alert("Successfully subscribed to push notifications!");
+  } catch (error) {
+    console.error('Failed to subscribe to push notifications:', error);
+    alert("Failed to subscribe to push notifications. Please try again later.");
+  }
+};
+
 export default function Home(): JSX.Element {
   const [isVisible, setIsVisible] = useState(false);
   const { user } = useAuth();
@@ -35,6 +67,14 @@ export default function Home(): JSX.Element {
                     Login with your NetID
                   </button>
                 </Link>
+              )}
+              {user && (
+                <button
+                  className="btn btn-primary font-custombold mr-4"
+                  onClick={() => subscribeToNotifications(user.id)}
+                >
+                  Enable Notifications
+                </button>
               )}
               <button
                 className="btn btn-warning text-black font-custombold"

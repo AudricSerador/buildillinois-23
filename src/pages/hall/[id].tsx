@@ -107,7 +107,17 @@ export default function HallFoodPage({
   };
   useEffect(() => {
     setDateServed(foodDates[dateIndex]);
-  }, [dateIndex]);
+  }, [dateIndex, foodDates]);
+
+  // Add this new state variable
+  const [futureDates, setFutureDates] = useState<string[]>([]);
+
+  // Add this useEffect to update futureDates when foodDates changes
+  useEffect(() => {
+    const currentDate = new Date();
+    const filteredDates = foodDates.filter(date => new Date(date) >= currentDate);
+    setFutureDates(filteredDates);
+  }, [foodDates]);
 
   useEffect(() => {
     const fetchFoodData = async () => {
@@ -358,6 +368,7 @@ export default function HallFoodPage({
                             key={foodItem.id}
                             foodItem={foodItem}
                             loading={false}
+                            futureDates={futureDates} // Add this line
                           />
                         ))}
                     </div>

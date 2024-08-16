@@ -8,6 +8,7 @@ function FavoritesPage() {
   const router = useRouter();
   const { user } = useAuth();
   const [favorites, setFavorites] = useState([]);
+  const [futureDates, setFutureDates] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -16,13 +17,18 @@ function FavoritesPage() {
         const data = await res.json();
         console.log(data);
         setFavorites(data.data);
+
+        // Fetch future dates (you may need to adjust this based on your API)
+        const datesRes = await fetch('/api/get_future_dates');
+        const datesData = await datesRes.json();
+        setFutureDates(datesData.futureDates);
       } else {
         router.push('/login');
       }
     };
 
     fetchFavorites();
-  }, [user]);
+  }, [user, router]);
 
   return (
     <div className="px-4 sm:px-8 font-custom md:px-16 lg:px-64 mt-4">
@@ -31,7 +37,12 @@ function FavoritesPage() {
       </p>
       {favorites && favorites.length > 0 ? (
         favorites.map((favorite: { foodId: string; food: FoodItem }) => (
-          <FoodItemCard key={favorite.foodId} foodItem={favorite.food} loading={false} />
+          <FoodItemCard 
+            key={favorite.foodId} 
+            foodItem={favorite.food} 
+            loading={false} 
+            futureDates={futureDates}
+          />
         ))
       ) : (
         <p className="text-center text-lg">No favorites yet.</p>

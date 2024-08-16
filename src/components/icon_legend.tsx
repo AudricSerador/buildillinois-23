@@ -64,7 +64,7 @@ export const IconLegend: React.FC = () => {
         }`}
       >
         <div className="mb-4 mt-2">
-          <span className="text-md ml-2 font-custombold">Dietary Preferences</span>
+          <span className="text-md ml-2 font-custombold">Dietary Restrictions</span>
           <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4 mt-2 ml-3">
             {dietaryPreferences.map((icon, index) => (
               <IconLabel key={index} src={icon.src} label={icon.label} />

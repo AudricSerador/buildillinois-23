@@ -1,21 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { FaCheck, FaChevronDown, FaTimes, FaArrowUp, FaArrowDown, FaSearch } from 'react-icons/fa';
+import { FaCheck, FaChevronDown, FaTimes, FaArrowUp, FaArrowDown, FaSearch, FaStar } from 'react-icons/fa';
 import { useAtom } from 'jotai';
 import {
   sortFieldsAtom, diningHallAtom, mealTypeAtom,
   dateServedAtom, allergensAtom, preferencesAtom,
-  servingAtom
+  servingAtom, availableDatesAtom, ratingFilterAtom
 } from '@/atoms/filterAtoms';
 import {
   sortFields as sortFieldOptions, allergenOptions, 
   preferenceOptions, diningOptions, mealTypeOptions,
-  servingOptions
 } from "./allfood/filter_options";
 
-export function FilterBar({ futureDates }) {
+const nutrientLabels: { [key: string]: string } = {
+  calories: "Calories",
+  protein: "Protein",
+  totalCarbohydrates: "Carbohydrates",
+  totalFat: "Fat",
+  sodium: "Sodium",
+  cholesterol: "Cholesterol",
+  sugars: "Sugars",
+  fiber: "Fiber",
+  rating: "Rating",
+};
+
+export function FilterBar({ availableDates }: { availableDates: string[] }) {
   const [sortFields, setSortFields] = useAtom(sortFieldsAtom);
   const [diningHall, setDiningHall] = useAtom(diningHallAtom);
   const [mealType, setMealType] = useAtom(mealTypeAtom);
@@ -23,20 +34,29 @@ export function FilterBar({ futureDates }) {
   const [allergens, setAllergens] = useAtom(allergensAtom);
   const [preferences, setPreferences] = useAtom(preferencesAtom);
   const [serving, setServing] = useAtom(servingAtom);
+  const [ratingFilter, setRatingFilter] = useAtom(ratingFilterAtom);
 
   const [searchTerm, setSearchTerm] = useState('');
+  const [localSearchTerm, setLocalSearchTerm] = useState('');
+
+  const servingOptions = [
+    { value: "", label: "Anytime" },
+    { value: "now", label: "Right Now" },
+    { value: "later", label: "Later Today" },
+    ...availableDates.map(date => ({ value: date, label: date }))
+  ];
 
   const toggleSort = (field: string) => {
     setSortFields(prevSortFields => {
       const existingSort = prevSortFields.find(s => s.field === field);
       if (existingSort) {
-        if (existingSort.order === 'asc') {
-          return prevSortFields.map(s => s.field === field ? {...s, order: 'desc'} : s);
+        if (existingSort.order === 'desc') {
+          return prevSortFields.map(s => s.field === field ? {...s, order: 'asc'} : s);
         } else {
           return prevSortFields.filter(s => s.field !== field);
         }
       } else {
-        return [...prevSortFields, { field, order: 'asc' }];
+        return [...prevSortFields, { field, order: 'desc' }];
       }
     });
   };
@@ -49,7 +69,7 @@ export function FilterBar({ futureDates }) {
     <Popover>
       <PopoverTrigger asChild>
         <Button variant="outline" className="mr-2 mb-2">
-          Sort by Nutrients <FaChevronDown className="ml-2 h-4 w-4" />
+          Sort by <FaChevronDown className="ml-2 h-4 w-4" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64">
@@ -60,9 +80,9 @@ export function FilterBar({ futureDates }) {
             className="w-full justify-between mb-2"
             onClick={() => toggleSort(field.value)}
           >
-            <span>{field.label}</span>
+            <span>{nutrientLabels[field.value] || field.label}</span>
             {sortFields.some(s => s.field === field.value) ? 
-              (sortFields.find(s => s.field === field.value)?.order === 'asc' ? <FaArrowUp /> : <FaArrowDown />) : 
+              (sortFields.find(s => s.field === field.value)?.order === 'desc' ? <FaArrowUp /> : <FaArrowDown />) : 
               <FaChevronDown className="opacity-0" />}
           </Button>
         ))}
@@ -77,15 +97,16 @@ export function FilterBar({ futureDates }) {
     onChange: (value: string | string[]) => void, 
     isMulti = false
   ) => {
-    const [localSearchTerm, setLocalSearchTerm] = useState('');
+    // Remove the useState hook from here
 
     if (title === "Dining Hall") {
-      const diningHalls = options.flatMap(group => group.options).filter(option => 
+      const allOptions = (options as { label: string; options: { value: string; label: string }[] }[]).flatMap(group => group.options);
+      const diningHalls = allOptions.filter(option => 
         ['Ikenberry Dining Center (Ike)', 'Illinois Street Dining Center (ISR)', 
          'Pennsylvania Avenue Dining Hall (PAR)', 'Lincoln Avenue Dining Hall (Allen)', 
          'Field of Greens (LAR)'].includes(option.label)
       );
-      const diningShops = options.flatMap(group => group.options).filter(option => !diningHalls.includes(option) && option.value !== '');
+      const diningShops = allOptions.filter(option => !diningHalls.includes(option) && option.value !== '');
 
       return (
         <Popover>
@@ -247,6 +268,33 @@ export function FilterBar({ futureDates }) {
           </PopoverContent>
         </Popover>
       );
+    } else if (title === "Serving") {
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="mr-2 mb-2">
+              {title} <FaChevronDown className="ml-2 h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-64">
+            <div className="max-h-[75vh] overflow-y-auto">
+              {servingOptions.map((option) => (
+                <Button
+                  key={option.value}
+                  variant="ghost"
+                  className="w-full justify-between mb-2"
+                  onClick={() => onChange(option.value)}
+                >
+                  <div className="flex items-center w-full">
+                    {currentValue === option.value && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
+                    <span>{option.label}</span>
+                  </div>
+                </Button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
+      );
     }
 
     // Default rendering for other filters
@@ -278,22 +326,49 @@ export function FilterBar({ futureDates }) {
     );
   };
 
+  const renderRatingPopover = () => (
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button variant="outline" className="mr-2 mb-2">
+          Rating <FaChevronDown className="ml-2 h-4 w-4" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-64">
+        {['Any', '50', '75', '90'].map((rating) => (
+          <Button
+            key={rating}
+            variant="ghost"
+            className="w-full justify-between mb-2"
+            onClick={() => {
+              console.log(`Setting rating filter to: ${rating}`);
+              setRatingFilter(rating);
+            }}
+          >
+            <span>{rating === 'Any' ? rating : `${rating}%+`}</span>
+            {ratingFilter === rating && <FaCheck className="ml-2 h-4 w-4" />}
+          </Button>
+        ))}
+      </PopoverContent>
+    </Popover>
+  );
+
   const renderFilterBadges = () => {
     const badges = [
       ...sortFields.map(s => ({ 
-        label: `Sort: ${s.field} ${s.order === 'asc' ? '▲' : '▼'}`, 
+        label: `Sort: ${nutrientLabels[s.field] || s.field} ${s.order === 'desc' ? 'Highest to Lowest' : 'Lowest to Highest'}`, 
         onRemove: () => removeSort(s.field) 
       })),
-      diningHall ? { label: `Dining Hall: ${diningHall}`, onRemove: () => setDiningHall('') } : null,
-      mealType ? { label: `Meal Type: ${mealType}`, onRemove: () => setMealType('') } : null,
+      diningHall ? { label: `Dining Hall: ${diningHall.toUpperCase()}`, onRemove: () => setDiningHall('') } : null,
+      mealType ? { label: `Meal Type: ${mealType.toUpperCase()}`, onRemove: () => setMealType('') } : null,
       dateServed ? { label: `Date: ${dateServed}`, onRemove: () => setDateServed('') } : null,
-      ...allergens.map(allergen => ({ label: `Allergen: ${allergen}`, onRemove: () => setAllergens(allergens.filter(a => a !== allergen)) })),
-      preferences ? { label: `Preference: ${preferences}`, onRemove: () => setPreferences('') } : null,
-      serving ? { label: `Serving: ${serving}`, onRemove: () => setServing('') } : null
+      ...allergens.map(allergen => ({ label: `Allergen: ${allergen.toUpperCase()}`, onRemove: () => setAllergens(allergens.filter(a => a !== allergen)) })),
+      preferences ? { label: `Restriction: ${preferences.toUpperCase()}`, onRemove: () => setPreferences('') } : null,
+      serving ? { label: `Serving: ${(servingOptions.find(o => o.value === serving)?.label || serving).toUpperCase()}`, onRemove: () => setServing('') } : null,
+      ratingFilter && ratingFilter !== 'Any' ? { label: `Rating: ${ratingFilter}%+`, onRemove: () => setRatingFilter('Any') } : null,
     ];
 
     return badges.filter((badge): badge is NonNullable<typeof badge> => badge !== null).map((badge, index) => (
-      <Badge key={index} variant="secondary" className="mr-2 mb-2">
+      <Badge key={index} variant="info" className="mr-2 mb-2">
         {badge.label}
         <Button variant="ghost" size="sm" className="ml-2 h-auto p-0" onClick={badge.onRemove}>
           <FaTimes className="h-3 w-4" />
@@ -310,7 +385,8 @@ export function FilterBar({ futureDates }) {
         {renderFilterPopover('Meal Type', mealTypeOptions, mealType, (value) => setMealType(value as string))}
         {renderFilterPopover('Serving', servingOptions, serving, (value) => setServing(value as string))}
         {renderFilterPopover('Allergens', allergenOptions, allergens, (value) => setAllergens(value as string[]), true)}
-        {renderFilterPopover('Preferences', preferenceOptions, preferences, (value) => setPreferences(value as string))}
+        {renderFilterPopover('Restrictions', preferenceOptions, preferences, (value) => setPreferences(value as string))}
+        {renderRatingPopover()}
         <Button variant="secondary" className="mb-2" onClick={() => {
           setSortFields([]);
           setDiningHall('');
@@ -319,6 +395,7 @@ export function FilterBar({ futureDates }) {
           setAllergens([]);
           setPreferences('');
           setServing('');
+          setRatingFilter('Any');
         }}>
           Clear All
         </Button>

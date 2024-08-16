@@ -5,7 +5,7 @@ import { FilterBar } from "@/components/FilterBar";
 import { useAtom } from 'jotai';
 import {
   sortFieldsAtom, diningHallAtom, mealTypeAtom,
-  searchTermAtom, dateServedAtom, allergensAtom, preferencesAtom, datesAtom, servingAtom
+  searchTermAtom, dateServedAtom, allergensAtom, preferencesAtom, datesAtom, servingAtom, availableDatesAtom, ratingFilterAtom
 } from '@/atoms/filterAtoms';
 
 function debounce(fn: Function, delay: number) {
@@ -34,12 +34,13 @@ export default function AllFood(): JSX.Element {
   const [preferences] = useAtom(preferencesAtom);
   const [dates, setDates] = useAtom(datesAtom);
   const [serving] = useAtom(servingAtom);
-  const [futureDates, setFutureDates] = useState([]);
+  const [availableDates, setAvailableDates] = useAtom(availableDatesAtom);
+  const [ratingFilter] = useAtom(ratingFilterAtom);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);  // Start with loading true
   const [food, setFood] = useState([]);
   const [foodCount, setFoodCount] = useState(0);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
 
   const debouncedFetchData = useCallback(
@@ -50,41 +51,50 @@ export default function AllFood(): JSX.Element {
   );
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
+    const fetchFood = async () => {
+      setIsLoading(true);  // Set loading to true when fetching starts
+      const queryParams = new URLSearchParams({
+        page: pageNumber.toString(),
+        sortFields: JSON.stringify(sortFields),
+        diningHall,
+        mealType,
+        searchTerm,
+        dateServed,
+        allergens: allergens.join(','),
+        preferences,
+        serving,
+        ratingFilter
+      });
+
+      console.log('Fetching food with params:', queryParams.toString());
+
       try {
-        const allergensString = allergens.join(",");
-        const sortFieldsString = JSON.stringify(sortFields);
-
-        const res = await fetch(
-          `/api/get_allfood?page=${pageNumber}&sortFields=${encodeURIComponent(sortFieldsString)}&diningHall=${diningHall}&mealType=${encodeURIComponent(mealType)}&searchTerm=${debouncedSearchTerm}&dateServed=${dateServed}&allergens=${allergensString}&preferences=${preferences}&serving=${serving}`
-        );
-
-        if (!res.ok) {
-          throw Error(res.statusText);
-        }
-        const data = await res.json();
+        const response = await fetch(`/api/get_allfood?${queryParams}`);
+        const data = await response.json();
         setFood(data.food);
         setFoodCount(data.foodCount);
-        setDates(data.dates);
-        setFutureDates(data.futureDates);
-        setIsLoading(false);
+        setAvailableDates(data.availableDates);
       } catch (error) {
-        setError(error as null);
-        setIsLoading(false);
+        console.error("Error fetching food:", error);
+        setError("Failed to load food data. Please try again later.");
+      } finally {
+        setIsLoading(false);  // Set loading to false when fetching is done
       }
     };
-    fetchData();
+
+    fetchFood();
   }, [
     pageNumber,
     sortFields,
     diningHall,
     mealType,
-    debouncedSearchTerm,
+    searchTerm,
     dateServed,
     allergens,
     preferences,
     serving,
+    ratingFilter,
+    setAvailableDates // Add this
   ]);
 
   const handlePageChange = (newPageNumber: number) => {
@@ -96,6 +106,7 @@ export default function AllFood(): JSX.Element {
         diningHall: diningHall,
         mealType: mealType,
         searchTerm: searchTerm,
+        ratingFilter: ratingFilter
       },
     });
   };
@@ -112,7 +123,7 @@ export default function AllFood(): JSX.Element {
 
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 mt-4">
-      <FilterBar futureDates={futureDates} />
+      <FilterBar availableDates={availableDates} />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
         <p className="text-4xl font-custombold mt-4">All Food ({foodCount})</p>
         <input
@@ -126,75 +137,67 @@ export default function AllFood(): JSX.Element {
           placeholder="Search food..."
         />
       </div>
-      {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-y-4 sm:gap-x-4">
-          {[...Array(10)].map((_, index) => (
-            <div key={index} className="flex">
-              <FoodItemCard foodItem={{} as any} loading={true} />
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {isLoading
+          ? Array(10).fill(null).map((_, index) => (
+              <div key={index} className="flex">
+                <FoodItemCard foodItem={{} as any} loading={true} sortFields={sortFields} futureDates={availableDates} />
+              </div>
+            ))
+          : food.length > 0
+          ? food.map((foodItem: any) => (
+              <div key={foodItem.id} className="flex">
+                <FoodItemCard
+                  foodItem={foodItem}
+                  loading={false}
+                  sortFields={sortFields}
+                  futureDates={availableDates}
+                />
+              </div>
+            ))
+          : <p className="font-custom text-center my-6 col-span-full">
+              No results found. Please try again with a different filter query.
+            </p>
+        }
+      </div>
+      {!isLoading && food.length > 0 && (
+        <div className="flex items-center justify-center space-x-2 mt-4 mb-8">
+          <button
+            onClick={() => handlePageChange(pageNumber - 1)}
+            className={`px-4 py-2 rounded-md text-white font-custom ${
+              pageNumber === 1
+                ? "bg-gray-300 cursor-not-allowed"
+                : "bg-uiucorange hover:bg-orange-600"
+            }`}
+            disabled={pageNumber === 1}
+          >
+            Back
+          </button>
+          {[...Array(Math.max(0, endPage + 1 - startPage))].map((e, i) => (
+            <button
+              key={i}
+              onClick={() => handlePageChange(i + startPage)}
+              className={`px-4 py-2 rounded-md text-white font-custom ${
+                pageNumber === i + startPage
+                  ? "bg-uiucorange"
+                  : "bg-gray-300 hover:bg-orange-600"
+              }`}
+            >
+              {i + startPage}
+            </button>
           ))}
+          <button
+            onClick={() => handlePageChange(pageNumber + 1)}
+            className={`px-4 py-2 rounded-md text-white font-custom ${
+              pageNumber === totalPages
+                ? "bg-gray-300 cursor-not-allowed"
+                : "bg-uiucorange hover:bg-orange-600"
+            }`}
+            disabled={pageNumber === totalPages}
+          >
+            Next
+          </button>
         </div>
-      ) : error ? (
-        <p className="font-custom text-center my-6">
-          Error loading dining hall data: {error}
-        </p>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            {food.length > 0 ? (
-              food.map((foodItem: any) => (
-                <div key={foodItem.id} className="flex">
-                  <FoodItemCard
-                    foodItem={foodItem}
-                    loading={false}
-                  />
-                </div>
-              ))
-            ) : (
-              <p className="font-custom text-center my-6 col-span-full">
-                No results found. Please try again with a different filter
-                query.
-              </p>
-            )}
-          </div>
-          <div className="flex items-center justify-center space-x-2 mt-4 mb-8">
-            <button
-              onClick={() => handlePageChange(pageNumber - 1)}
-              className={`px-4 py-2 rounded-md text-white font-custom ${
-                pageNumber === 1
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-uiucorange hover:bg-orange-600"
-              }`}
-              disabled={pageNumber === 1}
-            >
-              Back
-            </button>
-            {[...Array(Math.max(0, endPage + 1 - startPage))].map((e, i) => (
-              <button
-                key={i}
-                onClick={() => handlePageChange(i + startPage)}
-                className={`px-4 py-2 rounded-md text-white font-custom ${
-                  pageNumber === i + startPage
-                    ? "bg-uiucorange"
-                    : "bg-gray-300 hover:bg-orange-600"
-                }`}
-              >
-                {i + startPage}
-              </button>
-            ))}
-            <button
-              onClick={() => handlePageChange(pageNumber + 1)}
-              className={`px-4 py-2 rounded-md text-white font-custom ${
-                pageNumber === totalPages
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-uiucorange hover:bg-orange-600"
-              }`}
-              disabled={pageNumber === totalPages}
-            >
-              Next
-            </button>
-          </div>
-        </>
       )}
     </div>
   );

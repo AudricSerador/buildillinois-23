@@ -13,8 +13,8 @@ export default function Error404() {
         changed, or is temporarily unavailable.
       </p>
       <button
-        className="font-custom px-4 py-2 text-xl bg-uiucorange text-white rounded hover:bg-uiucblue focus:outline-none"
-        onClick={() => (window.location.href = "/")}
+        className="btn btn-secondary font-custom text-xl"
+        onClick={() => router.push('/')}
       >
         Go to Home
       </button>
