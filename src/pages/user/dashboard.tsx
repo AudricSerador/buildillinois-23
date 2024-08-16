@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import { FaInfo } from "react-icons/fa";
 import { FoodItemCard } from "@/components/food_card_display";
 import { FoodItem } from '@/pages/food/[id]';
-import { generateRecommendations } from "@/utils/create_recommendation";
 
 export default function Dashboard(): JSX.Element {
     const [name, setName] = useState('');
