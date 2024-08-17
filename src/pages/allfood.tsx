@@ -27,6 +27,7 @@ export default function AllFood(): JSX.Element {
   const [isLoading, setIsLoading] = useState(true);  // Start with loading true
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0); // New state for total items count
   const [error, setError] = useState<string | null>(null);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [page, setPage] = useState(1);
@@ -80,7 +81,7 @@ export default function AllFood(): JSX.Element {
         allergens: Array.isArray(allergens) ? allergens.join(',') : allergens || '',
         preferences: Array.isArray(preferences) ? preferences.join(',') : preferences || '',
         serving: serving || '',
-        ratingFilter: ratingFilter || ''
+        ratingFilter: ratingFilter || 'any'
       });
 
       console.log('Fetching with params:', queryParams.toString());
@@ -108,6 +109,7 @@ export default function AllFood(): JSX.Element {
       }
 
       setTotalPages(data.totalPages);
+      setTotalItems(data.totalItems); // Set the total items count
       setAvailableDates(data.availableDates || []);
       setHasMore(data.currentPage < data.totalPages);
 
@@ -213,7 +215,7 @@ export default function AllFood(): JSX.Element {
     <div className="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 mt-4">
       <FilterBar availableDates={availableDates} />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-        <p className="text-4xl font-custombold mt-4">All Food ({foodItems.length})</p>
+        <p className="text-4xl font-custombold mt-4">All Food ({totalItems})</p>
         <input
           type="text"
           className="input input-bordered w-full sm:w-64 md:w-80 lg:w-96 mt-4 sm:mt-0"

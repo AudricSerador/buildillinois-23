@@ -88,11 +88,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('API: Parsed sort fields:', parsedSortFields);
 
-    const orderBy = parsedSortFields.map((field: { field: string; order: 'asc' | 'desc' }) => ({
-      [field.field]: field.order
-    }));
+    let orderBy: Prisma.FoodInfoOrderByWithRelationInput[] = [];
 
-    const where: Prisma.FoodInfoWhereInput = {
+    // Add rating-based sorting if "rated only" is selected
+    if (ratingFilter === 'rated_only') {
+      orderBy.push(
+        { Review: { _count: 'desc' } },
+        {
+          Review: {
+            _count: 'desc'
+          }
+        }
+      );
+    }
+
+    // Add other sort fields
+    orderBy = orderBy.concat(parsedSortFields.map((field: { field: string; order: 'asc' | 'desc' }) => ({
+      [field.field]: field.order
+    })));
+
+    let where: Prisma.FoodInfoWhereInput = {
       ...(diningHall && { mealEntries: { some: { diningHall: diningHall as string } } }),
       ...(mealType && { mealEntries: { some: { mealType: mealType as string } } }),
       ...(searchTerm && { 
@@ -105,38 +120,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ...(preferences && { preferences: { contains: preferences as string } }),
     };
 
-    if (serving) {
-      const currentTime = getCurrentCSTTime();
-      const currentDate = format(currentTime, 'EEEE, MMMM d, yyyy');
-      
-      if (serving === 'now' || serving === 'later') {
-        where.mealEntries = {
-          some: {
-            dateServed: currentDate,
-            AND: [
-              { diningHall: { in: Object.keys(diningHallTimes) } },
-              { mealType: { in: Object.keys(diningHallTimes[Object.keys(diningHallTimes)[0]]) } }
-            ]
-          }
-        };
-      } else {
-        where.mealEntries = {
-          some: {
-            dateServed: {
-              gt: currentDate
-            }
-          }
-        };
-      }
+    // Apply rating filter
+    if (ratingFilter === 'rated_only') {
+      where.Review = {
+        some: {}  // This ensures at least one review exists
+      };
     }
 
     console.log('API: Where clause:', where);
 
-    const foodCount = await prisma.foodInfo.count({ where });
+    const foodCount = await prisma.FoodInfo.count({ where });
 
     console.log(`API: Found ${foodCount} food items after applying filters`);
 
-    const food = await prisma.foodInfo.findMany({
+    const food = await prisma.FoodInfo.findMany({
       where,
       include: { 
         mealEntries: true,

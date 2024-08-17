@@ -355,18 +355,21 @@ export function FilterBar({ availableDates }: { availableDates: string[] }) {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-64">
-        {['Any', '50', '75', '90'].map((rating) => (
+        {[
+          { value: 'any', label: 'Any Rating' },
+          { value: 'rated_only', label: 'Rated Only' }
+        ].map((option) => (
           <Button
-            key={rating}
+            key={option.value}
             variant="ghost"
             className="w-full justify-between mb-2"
             onClick={() => {
-              console.log(`Setting rating filter to: ${rating}`);
-              setRatingFilter(rating);
+              console.log(`Setting rating filter to: ${option.value}`);
+              setRatingFilter(option.value);
             }}
           >
-            <span>{rating === 'Any' ? rating : `${rating}%+`}</span>
-            {ratingFilter === rating && <FaCheck className="ml-2 h-4 w-4" />}
+            <span>{option.label}</span>
+            {ratingFilter === option.value && <FaCheck className="ml-2 h-4 w-4" />}
           </Button>
         ))}
       </PopoverContent>
@@ -385,7 +388,7 @@ export function FilterBar({ availableDates }: { availableDates: string[] }) {
       ...allergens.map(allergen => ({ label: `Allergen: ${allergen.toUpperCase()}`, onRemove: () => setAllergens(allergens.filter(a => a !== allergen)) })),
       preferences ? { label: `Restriction: ${preferences.toUpperCase()}`, onRemove: () => setPreferences('') } : null,
       serving ? { label: `Serving: ${(servingOptions.find(o => o.value === serving)?.label || serving).toUpperCase()}`, onRemove: () => setServing('') } : null,
-      ratingFilter && ratingFilter !== 'Any' ? { label: `Rating: ${ratingFilter}%+`, onRemove: () => setRatingFilter('Any') } : null,
+      ratingFilter && ratingFilter !== 'any' ? { label: `Rating: ${ratingFilter === 'rated_only' ? 'Rated Only' : 'Any'}`, onRemove: () => setRatingFilter('any') } : null,
     ];
 
     return badges.filter((badge): badge is NonNullable<typeof badge> => badge !== null).map((badge, index) => (
@@ -416,7 +419,7 @@ export function FilterBar({ availableDates }: { availableDates: string[] }) {
           setAllergens([]);
           setPreferences('');
           setServing('');
-          setRatingFilter('Any');
+          setRatingFilter('any');
         }}>
           Clear All
         </Button>
