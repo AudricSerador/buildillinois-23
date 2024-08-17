@@ -129,11 +129,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('API: Where clause:', where);
 
-    const foodCount = await prisma.FoodInfo.count({ where });
+    const foodCount = await prisma.foodInfo.count({ where });
 
     console.log(`API: Found ${foodCount} food items after applying filters`);
 
-    const food = await prisma.FoodInfo.findMany({
+    const food = await prisma.foodInfo.findMany({
       where,
       include: { 
         mealEntries: true,
@@ -147,7 +147,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log(`API: Returning ${food.length} food items for page ${pageNumber}`);
 
     const currentTime = getCurrentCSTTime();
-    const processedFood = food.map(item => {
+    const processedFood = food.map((item: FoodInfo & { Review: Review[]; mealEntries: any[] }) => {
       const servingStatus = getServingStatus(item.mealEntries, currentTime);
       const reviews = item.Review;
       console.log(`Processing food item: ${item.name}, Reviews:`, reviews);
@@ -178,7 +178,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     })));
 
     const filteredFood = serving
-      ? processedFood.filter((item: any) => {
+      ? processedFood.filter((item: { servingStatus: string | string[] }) => {
           if (serving === 'now') return item.servingStatus === 'now';
           if (serving === 'later') return item.servingStatus === 'later';
           if (Array.isArray(item.servingStatus)) return item.servingStatus.includes(serving as string);

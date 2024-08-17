@@ -365,7 +365,7 @@ export function FilterBar({ availableDates }: { availableDates: string[] }) {
             className="w-full justify-between mb-2"
             onClick={() => {
               console.log(`Setting rating filter to: ${option.value}`);
-              setRatingFilter(option.value);
+              setRatingFilter(option.value as "rated_only" | "any");
             }}
           >
             <span>{option.label}</span>
