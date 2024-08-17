@@ -5,47 +5,55 @@ import { Footer } from "../components/layout/footer";
 import { SEO } from "../components/layout/seo";
 import FeedbackBanner from "@/components/layout/feedback";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AuthProvider } from "@/components/layout/auth.service";
 import { ToastContainer } from "react-toastify";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import "react-toastify/dist/ReactToastify.css";
+import BottomNav from "../components/layout/BottomNav";
+import BackButton from '../components/layout/BackButton';
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const showFeedbackBanner =
     router.pathname !== "/" && router.pathname !== "/user/onboarding";
   const [isFeedbackBannerClosed, setFeedbackBannerClosed] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   const handleCloseFeedbackBanner = () => {
     setFeedbackBannerClosed(true);
   };
 
   const showNavbarAndFooter = router.pathname !== "/user/onboarding";
+  const isMainPage = ['/', '/allfood', '/profile'].includes(router.pathname);
 
   return (
     <>
       <SEO title="IllinEats" description="The better UIUC dining hall experience." />
       <AuthProvider>
         <div className="flex flex-col min-h-screen w-full bg-background font-custom">
+          {showNavbarAndFooter && (
+            <>
+              <Navbar className="hidden md:block" />
+              <div className="h-16 hidden md:block" />
+            </>
+          )}
+          {!isMainPage && <BackButton />}
           <main className="flex-grow">
-            {showNavbarAndFooter && <Navbar />}
-            {showNavbarAndFooter && (
-              <div
-                className={
-                  !showFeedbackBanner
-                    ? "h-16 md:block hidden"
-                    : isFeedbackBannerClosed
-                    ? "h-16 md:block hidden"
-                    : "h-32 md:block hidden"
-                }
-              ></div>
-            )}
-            {showFeedbackBanner && !isFeedbackBannerClosed && (
+            {/* {showFeedbackBanner && !isFeedbackBannerClosed && (
               <FeedbackBanner onClose={handleCloseFeedbackBanner} />
-            )}
-            <Component {...pageProps} />;
+            )} */}
+            <Component {...pageProps} />
             <Analytics />
             <SpeedInsights />
             <ToastContainer
@@ -61,7 +69,12 @@ export default function App({ Component, pageProps }: AppProps) {
               theme="light"
             />
           </main>
-          {showNavbarAndFooter && <Footer />}
+          {showNavbarAndFooter && (
+            <>
+              <BottomNav className="md:hidden" />
+              {!isMobile && <Footer />}
+            </>
+          )}
         </div>
       </AuthProvider>
     </>

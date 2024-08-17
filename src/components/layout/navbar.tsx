@@ -2,7 +2,11 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/components/layout/auth.service";
 import Link from "next/link";
 
-export function Navbar(): JSX.Element {
+interface NavbarProps {
+  className?: string;
+}
+
+export const Navbar: React.FC<NavbarProps> = ({ className }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -25,11 +29,6 @@ export function Navbar(): JSX.Element {
     const checkMobile = () => {
       const mobile = window.innerWidth <= 768;
       setIsMobile(mobile);
-      if (mobile) {
-        document.body.style.paddingTop = "64px";
-      } else {
-        document.body.style.paddingTop = "0px";
-      }
     };
 
     checkMobile();
@@ -43,8 +42,8 @@ export function Navbar(): JSX.Element {
   return (
     <nav
       className={`${
-        isMobile ? "fixed top-0" : ""
-      } fixed bg-uiucblue text-white w-full z-10`}
+        isMobile ? "hidden" : ""
+      } fixed bg-uiucblue text-white w-full z-10 ${className}`}
     >
       <div className="px-5 xl:px-12 py-6 flex w-full items-center shadow-xl justify-center">
         <Link
@@ -257,4 +256,4 @@ export function Navbar(): JSX.Element {
       </div>
     </nav>
   );
-}
+};

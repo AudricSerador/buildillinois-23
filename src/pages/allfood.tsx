@@ -213,7 +213,9 @@ export default function AllFood(): JSX.Element {
 
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 mt-4">
-      <FilterBar availableDates={availableDates} />
+      <div className="pt-4">
+        <FilterBar availableDates={availableDates} />
+      </div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
         <p className="text-4xl font-custombold mt-4">All Food ({totalItems})</p>
         <input
