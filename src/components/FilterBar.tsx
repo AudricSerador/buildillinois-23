@@ -65,6 +65,27 @@ export function FilterBar({ availableDates }: { availableDates: string[] }) {
     setSortFields(prevSortFields => prevSortFields.filter(s => s.field !== field));
   };
 
+  const handleFilterChange = (filterType: string, value: string | string[]) => {
+    switch (filterType) {
+      case 'diningHall':
+        setDiningHall(value as string);
+        break;
+      case 'mealType':
+        setMealType(value as string);
+        break;
+      case 'allergens':
+        setAllergens(value as string[]);
+        break;
+      case 'preferences':
+        setPreferences(value as string);
+        break;
+      case 'serving':
+        setServing(value as string);
+        break;
+      // Add other cases as needed
+    }
+  };
+
   const renderSortPopover = () => (
     <Popover>
       <PopoverTrigger asChild>
@@ -381,11 +402,11 @@ export function FilterBar({ availableDates }: { availableDates: string[] }) {
     <div className="mb-4">
       <div className="flex flex-wrap items-center mb-2">
         {renderSortPopover()}
-        {renderFilterPopover('Dining Hall', diningOptions, diningHall, (value) => setDiningHall(value as string))}
-        {renderFilterPopover('Meal Type', mealTypeOptions, mealType, (value) => setMealType(value as string))}
-        {renderFilterPopover('Serving', servingOptions, serving, (value) => setServing(value as string))}
-        {renderFilterPopover('Allergens', allergenOptions, allergens, (value) => setAllergens(value as string[]), true)}
-        {renderFilterPopover('Restrictions', preferenceOptions, preferences, (value) => setPreferences(value as string))}
+        {renderFilterPopover('Dining Hall', diningOptions, diningHall, (value) => handleFilterChange('diningHall', value))}
+        {renderFilterPopover('Meal Type', mealTypeOptions, mealType, (value) => handleFilterChange('mealType', value))}
+        {renderFilterPopover('Serving', servingOptions, serving, (value) => handleFilterChange('serving', value))}
+        {renderFilterPopover('Allergens', allergenOptions, allergens, (value) => handleFilterChange('allergens', value), true)}
+        {renderFilterPopover('Restrictions', preferenceOptions, preferences, (value) => handleFilterChange('preferences', value))}
         {renderRatingPopover()}
         <Button variant="secondary" className="mb-2" onClick={() => {
           setSortFields([]);

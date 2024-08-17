@@ -41,31 +41,37 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
   const [sortBy, setSortBy] = useState<'likes' | 'recent'>('likes');
   const [filterRating, setFilterRating] = useState<'all' | 'bad' | 'mid' | 'good'>('all');
 
-  useEffect(() => {
-    const fetchReviews = async () => {
-      try {
-        const res = await fetch(`/api/review/get_review?foodId=${foodId}`);
-        const data = await res.json();
-        if (data.success && Array.isArray(data.data)) {
-          const reviewsWithUserNames = await Promise.all(
-            data.data.map(async (review: Review) => {
-              const userName = await fetchUserName(review.userId);
-              return { ...review, userName };
-            })
-          );
-          setReviews(reviewsWithUserNames);
-        } else {
-          console.error("Failed to fetch reviews or invalid data format");
-          setReviews([]);
-        }
-      } catch (error) {
-        console.error("Error fetching reviews:", error);
-        setReviews([]);
-      } finally {
-        setIsLoading(false);
+  const fetchReviews = async () => {
+    try {
+      console.log('Fetching reviews for foodId:', foodId);
+      const res = await fetch(`/api/review/get_reviews?foodIds=${foodId}`);
+      if (!res.ok) {
+        throw new Error('Failed to fetch reviews');
       }
-    };
+      const data = await res.json();
+      console.log('Received review data:', data);
+      if (data.success && data.data && data.data[foodId]) {
+        const reviewsWithUserNames = await Promise.all(
+          data.data[foodId].map(async (review: Review) => {
+            const userName = await fetchUserName(review.userId);
+            return { ...review, userName };
+          })
+        );
+        console.log('Reviews with usernames:', reviewsWithUserNames);
+        setReviews(reviewsWithUserNames);
+      } else {
+        console.log("No reviews found for this food item");
+        setReviews([]);
+      }
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      setReviews([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchReviews();
   }, [foodId]);
 

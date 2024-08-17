@@ -42,4 +42,31 @@ export const diningHallTimes: { [key: string]: { [key: string]: string } } = {
       "A la Carte--POS Feed": "10:00AM - 10:30PM",
     },
   };
-  
+
+  export interface FoodItem {
+    id: string;
+    calories: number;
+    servingSize: string;
+    caloriesFat: number;
+    totalFat: number;
+    saturatedFat: number;
+    transFat: number;
+    cholesterol: number;
+    sodium: number;
+    totalCarbohydrates: number;
+    fiber: number;
+    sugars: number;
+    protein: number;
+    calciumDV: number;
+    ironDV: number;
+    name: string;
+    ingredients: string;
+    allergens: string;
+    preferences: string;
+    mealEntries: any[];
+    reviewSummary?: {
+      count: number;
+      averageRating: number;
+    };
+    topImage?: any;
+  }

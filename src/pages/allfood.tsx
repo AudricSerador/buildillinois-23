@@ -1,30 +1,17 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { FoodItemCard } from "@/components/food_card_display";
-import { useRouter } from "next/router";
 import { FilterBar } from "@/components/FilterBar";
 import { useAtom } from 'jotai';
 import {
   sortFieldsAtom, diningHallAtom, mealTypeAtom,
   searchTermAtom, dateServedAtom, allergensAtom, preferencesAtom, datesAtom, servingAtom, availableDatesAtom, ratingFilterAtom
 } from '@/atoms/filterAtoms';
-
-function debounce(fn: Function, delay: number) {
-  let timer: NodeJS.Timeout;
-  return function (this: any, ...args: any[]) {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      fn.apply(this, args);
-    }, delay);
-  };
-}
+import { FoodItem } from '@/utils/constants';
+import { useInView } from 'react-intersection-observer';
+import debounce from 'lodash/debounce';
 
 export default function AllFood(): JSX.Element {
-  const router = useRouter();
   const pageSize = 10;
-  const pageNumber = router.query.page
-    ? parseInt(router.query.page as string)
-    : 1;
-
   const [sortFields] = useAtom(sortFieldsAtom);
   const [diningHall] = useAtom(diningHallAtom);
   const [mealType] = useAtom(mealTypeAtom);
@@ -38,10 +25,35 @@ export default function AllFood(): JSX.Element {
   const [ratingFilter] = useAtom(ratingFilterAtom);
 
   const [isLoading, setIsLoading] = useState(true);  // Start with loading true
-  const [food, setFood] = useState([]);
-  const [foodCount, setFoodCount] = useState(0);
+  const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const maxPages = 5;
+
+  const isFetchingRef = useRef(false);
+  const prevFiltersRef = useRef({ sortFields, diningHall, mealType, debouncedSearchTerm, dateServed, allergens, preferences, serving, ratingFilter });
+
+  const { ref, inView } = useInView({
+    threshold: 0,
+  });
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768); // Adjust this breakpoint as needed
+    };
+
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   const debouncedFetchData = useCallback(
     debounce((value: string) => {
@@ -50,82 +62,158 @@ export default function AllFood(): JSX.Element {
     [setDebouncedSearchTerm]
   );
 
-  useEffect(() => {
-    const fetchFood = async () => {
-      setIsLoading(true);  // Set loading to true when fetching starts
+  const fetchFoodItems = useCallback(async (loadMore = false) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    setIsLoadingMore(loadMore);
+    if (!loadMore) setIsLoading(true);
+
+    try {
       const queryParams = new URLSearchParams({
-        page: pageNumber.toString(),
+        page: loadMore ? (page + 1).toString() : '1',
+        pageSize: pageSize.toString(),
         sortFields: JSON.stringify(sortFields),
-        diningHall,
-        mealType,
-        searchTerm,
-        dateServed,
-        allergens: allergens.join(','),
-        preferences,
-        serving,
-        ratingFilter
+        diningHall: diningHall || '',
+        mealType: mealType || '',
+        searchTerm: debouncedSearchTerm,
+        dateServed: dateServed || '',
+        allergens: Array.isArray(allergens) ? allergens.join(',') : allergens || '',
+        preferences: Array.isArray(preferences) ? preferences.join(',') : preferences || '',
+        serving: serving || '',
+        ratingFilter: ratingFilter || ''
       });
 
-      console.log('Fetching food with params:', queryParams.toString());
+      console.log('Fetching with params:', queryParams.toString());
 
-      try {
-        const response = await fetch(`/api/get_allfood?${queryParams}`);
-        const data = await response.json();
-        setFood(data.food);
-        setFoodCount(data.foodCount);
-        setAvailableDates(data.availableDates);
-      } catch (error) {
-        console.error("Error fetching food:", error);
-        setError("Failed to load food data. Please try again later.");
-      } finally {
-        setIsLoading(false);  // Set loading to false when fetching is done
+      const response = await fetch(`/api/get_allfood?${queryParams.toString()}`);
+      if (!response.ok) throw new Error('Failed to fetch food items');
+
+      const data = await response.json();
+      console.log('Received data from API:', data);
+
+      const processedFoodItems = data.foodItems.map((item: FoodItem) => {
+        console.log(`Processing food item: ${item.name}, Review Summary:`, item.reviewSummary);
+        return {
+          ...item,
+          reviewSummary: item.reviewSummary || { count: 0, averageRating: 0 }
+        };
+      });
+
+      if (loadMore) {
+        setFoodItems(prev => [...prev, ...processedFoodItems]);
+        setPage(prevPage => prevPage + 1);
+      } else {
+        setFoodItems(processedFoodItems);
+        setPage(1);
       }
+
+      setTotalPages(data.totalPages);
+      setAvailableDates(data.availableDates || []);
+      setHasMore(data.currentPage < data.totalPages);
+
+      // Fetch images for the new food items
+      if (data.foodItems.length > 0) {
+        const foodIds = data.foodItems.map((item: FoodItem) => item.id).join(',');
+        const imagesResponse = await fetch(`/api/image/get_images?foodIds=${foodIds}`);
+        const imagesData = await imagesResponse.json();
+
+        setFoodItems(prevItems => 
+          prevItems.map(item => ({
+            ...item,
+            topImage: imagesData.images?.[item.id]?.[0] || null
+          }))
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching food items:', error);
+      setError('Failed to fetch food items. Please try again later.');
+    } finally {
+      isFetchingRef.current = false;
+      setIsLoading(false);
+      setIsLoadingMore(false);
+    }
+  }, [sortFields, diningHall, mealType, debouncedSearchTerm, dateServed, allergens, preferences, serving, ratingFilter, page, pageSize]);
+
+  const debouncedFetchFoodItems = useCallback(
+    debounce(() => {
+      fetchFoodItems();
+    }, 300),
+    [fetchFoodItems]
+  );
+
+  useEffect(() => {
+    const currentFilters = { sortFields, diningHall, mealType, debouncedSearchTerm, dateServed, allergens, preferences, serving, ratingFilter };
+    const prevFilters = prevFiltersRef.current;
+
+    if (JSON.stringify(currentFilters) !== JSON.stringify(prevFilters)) {
+      console.log('Filters changed, triggering fetch');
+      debouncedFetchFoodItems();
+      prevFiltersRef.current = currentFilters;
+    } else {
+      console.log('Filters unchanged, skipping fetch');
+    }
+  }, [sortFields, diningHall, mealType, debouncedSearchTerm, dateServed, allergens, preferences, serving, ratingFilter, debouncedFetchFoodItems]);
+
+  useEffect(() => {
+    return () => {
+      debouncedFetchFoodItems.cancel();
     };
+  }, [debouncedFetchFoodItems]);
 
-    fetchFood();
-  }, [
-    pageNumber,
-    sortFields,
-    diningHall,
-    mealType,
-    searchTerm,
-    dateServed,
-    allergens,
-    preferences,
-    serving,
-    ratingFilter,
-    setAvailableDates // Add this
-  ]);
+  useEffect(() => {
+    console.log('Component mounted, triggering initial fetch');
+    fetchFoodItems();
+  }, []);
 
-  const handlePageChange = (newPageNumber: number) => {
-    router.push({
-      pathname: "/allfood",
-      query: {
-        page: newPageNumber,
-        sortFields: JSON.stringify(sortFields),
-        diningHall: diningHall,
-        mealType: mealType,
-        searchTerm: searchTerm,
-        ratingFilter: ratingFilter
-      },
+  useEffect(() => {
+    console.log('Current state:', {
+      isLoading,
+      foodItems: foodItems.length,
+      page,
+      totalPages,
+      hasMore,
+      error
     });
-  };
+  }, [isLoading, foodItems, page, totalPages, hasMore, error]);
 
-  const totalPages = Math.ceil(foodCount / pageSize);
-  const startPage = Math.min(
-    Math.max(1, pageNumber - 2),
-    Math.max(1, totalPages - 4)
-  );
-  const endPage = Math.max(
-    Math.min(totalPages, pageNumber + 2),
-    Math.min(totalPages, startPage + 4)
-  );
+  useEffect(() => {
+    if (!isInitialLoad) {
+      setPage(1);
+      setFoodItems([]);
+      setHasMore(true);
+      fetchFoodItems();
+    }
+  }, [sortFields, diningHall, mealType, debouncedSearchTerm, dateServed, allergens, preferences, serving, ratingFilter, fetchFoodItems, isInitialLoad]);
+
+  useEffect(() => {
+    if (!isInitialLoad && page > 1) {
+      fetchFoodItems(true);
+    }
+  }, [page, isInitialLoad, fetchFoodItems]);
+
+  useEffect(() => {
+    if (!isInitialLoad && page > 1) {
+      fetchFoodItems(true);
+    }
+  }, [page, isInitialLoad, fetchFoodItems]);
+
+  useEffect(() => {
+    if (inView && isMobile && !isLoadingMore && hasMore) {
+      fetchFoodItems(true);
+    }
+  }, [inView, isMobile, isLoadingMore, hasMore, fetchFoodItems]);
+
+  const handleShowMore = () => {
+    if (!isLoadingMore && hasMore) {
+      fetchFoodItems(true);
+    }
+  };
 
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 mt-4">
       <FilterBar availableDates={availableDates} />
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-        <p className="text-4xl font-custombold mt-4">All Food ({foodCount})</p>
+        <p className="text-4xl font-custombold mt-4">All Food ({foodItems.length})</p>
         <input
           type="text"
           className="input input-bordered w-full sm:w-64 md:w-80 lg:w-96 mt-4 sm:mt-0"
@@ -138,65 +226,42 @@ export default function AllFood(): JSX.Element {
         />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {isLoading
-          ? Array(10).fill(null).map((_, index) => (
-              <div key={index} className="flex">
-                <FoodItemCard foodItem={{} as any} loading={true} sortFields={sortFields} futureDates={availableDates} />
-              </div>
-            ))
-          : food.length > 0
-          ? food.map((foodItem: any) => (
-              <div key={foodItem.id} className="flex">
-                <FoodItemCard
-                  foodItem={foodItem}
-                  loading={false}
-                  sortFields={sortFields}
-                  futureDates={availableDates}
-                />
-              </div>
-            ))
-          : <p className="font-custom text-center my-6 col-span-full">
-              No results found. Please try again with a different filter query.
-            </p>
-        }
+        {isLoading ? (
+          Array(10).fill(null).map((_, index) => (
+            <FoodItemCard key={`skeleton-${index}`} foodItem={{} as FoodItem} loading={true} sortFields={sortFields} futureDates={availableDates} />
+          ))
+        ) : (
+          foodItems.map((foodItem: FoodItem) => (
+            <FoodItemCard 
+              key={foodItem.id} 
+              foodItem={{
+                ...foodItem,
+                reviewSummary: foodItem.reviewSummary || { count: 0, averageRating: 0 }
+              }} 
+              loading={false} 
+              sortFields={sortFields} 
+              futureDates={availableDates} 
+            />
+          ))
+        )}
       </div>
-      {!isLoading && food.length > 0 && (
-        <div className="flex items-center justify-center space-x-2 mt-4 mb-8">
-          <button
-            onClick={() => handlePageChange(pageNumber - 1)}
-            className={`px-4 py-2 rounded-md text-white font-custom ${
-              pageNumber === 1
-                ? "bg-gray-300 cursor-not-allowed"
-                : "bg-uiucorange hover:bg-orange-600"
-            }`}
-            disabled={pageNumber === 1}
-          >
-            Back
-          </button>
-          {[...Array(Math.max(0, endPage + 1 - startPage))].map((e, i) => (
+      {!isLoading && foodItems.length === 0 && (
+        <p className="font-custom text-center my-6 col-span-full">
+          No results found. Please try again with a different filter query.
+        </p>
+      )}
+      {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+      {hasMore && (
+        <div ref={ref} className="mt-4 flex justify-center">
+          {!isMobile && (
             <button
-              key={i}
-              onClick={() => handlePageChange(i + startPage)}
-              className={`px-4 py-2 rounded-md text-white font-custom ${
-                pageNumber === i + startPage
-                  ? "bg-uiucorange"
-                  : "bg-gray-300 hover:bg-orange-600"
-              }`}
+              onClick={handleShowMore}
+              className="btn btn-primary"
+              disabled={isLoadingMore}
             >
-              {i + startPage}
+              {isLoadingMore ? 'Loading...' : 'Show More'}
             </button>
-          ))}
-          <button
-            onClick={() => handlePageChange(pageNumber + 1)}
-            className={`px-4 py-2 rounded-md text-white font-custom ${
-              pageNumber === totalPages
-                ? "bg-gray-300 cursor-not-allowed"
-                : "bg-uiucorange hover:bg-orange-600"
-            }`}
-            disabled={pageNumber === totalPages}
-          >
-            Next
-          </button>
+          )}
         </div>
       )}
     </div>

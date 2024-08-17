@@ -35,24 +35,30 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ foodId }) => {
       return;
     }
     const fetchImages = async () => {
-      const response = await fetch(`/api/image/get_images?foodId=${foodId}`);
-      const data = await response.json();
-    
-      if (data.success) {
-        const imagesWithUserNames = await Promise.all(
-          data.images.map(async (image: ImageData) => {
-            const userName = await fetchUserName(image.userId);
-            return { ...image, userName };
-          })
-        );
-    
-        const sortedImages = imagesWithUserNames.sort((a, b) => b.likes - a.likes);
-    
-        setImages(sortedImages);
-
-        console.log("Images fetched and sorted by likes:", sortedImages);
-      } else {
-        console.error("Failed to fetch images:", data.message);
+      try {
+        console.log('Fetching images for foodId:', foodId);
+        const res = await fetch(`/api/image/get_images?foodIds=${foodId}`);
+        if (!res.ok) {
+          throw new Error('Failed to fetch images');
+        }
+        const data = await res.json();
+        console.log('Received image data:', data);
+        if (data.success && data.images && data.images[foodId]) {
+          const imagesWithUserNames = await Promise.all(
+            data.images[foodId].map(async (image: ImageData) => {
+              const userName = await fetchUserName(image.userId);
+              return { ...image, userName };
+            })
+          );
+          console.log('Images with usernames:', imagesWithUserNames);
+          setImages(imagesWithUserNames);
+        } else {
+          console.log("No images found for this food item");
+          setImages([]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch images:', error);
+        setImages([]);
       }
     };
 

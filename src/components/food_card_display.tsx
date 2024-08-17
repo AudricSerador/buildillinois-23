@@ -76,45 +76,46 @@ const nutrientLabels: { [key: string]: string } = {
 };
 
 export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, futureDates, sortFields }) => {
-  const [topImage, setTopImage] = useState<ImageData | null>(null);
-  const [reviews, setReviews] = useState<ReviewData[]>([]);
-  const [scorePercentage, setScorePercentage] = useState(0);
+  console.log('Food Item in FoodItemCard:', foodItem);
+  console.log('Review Summary:', foodItem.reviewSummary);
+
+  const renderRating = () => {
+    console.log('Rendering rating for food item:', foodItem.name);
+    console.log('Review summary:', foodItem.reviewSummary);
+
+    if (!foodItem.reviewSummary) {
+      console.log('No review summary available');
+      return null;
+    }
+
+    const { count, averageRating } = foodItem.reviewSummary;
+    const scorePercentage = Math.round(averageRating * 100);
+
+    console.log('Calculated score percentage:', scorePercentage);
+
+    return (
+      <div className="flex items-center">
+        <div className="mr-1">
+          {count === 0 ? (
+            <FaFaceMehBlank className="text-lg text-gray-500" />
+          ) : scorePercentage >= 70 ? (
+            <FaSmile className="text-lg text-green-500" />
+          ) : scorePercentage >= 40 ? (
+            <FaMeh className="text-lg text-yellow-500" />
+          ) : (
+            <FaFrown className="text-lg text-red-500" />
+          )}
+        </div>
+        <div className="text-sm font-semibold">
+          {count === 0 ? 'N/A' : `${scorePercentage}%`}
+        </div>
+        <div className="ml-1 text-xs text-gray-500">({count})</div>
+      </div>
+    );
+  };
+
   const [isServingNow, setIsServingNow] = useState(false);
   const [isServingLater, setIsServingLater] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
-  const [dataLoaded, setDataLoaded] = useState(false);
-
-  useEffect(() => {
-    if (!loading) {
-      const fetchTopImage = async () => {
-        const response = await fetch(`/api/image/get_images?foodId=${foodItem.id}`);
-        const data = await response.json();
-        if (data.success) {
-          const sortedImages = data.images.sort((a: ImageData, b: ImageData) => b.likes - a.likes);
-          setTopImage(sortedImages[0] || null);
-          setImageLoaded(true);
-        }
-      };
-
-      const fetchReviews = async () => {
-        const response = await fetch(`/api/review/get_review?foodId=${foodItem.id}`);
-        const data = await response.json();
-        if (data.success) {
-          const fetchedReviews = data.data || [];
-          setReviews(fetchedReviews);
-          const totalScore = fetchedReviews.reduce((sum: number, review: ReviewData) => {
-            return sum + (review.rating === 'good' ? 100 : review.rating === 'mid' ? 50 : 0);
-          }, 0);
-          const percentage = fetchedReviews.length > 0 ? Math.round(totalScore / fetchedReviews.length) : 0;
-          setScorePercentage(percentage);
-        }
-        setDataLoaded(true);
-      };
-
-      fetchTopImage();
-      fetchReviews();
-    }
-  }, [loading, foodItem.id]);
 
   useEffect(() => {
     if (!loading) {
@@ -147,26 +148,6 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, f
     }
   }, [loading, foodItem.mealEntries]);
 
-  const renderRating = () => {
-    return (
-      <div className="flex items-center">
-        {reviews.length === 0 ? (
-          <FaFaceMehBlank className={`text-2xl text-gray-500`} />
-        ) : scorePercentage >= 70 ? (
-          <FaSmile className={`text-2xl text-green-500`} />
-        ) : scorePercentage >= 40 ? (
-          <FaMeh className={`text-2xl text-yellow-500`} />
-        ) : (
-          <FaFrown className={`text-2xl text-red-500`} />
-        )}
-        <div className={`ml-2`}>
-          <div className={`text-lg font-medium`}>{reviews.length === 0 ? "n/a" : `${scorePercentage}%`}</div>
-          <div className={`text-sm text-gray-500`}>({reviews.length})</div>
-        </div>
-      </div>
-    );
-  };
-
   const renderBadges = () => {
     const mealTypes = new Set(foodItem.mealEntries?.map((entry: any) => entry.mealType) || []);
     const diningHalls = new Set(foodItem.mealEntries?.map((entry: any) => diningTags[entry.diningHall] || entry.diningHall) || []);
@@ -195,7 +176,7 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, f
         .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
       
       if (futureDates.length > 0) {
-        return <Badge variant="info">Serving on {futureDates[0]}</Badge>;
+        return <Badge variant="info">Serving on {new Date(futureDates[0]).toLocaleDateString()}</Badge>;
       }
     }
     return <Badge variant="destructive">Not Available</Badge>;
@@ -224,18 +205,25 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, f
   };
 
   return (
-    <Link href={`/food/${foodItem.id}`} className="w-full">
+    <Link href={`/food/${foodItem.id}`} className="w-full" key={foodItem.id}>
       <Card className="overflow-hidden flex flex-row sm:flex-col h-full">
         <div className="w-1/3 sm:w-full h-full sm:h-32 bg-gray-100 overflow-hidden">
-          {!loading && imageLoaded && topImage ? (
+          {!loading && foodItem.topImage ? (
             <img 
-              src={topImage.url} 
+              src={foodItem.topImage.url} 
               alt={foodItem.name} 
               className="w-full h-full object-cover object-center"
+              onError={(e) => {
+                console.error('Image failed to load:', foodItem.topImage.url);
+                e.currentTarget.onerror = null; // Prevent infinite loop
+                e.currentTarget.src = '/placeholder-image.jpg'; // Replace with your placeholder image path
+              }}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
-              <span className="text-gray-500 text-sm">No Image</span>
+              <span className="text-gray-500 text-sm">
+                {loading ? "Loading..." : "No Image"}
+              </span>
             </div>
           )}
         </div>
@@ -246,7 +234,7 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, f
                 <CardTitle className="text-sm font-bold truncate w-3/4 md:text-sm">
                   {loading ? <div className="bg-gray-200 animate-pulse h-4 w-full"></div> : foodItem.name}
                 </CardTitle>
-                <div className={`${loading ? 'bg-gray-200 animate-pulse w-6 h-6 md:w-8 md:h-8 rounded-full' : ''}`}>
+                <div className={`${loading ? 'bg-gray-200 animate-pulse w-6 h-6 rounded-full' : ''}`}>
                   {!loading && renderRating()}
                 </div>
               </div>

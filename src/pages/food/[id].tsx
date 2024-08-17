@@ -30,6 +30,11 @@ export interface FoodItem {
   allergens: string;
   preferences: string;
   mealEntries: any[];
+  reviewSummary?: {
+    count: number;
+    averageRating: number;
+  };
+  topImage?: Image;
 }
 
 export interface Image {
@@ -76,9 +81,16 @@ export default function FoodItemPage() {
 
     const fetchImages = async () => {
       if (foodId) {
-        const res = await fetch(`/api/images?foodId=${foodId}`);
-        const data = await res.json();
-        setImages(data.images);
+        try {
+          const res = await fetch(`/api/image/get_images?foodId=${foodId}`);
+          if (!res.ok) {
+            throw new Error('Failed to fetch images');
+          }
+          const data = await res.json();
+          setImages(data.images[foodId] || []);
+        } catch (error) {
+          console.error('Error fetching images:', error);
+        }
       }
     };
 
