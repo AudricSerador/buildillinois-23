@@ -87,7 +87,7 @@ export default function FoodItemPage() {
             throw new Error('Failed to fetch images');
           }
           const data = await res.json();
-          setImages(data.images[foodId] || []);
+          setImages(data.images?.[foodId as string] ?? []);
         } catch (error) {
           console.error('Error fetching images:', error);
         }

@@ -192,12 +192,12 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, f
       <div className="flex flex-wrap gap-1">
         {mainNutrients.map(nutrient => (
           <Badge key={nutrient} variant="outline" className="whitespace-nowrap py-0 px-1 sm:py-0 sm:px-1">
-            {foodItem[nutrient as keyof FoodItem] }{nutrient === 'calories' ? '' : 'g'} {nutrientLabels[nutrient]}
+            {String(foodItem[nutrient as keyof FoodItem])}{nutrient === 'calories' ? '' : 'g'} {nutrientLabels[nutrient]}
           </Badge>
         ))}
         {additionalNutrients && additionalNutrients.map(nutrient => (
           <Badge key={nutrient} variant="outline" className="whitespace-nowrap py-0 px-1 sm:py-0 sm:px-1">
-            {foodItem[nutrient as keyof FoodItem] }{nutrient === 'calories' ? '' : 'g'} {nutrientLabels[nutrient]}
+            {String(foodItem[nutrient as keyof FoodItem])}{nutrient === 'calories' ? '' : 'g'} {nutrientLabels[nutrient]}
           </Badge>
         ))}
       </div>
@@ -210,11 +210,11 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, f
         <div className="w-1/3 sm:w-full h-full sm:h-32 bg-gray-100 overflow-hidden">
           {!loading && foodItem.topImage ? (
             <img 
-              src={foodItem.topImage.url} 
+              src={foodItem.topImage?.url} 
               alt={foodItem.name} 
               className="w-full h-full object-cover object-center"
               onError={(e) => {
-                console.error('Image failed to load:', foodItem.topImage.url);
+                console.error('Image failed to load:', foodItem.topImage?.url);
                 e.currentTarget.onerror = null; // Prevent infinite loop
                 e.currentTarget.src = '/placeholder-image.jpg'; // Replace with your placeholder image path
               }}
