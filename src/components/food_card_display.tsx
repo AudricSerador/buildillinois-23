@@ -164,7 +164,14 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({
       }
       return entry.mealType;
     }) || []);
-    const diningHalls = new Set(foodItem.mealEntries?.map((entry: any) => diningTags[entry.diningHall] || entry.diningHall) || []);
+    
+    const diningHalls = new Set(foodItem.mealEntries?.map((entry: any) => {
+      // Exclude "Provolone Soup, Salad, Deli & Dessert Station"
+      if (entry.diningHall === "Provolone Soup, Salad, Deli & Dessert Station") {
+        return null;
+      }
+      return diningTags[entry.diningHall] || entry.diningHall;
+    }).filter(Boolean) || []);
 
     return (
       <>
