@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@/components/layout/auth.service";
 import { FoodCarousel } from "@/components/FoodCarousel";
 
@@ -45,6 +46,20 @@ export default function Home(): JSX.Element {
 
   return (
     <div className="flex flex-col items-stretch">
+      {/* Mobile-only navbar */}
+      <div className="md:hidden bg-primary p-4 flex items-center">
+        <Image
+          src="/illineatslogo.svg"
+          alt="IllinEats Icon"
+          width={32}
+          height={32}
+          className="mr-2"
+        />
+        <Link href="/" className="text-2xl font-bold font-heading text-white">
+          IllinEats
+        </Link>
+      </div>
+
       <div
         className="hero h-[40vh]"
         style={{

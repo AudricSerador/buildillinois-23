@@ -14,6 +14,7 @@ interface FoodItemCardProps {
   loading: boolean;
   futureDates: string[];
   sortFields?: { field: string; order: 'asc' | 'desc' }[];
+  disableVerticalLayout?: boolean; // New prop
 }
 
 export interface ImageData {
@@ -78,7 +79,13 @@ const nutrientLabels: { [key: string]: string } = {
   // Add any other nutrient fields here
 };
 
-export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, futureDates, sortFields }) => {
+export const FoodItemCard: React.FC<FoodItemCardProps> = ({ 
+  foodItem, 
+  loading, 
+  futureDates, 
+  sortFields,
+  disableVerticalLayout = false // Default to false
+}) => {
   console.log('Rendering FoodItemCard:', foodItem.name);
 
   const renderRating = () => {
@@ -211,9 +218,21 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, f
     );
   };
 
+  const layoutClasses = disableVerticalLayout
+    ? "flex flex-col h-full"
+    : "flex flex-row sm:flex-col h-full";
+
+  const imageClasses = disableVerticalLayout
+    ? "w-full h-32 bg-gray-100 overflow-hidden"
+    : "w-1/3 sm:w-full h-full sm:h-32 bg-gray-100 overflow-hidden";
+
+  const contentClasses = disableVerticalLayout
+    ? "p-3 flex flex-col justify-between flex-grow"
+    : "p-3 flex flex-col justify-between flex-grow w-2/3 sm:w-full";
+
   const CardContentJSX = (
-    <Card className="overflow-hidden flex flex-row sm:flex-col h-full">
-      <div className="w-1/3 sm:w-full h-full sm:h-32 bg-gray-100 overflow-hidden">
+    <Card className={`overflow-hidden ${layoutClasses}`}>
+      <div className={imageClasses}>
         {!loading && foodItem.topImage ? (
           <Image 
             src={foodItem.topImage?.url} 
@@ -235,7 +254,7 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, f
           </div>
         )}
       </div>
-      <CardContent className="p-3 flex flex-col justify-between flex-grow w-2/3 sm:w-full">
+      <CardContent className={contentClasses}>
         <div>
           <CardHeader className="p-0 mb-1">
             <div className="flex justify-between items-start">

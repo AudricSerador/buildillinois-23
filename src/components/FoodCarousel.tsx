@@ -40,30 +40,38 @@ export function FoodCarousel({ title, filters }: FoodCarouselProps) {
   }, [filters]);
 
   return (
-    <div className="my-8">
+    <div className="my-8 px-4 sm:px-0">
       <h2 className="text-2xl font-custombold mb-4">{title}</h2>
-      <Carousel className="w-full">
-        <CarouselContent className="-ml-2 md:-ml-4">
-          {isLoading
-            ? Array.from({ length: 5 }).map((_, index) => (
-                <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-                  <FoodItemCard foodItem={{} as FoodItem} loading={true} futureDates={[]} />
-                </CarouselItem>
-              ))
-            : foodItems.map((foodItem) => (
-                <CarouselItem key={foodItem.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
-                  <FoodItemCard 
-                    foodItem={foodItem} 
-                    loading={false} 
-                    futureDates={[]} 
-                    sortFields={[]}
-                  />
-                </CarouselItem>
-              ))}
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel>
+      <div className="relative">
+        <Carousel className="w-full">
+          <CarouselContent className="-ml-2 md:-ml-4">
+            {isLoading
+              ? Array.from({ length: 5 }).map((_, index) => (
+                  <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                    <FoodItemCard 
+                      foodItem={{} as FoodItem} 
+                      loading={true} 
+                      futureDates={[]} 
+                      disableVerticalLayout={true}
+                    />
+                  </CarouselItem>
+                ))
+              : foodItems.map((foodItem) => (
+                  <CarouselItem key={foodItem.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                    <FoodItemCard 
+                      foodItem={foodItem} 
+                      loading={false} 
+                      futureDates={[]} 
+                      sortFields={[]}
+                      disableVerticalLayout={true}
+                    />
+                  </CarouselItem>
+                ))}
+          </CarouselContent>
+          <CarouselPrevious className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2" />
+          <CarouselNext className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2" />
+        </Carousel>
+      </div>
     </div>
   );
 }

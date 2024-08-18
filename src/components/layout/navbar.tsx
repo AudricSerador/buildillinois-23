@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/components/layout/auth.service";
 import Link from "next/link";
+import Image from 'next/image';
 
 interface NavbarProps {
   className?: string;
@@ -46,12 +47,21 @@ export const Navbar: React.FC<NavbarProps> = ({ className }) => {
       } fixed bg-uiucblue text-white w-full z-10 ${className}`}
     >
       <div className="px-5 xl:px-12 py-6 flex w-full items-center shadow-xl justify-center">
-        <Link
-          href="/"
-          className="text-3xl font-bold font-heading text-uiucorange absolute left-5"
-        >
-          IllinEats
-        </Link>
+        <div className="flex items-center absolute left-5">
+          <Image
+            src="/illineatslogo.svg"
+            alt="IllinEats Icon"
+            width={32}
+            height={32}
+            className="mr-2"
+          />
+          <Link
+            href="/"
+            className="text-3xl font-bold font-heading text-uiucorange"
+          >
+            IllinEats
+          </Link>
+        </div>
         {isMobile ? (
           <>
             <button

@@ -48,7 +48,7 @@ export default function App({ Component, pageProps }: AppProps) {
             </>
           )}
           {!isMainPage && <BackButton />}
-          <main className="flex-grow">
+          <main className="flex-grow pb-16 md:pb-0">
             {/* {showFeedbackBanner && !isFeedbackBannerClosed && (
               <FeedbackBanner onClose={handleCloseFeedbackBanner} />
             )} */}
