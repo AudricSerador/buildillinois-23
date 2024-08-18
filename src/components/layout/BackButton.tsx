@@ -11,7 +11,7 @@ const BackButton: React.FC = () => {
   return (
     <button
       onClick={handleBack}
-      className="fixed top-4 left-4 z-50 p-2 bg-primary text-white rounded-full shadow-md"
+      className="fixed top-4 left-4 z-50 p-2 bg-primary text-white rounded-full shadow-md md:hidden"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

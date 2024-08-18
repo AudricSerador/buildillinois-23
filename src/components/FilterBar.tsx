@@ -26,7 +26,12 @@ const nutrientLabels: { [key: string]: string } = {
   rating: "Rating",
 };
 
-export function FilterBar({ availableDates }: { availableDates: string[] }) {
+interface FilterBarProps {
+  availableDates: string[];
+  debouncedFetchFoodItems: () => void;
+}
+
+export function FilterBar({ availableDates, debouncedFetchFoodItems }: FilterBarProps) {
   const [sortFields, setSortFields] = useAtom(sortFieldsAtom);
   const [diningHall, setDiningHall] = useAtom(diningHallAtom);
   const [mealType, setMealType] = useAtom(mealTypeAtom);
@@ -82,8 +87,9 @@ export function FilterBar({ availableDates }: { availableDates: string[] }) {
       case 'serving':
         setServing(value as string);
         break;
-      // Add other cases as needed
     }
+    // Trigger a re-fetch whenever any filter changes
+    debouncedFetchFoodItems();
   };
 
   const renderSortPopover = () => (

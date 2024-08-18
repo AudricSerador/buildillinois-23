@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/layout/auth.service";
+import { FoodCarousel } from "@/components/FoodCarousel";
 
 const subscribeToNotifications = async (userId: string | undefined) => {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
@@ -85,6 +86,13 @@ export default function Home(): JSX.Element {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32">
+        <FoodCarousel 
+          title="Most Popular" 
+          filters={{ ratingFilter: 'rated_only' }} 
+        />
       </div>
     </div>
   );

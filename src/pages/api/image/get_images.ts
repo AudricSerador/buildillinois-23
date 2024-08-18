@@ -16,7 +16,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    const idArray = Array.isArray(foodIds) ? foodIds : [foodIds];
+    // Split the comma-separated string into an array of foodIds
+    const idArray = (foodIds as string).split(',');
     console.log('API: Searching for images with foodIds:', idArray);
 
     const images = await prisma.foodImage.findMany({

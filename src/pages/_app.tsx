@@ -3,7 +3,6 @@ import type { AppProps } from "next/app";
 import { Navbar } from "../components/layout/navbar";
 import { Footer } from "../components/layout/footer";
 import { SEO } from "../components/layout/seo";
-import FeedbackBanner from "@/components/layout/feedback";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import { AuthProvider } from "@/components/layout/auth.service";

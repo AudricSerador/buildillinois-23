@@ -7,6 +7,7 @@ import { FaFaceMehBlank } from "react-icons/fa6";
 import { diningHallTimes } from "./entries_display";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Image from 'next/image';
 
 interface FoodItemCardProps {
   foodItem: FoodItem;
@@ -25,8 +26,10 @@ export interface ImageData {
 }
 
 export const diningTags: { [key: string]: string } = {
-  "Ikenberry Dining Center (Ike)": "Ikenberry",
+  "Ikenberry Dining Center (Ike)": "Ike",
+  "Ike Everybody Eats Menu": "Ike",
   "Illinois Street Dining Center (ISR)": "ISR",
+  "ISR Everybody Eats Menu": "ISR",
   "Pennsylvania Avenue Dining Hall (PAR)": "PAR",
   "Lincoln Avenue Dining Hall (Allen)": "Allen",
   "Field of Greens (LAR)": "LAR",
@@ -76,8 +79,7 @@ const nutrientLabels: { [key: string]: string } = {
 };
 
 export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, futureDates, sortFields }) => {
-  console.log('Food Item in FoodItemCard:', foodItem);
-  console.log('Review Summary:', foodItem.reviewSummary);
+  console.log('Rendering FoodItemCard:', foodItem.name);
 
   const renderRating = () => {
     console.log('Rendering rating for food item:', foodItem.name);
@@ -149,7 +151,12 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, f
   }, [loading, foodItem.mealEntries]);
 
   const renderBadges = () => {
-    const mealTypes = new Set(foodItem.mealEntries?.map((entry: any) => entry.mealType) || []);
+    const mealTypes = new Set(foodItem.mealEntries?.map((entry: any) => {
+      if (entry.mealType === "A la Carte--APP DISPLAY" || entry.mealType === "A la Carte--POS Feed") {
+        return "A la Carte";
+      }
+      return entry.mealType;
+    }) || []);
     const diningHalls = new Set(foodItem.mealEntries?.map((entry: any) => diningTags[entry.diningHall] || entry.diningHall) || []);
 
     return (
@@ -204,71 +211,79 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({ foodItem, loading, f
     );
   };
 
-  return (
-    <Link href={`/food/${foodItem.id}`} className="w-full" key={foodItem.id}>
-      <Card className="overflow-hidden flex flex-row sm:flex-col h-full">
-        <div className="w-1/3 sm:w-full h-full sm:h-32 bg-gray-100 overflow-hidden">
-          {!loading && foodItem.topImage ? (
-            <img 
-              src={foodItem.topImage?.url} 
-              alt={foodItem.name} 
-              className="w-full h-full object-cover object-center"
-              onError={(e) => {
-                console.error('Image failed to load:', foodItem.topImage?.url);
-                e.currentTarget.onerror = null; // Prevent infinite loop
-                e.currentTarget.src = '/placeholder-image.jpg'; // Replace with your placeholder image path
-              }}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <span className="text-gray-500 text-sm">
-                {loading ? "Loading..." : "No Image"}
-              </span>
+  const CardContentJSX = (
+    <Card className="overflow-hidden flex flex-row sm:flex-col h-full">
+      <div className="w-1/3 sm:w-full h-full sm:h-32 bg-gray-100 overflow-hidden">
+        {!loading && foodItem.topImage ? (
+          <Image 
+            src={foodItem.topImage?.url} 
+            alt={foodItem.name}
+            width={500}
+            height={300}
+            className="w-full h-full object-cover object-center"
+            onError={(e) => {
+              console.error('Image failed to load:', foodItem.topImage?.url);
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = '/placeholder-image.jpg';
+            }}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <span className="text-gray-500 text-sm">
+              {loading ? "Loading..." : "No Image"}
+            </span>
+          </div>
+        )}
+      </div>
+      <CardContent className="p-3 flex flex-col justify-between flex-grow w-2/3 sm:w-full">
+        <div>
+          <CardHeader className="p-0 mb-1">
+            <div className="flex justify-between items-start">
+              <CardTitle className="text-sm font-bold truncate w-3/4 md:text-sm">
+                {loading ? <div className="bg-gray-200 animate-pulse h-4 w-full"></div> : foodItem.name}
+              </CardTitle>
+              <div className={`${loading ? 'bg-gray-200 animate-pulse w-6 h-6 rounded-full' : ''}`}>
+                {!loading && renderRating()}
+              </div>
             </div>
+          </CardHeader>
+          <div className="h-4 md:h-6 mb-4">
+            {!loading && (
+              <PreferenceIcons
+                preferences={foodItem.preferences}
+                allergens={foodItem.allergens}
+              />
+            )}
+          </div>
+        </div>
+        <div className="text-[0.6rem] md:text-xs mb-1">
+          {loading ? (
+            <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+          ) : (
+            renderNutrientBadges()
           )}
         </div>
-        <CardContent className="p-3 flex flex-col justify-between flex-grow w-2/3 sm:w-full">
-          <div>
-            <CardHeader className="p-0 mb-1">
-              <div className="flex justify-between items-start">
-                <CardTitle className="text-sm font-bold truncate w-3/4 md:text-sm">
-                  {loading ? <div className="bg-gray-200 animate-pulse h-4 w-full"></div> : foodItem.name}
-                </CardTitle>
-                <div className={`${loading ? 'bg-gray-200 animate-pulse w-6 h-6 rounded-full' : ''}`}>
-                  {!loading && renderRating()}
-                </div>
-              </div>
-            </CardHeader>
-            <div className="h-4 md:h-6 mb-4">
-              {!loading && (
-                <PreferenceIcons
-                  preferences={foodItem.preferences}
-                  allergens={foodItem.allergens}
-                />
-              )}
-            </div>
-          </div>
-          <div className="text-[0.6rem] md:text-xs mb-1">
-            {loading ? (
-              <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
-            ) : (
-              renderNutrientBadges()
-            )}
-          </div>
-          <div className="flex flex-wrap gap-1">
-            {loading ? (
-              [1, 2].map((i) => (
-                <div key={i} className="h-4 bg-gray-200 rounded w-10 animate-pulse"></div>
-              ))
-            ) : (
-              <>
-                {renderBadges()}
-                {renderServingStatus()}
-              </>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+        <div className="flex flex-wrap gap-1">
+          {loading ? (
+            [1, 2].map((i) => (
+              <div key={i} className="h-4 bg-gray-200 rounded w-10 animate-pulse"></div>
+            ))
+          ) : (
+            <>
+              {renderBadges()}
+              {renderServingStatus()}
+            </>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  return loading ? (
+    <div className="w-full">{CardContentJSX}</div>
+  ) : (
+    <Link href={`/food/${foodItem.id}`} className="w-full" key={foodItem.id}>
+      {CardContentJSX}
     </Link>
   );
 };

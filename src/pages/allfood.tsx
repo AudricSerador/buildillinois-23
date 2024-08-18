@@ -24,10 +24,10 @@ export default function AllFood(): JSX.Element {
   const [availableDates, setAvailableDates] = useAtom(availableDatesAtom);
   const [ratingFilter] = useAtom(ratingFilterAtom);
 
-  const [isLoading, setIsLoading] = useState(true);  // Start with loading true
+  const [isLoading, setIsLoading] = useState(true);
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0); // New state for total items count
+  const [totalItems, setTotalItems] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
   const [page, setPage] = useState(1);
@@ -47,7 +47,7 @@ export default function AllFood(): JSX.Element {
 
   useEffect(() => {
     const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768); // Adjust this breakpoint as needed
+      setIsMobile(window.innerWidth < 768);
     };
 
     checkIsMobile();
@@ -64,7 +64,7 @@ export default function AllFood(): JSX.Element {
   );
 
   const fetchFoodItems = useCallback(async (loadMore = false) => {
-    if (isFetchingRef.current) return;
+    if (isFetchingRef.current || (!loadMore && foodItems.length > 0 && !hasMore)) return;
     isFetchingRef.current = true;
     setIsLoadingMore(loadMore);
     if (!loadMore) setIsLoading(true);
@@ -84,21 +84,15 @@ export default function AllFood(): JSX.Element {
         ratingFilter: ratingFilter || 'any'
       });
 
-      console.log('Fetching with params:', queryParams.toString());
-
       const response = await fetch(`/api/get_allfood?${queryParams.toString()}`);
       if (!response.ok) throw new Error('Failed to fetch food items');
 
       const data = await response.json();
-      console.log('Received data from API:', data);
 
-      const processedFoodItems = data.foodItems.map((item: FoodItem) => {
-        console.log(`Processing food item: ${item.name}, Review Summary:`, item.reviewSummary);
-        return {
-          ...item,
-          reviewSummary: item.reviewSummary || { count: 0, averageRating: 0 }
-        };
-      });
+      const processedFoodItems = data.foodItems.map((item: FoodItem) => ({
+        ...item,
+        reviewSummary: item.reviewSummary || { count: 0, averageRating: 0 }
+      }));
 
       if (loadMore) {
         setFoodItems(prev => [...prev, ...processedFoodItems]);
@@ -109,11 +103,10 @@ export default function AllFood(): JSX.Element {
       }
 
       setTotalPages(data.totalPages);
-      setTotalItems(data.totalItems); // Set the total items count
+      setTotalItems(data.totalItems);
       setAvailableDates(data.availableDates || []);
       setHasMore(data.currentPage < data.totalPages);
 
-      // Fetch images for the new food items
       if (data.foodItems.length > 0) {
         const foodIds = data.foodItems.map((item: FoodItem) => item.id).join(',');
         const imagesResponse = await fetch(`/api/image/get_images?foodIds=${foodIds}`);
@@ -127,7 +120,6 @@ export default function AllFood(): JSX.Element {
         );
       }
     } catch (error) {
-      console.error('Error fetching food items:', error);
       setError('Failed to fetch food items. Please try again later.');
     } finally {
       isFetchingRef.current = false;
@@ -148,13 +140,13 @@ export default function AllFood(): JSX.Element {
     const prevFilters = prevFiltersRef.current;
 
     if (JSON.stringify(currentFilters) !== JSON.stringify(prevFilters)) {
-      console.log('Filters changed, triggering fetch');
-      debouncedFetchFoodItems();
+      setPage(1);
+      setFoodItems([]);
+      setHasMore(true);
+      fetchFoodItems();
       prevFiltersRef.current = currentFilters;
-    } else {
-      console.log('Filters unchanged, skipping fetch');
     }
-  }, [sortFields, diningHall, mealType, debouncedSearchTerm, dateServed, allergens, preferences, serving, ratingFilter, debouncedFetchFoodItems]);
+  }, [sortFields, diningHall, mealType, debouncedSearchTerm, dateServed, allergens, preferences, serving, ratingFilter]);
 
   useEffect(() => {
     return () => {
@@ -163,20 +155,8 @@ export default function AllFood(): JSX.Element {
   }, [debouncedFetchFoodItems]);
 
   useEffect(() => {
-    console.log('Component mounted, triggering initial fetch');
     fetchFoodItems();
   }, []);
-
-  useEffect(() => {
-    console.log('Current state:', {
-      isLoading,
-      foodItems: foodItems.length,
-      page,
-      totalPages,
-      hasMore,
-      error
-    });
-  }, [isLoading, foodItems, page, totalPages, hasMore, error]);
 
   useEffect(() => {
     if (!isInitialLoad) {
@@ -194,19 +174,14 @@ export default function AllFood(): JSX.Element {
   }, [page, isInitialLoad, fetchFoodItems]);
 
   useEffect(() => {
-    if (!isInitialLoad && page > 1) {
+    if (inView && isMobile && !isLoadingMore && hasMore && foodItems.length > 0) {
       fetchFoodItems(true);
     }
-  }, [page, isInitialLoad, fetchFoodItems]);
-
-  useEffect(() => {
-    if (inView && isMobile && !isLoadingMore && hasMore) {
-      fetchFoodItems(true);
-    }
-  }, [inView, isMobile, isLoadingMore, hasMore, fetchFoodItems]);
+  }, [inView, isMobile, isLoadingMore, hasMore, fetchFoodItems, foodItems.length]);
 
   const handleShowMore = () => {
     if (!isLoadingMore && hasMore) {
+      setIsLoadingMore(true);
       fetchFoodItems(true);
     }
   };
@@ -214,7 +189,10 @@ export default function AllFood(): JSX.Element {
   return (
     <div className="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 mt-4">
       <div className="pt-4">
-        <FilterBar availableDates={availableDates} />
+        <FilterBar 
+          availableDates={availableDates} 
+          debouncedFetchFoodItems={debouncedFetchFoodItems}
+        />
       </div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
         <p className="text-4xl font-custombold mt-4">All Food ({totalItems})</p>
@@ -230,24 +208,23 @@ export default function AllFood(): JSX.Element {
         />
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {isLoading ? (
+        {foodItems.map((foodItem: FoodItem) => (
+          <FoodItemCard 
+            key={foodItem.id} 
+            foodItem={{
+              ...foodItem,
+              reviewSummary: foodItem.reviewSummary || { count: 0, averageRating: 0 }
+            }} 
+            loading={false} 
+            sortFields={sortFields} 
+            futureDates={availableDates} 
+          />
+        ))}
+        {(isLoading || isLoadingMore) && 
           Array(10).fill(null).map((_, index) => (
             <FoodItemCard key={`skeleton-${index}`} foodItem={{} as FoodItem} loading={true} sortFields={sortFields} futureDates={availableDates} />
           ))
-        ) : (
-          foodItems.map((foodItem: FoodItem) => (
-            <FoodItemCard 
-              key={foodItem.id} 
-              foodItem={{
-                ...foodItem,
-                reviewSummary: foodItem.reviewSummary || { count: 0, averageRating: 0 }
-              }} 
-              loading={false} 
-              sortFields={sortFields} 
-              futureDates={availableDates} 
-            />
-          ))
-        )}
+        }
       </div>
       {!isLoading && foodItems.length === 0 && (
         <p className="font-custom text-center my-6 col-span-full">
