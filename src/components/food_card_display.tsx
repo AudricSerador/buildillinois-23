@@ -14,7 +14,7 @@ interface FoodItemCardProps {
   loading: boolean;
   futureDates: string[];
   sortFields?: { field: string; order: 'asc' | 'desc' }[];
-  disableVerticalLayout?: boolean; // New prop
+  disableVerticalLayout?: boolean;
 }
 
 export interface ImageData {
@@ -140,13 +140,16 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({
           const entryDate = new Date(entry.dateServed).toISOString().split('T')[0];
 
           if (entryDate === currentDateString) {
-            const mealTimes = diningHallTimes[entry.diningHall][entry.mealType];
-            const [start, end] = mealTimes.split(" - ");
+            const hallTimes = diningHallTimes[entry.diningHall];
+            if (hallTimes && hallTimes[entry.mealType]) {
+              const mealTimes = hallTimes[entry.mealType];
+              const [start, end] = mealTimes.split(" - ");
 
-            if (isNowBetween(start, end, currentTime)) {
-              nowServing = true;
-            } else if (currentTime < parseTime(end)) {
-              servingLater = true;
+              if (isNowBetween(start, end, currentTime)) {
+                nowServing = true;
+              } else if (currentTime < parseTime(end)) {
+                servingLater = true;
+              }
             }
           }
         });

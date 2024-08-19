@@ -61,12 +61,12 @@ export default function Home(): JSX.Element {
       </div>
 
       <div
-        className="hero h-[40vh]"
+        className="hero min-h-[40vh] bg-cover bg-center"
         style={{
           backgroundImage: "url(/images/dininghall.jpg)",
         }}>
         <div className="hero-overlay bg-opacity-70 bg-black"></div>
-        <div className="hero-content text-neutral-content text-center">
+        <div className="hero-content text-neutral-content text-center py-8">
           <div className="max-w-2xl">
             <h1 className={`mb-4 text-4xl sm:text-6xl font-custombold text-uiucorange transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               Find your favorite dining hall food in <i>seconds</i>.
