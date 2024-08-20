@@ -88,7 +88,7 @@ export function FilterBar({ availableDates, debouncedFetchFoodItems }: FilterBar
         setServing(value as string);
         break;
     }
-    // Trigger a re-fetch whenever any filter changes
+    // Immediately trigger a re-fetch
     debouncedFetchFoodItems();
   };
 
@@ -182,7 +182,7 @@ export function FilterBar({ availableDates, debouncedFetchFoodItems }: FilterBar
                 </Button>
               ))}
 
-              {/* Dining Shops */}
+              {/* Dining Shops (D$) */}
               <div className="font-bold text-sm mt-2 mb-1">Dining Shops (D$)</div>
               <Button
                 variant="ghost"

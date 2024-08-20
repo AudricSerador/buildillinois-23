@@ -76,6 +76,7 @@ const IngredientsCard: React.FC<IngredientsCardProps> = React.memo(({ ingredient
     </Card>
   );
 });
+IngredientsCard.displayName = 'IngredientsCard';
 
 interface IngredientsSectionProps {
   ingredients: string[];
@@ -116,3 +117,4 @@ export const IngredientsSection: React.FC<IngredientsSectionProps> = ({ ingredie
     </div>
   );
 };
+IngredientsSection.displayName = 'IngredientsSection';

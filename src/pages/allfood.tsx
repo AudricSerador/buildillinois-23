@@ -67,7 +67,10 @@ export default function AllFood(): JSX.Element {
     if (isFetchingRef.current || (!loadMore && foodItems.length > 0 && !hasMore)) return;
     isFetchingRef.current = true;
     setIsLoadingMore(loadMore);
-    if (!loadMore) setIsLoading(true);
+    if (!loadMore) {
+      setIsLoading(true);
+      setFoodItems([]); // Always clear food items when fetching new data
+    }
 
     try {
       const queryParams = new URLSearchParams({
@@ -94,11 +97,12 @@ export default function AllFood(): JSX.Element {
         reviewSummary: item.reviewSummary || { count: 0, averageRating: 0 }
       }));
 
+      let newFoodItems;
       if (loadMore) {
-        setFoodItems(prev => [...prev, ...processedFoodItems]);
+        newFoodItems = [...foodItems, ...processedFoodItems];
         setPage(prevPage => prevPage + 1);
       } else {
-        setFoodItems(processedFoodItems);
+        newFoodItems = processedFoodItems;
         setPage(1);
       }
 
@@ -107,18 +111,20 @@ export default function AllFood(): JSX.Element {
       setAvailableDates(data.availableDates || []);
       setHasMore(data.currentPage < data.totalPages);
 
-      if (data.foodItems.length > 0) {
-        const foodIds = data.foodItems.map((item: FoodItem) => item.id).join(',');
+      // Fetch images for all food items, including newly loaded ones
+      if (newFoodItems.length > 0) {
+        const foodIds = newFoodItems.map((item: FoodItem) => item.id).join(',');
         const imagesResponse = await fetch(`/api/image/get_images?foodIds=${foodIds}`);
         const imagesData = await imagesResponse.json();
 
-        setFoodItems(prevItems => 
-          prevItems.map(item => ({
-            ...item,
-            topImage: imagesData.images?.[item.id]?.[0] || null
-          }))
-        );
+        newFoodItems = newFoodItems.map((item: FoodItem) => ({
+          ...item,
+          topImage: imagesData.images?.[item.id]?.[0] || null
+        }));
       }
+
+      setFoodItems(newFoodItems);
+
     } catch (error) {
       setError('Failed to fetch food items. Please try again later.');
     } finally {
@@ -126,7 +132,7 @@ export default function AllFood(): JSX.Element {
       setIsLoading(false);
       setIsLoadingMore(false);
     }
-  }, [sortFields, diningHall, mealType, debouncedSearchTerm, dateServed, allergens, preferences, serving, ratingFilter, page, pageSize]);
+  }, [sortFields, diningHall, mealType, debouncedSearchTerm, dateServed, allergens, preferences, serving, ratingFilter, page, pageSize, foodItems]);
 
   const debouncedFetchFoodItems = useCallback(
     debounce(() => {
@@ -140,10 +146,10 @@ export default function AllFood(): JSX.Element {
     const prevFilters = prevFiltersRef.current;
 
     if (JSON.stringify(currentFilters) !== JSON.stringify(prevFilters)) {
+      console.log('Filters changed, fetching new data');
       setPage(1);
-      setFoodItems([]);
       setHasMore(true);
-      fetchFoodItems();
+      fetchFoodItems(); // This will now always clear and refetch food items
       prevFiltersRef.current = currentFilters;
     }
   }, [sortFields, diningHall, mealType, debouncedSearchTerm, dateServed, allergens, preferences, serving, ratingFilter]);
