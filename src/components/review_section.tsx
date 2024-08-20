@@ -212,7 +212,6 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
 
   return (
     <div className="mt-8">
-      <h2 className="text-2xl font-custombold mb-2">Reviews</h2>
       {isLoading ? (
         <LoadingSpinner text="Loading reviews" />
       ) : (

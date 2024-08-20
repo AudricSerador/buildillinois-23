@@ -21,6 +21,7 @@ module.exports = {
         'clouddark': '#E8E9EB',
         'clouddarker': '#DDDEDE',
         'clouddarkest': '#D2D2D2',
+        'custombg': '#f4f4f2',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -65,6 +66,20 @@ module.exports = {
       },
       boxShadow: {
         'glow': '0 0 10px 2px #F5821E',
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
       },
     },
   },

@@ -1,32 +1,25 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "react-toastify";
 
 interface FavoriteBtnProps {
   userId: string;
   foodId: string;
   foodName: string;
+  isFavorited: boolean;
+  setIsFavorited: (isFavorited: boolean) => void;
+  className?: string;
 }
 
 const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
   userId,
   foodId,
   foodName,
+  isFavorited,
+  setIsFavorited,
+  className,
 }) => {
-  const [isFavorited, setIsFavorited] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [isCooldown, setIsCooldown] = useState(false); // Cooldown state
-
-  useEffect(() => {
-    const fetchFavorite = async () => {
-      if (userId) {
-        const res = await fetch(`/api/favorite/get_favorite?userId=${userId}&foodId=${foodId}`);
-        const data = await res.json();
-        setIsFavorited(data.success && data.data !== null);
-      }
-    };
-
-    fetchFavorite();
-  }, [userId, foodId]);
+  const [isCooldown, setIsCooldown] = useState(false);
 
   const handleFavorite = async () => {
     if (!userId) {
@@ -35,49 +28,26 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
     }
 
     if (isCooldown) {
-      toast.error(
-        <>
-          Please wait a bit before toggling favorites!
-        </>,
-        {
-          icon: (
-            <span role="img" aria-label="star" style={{ fontSize: "20px" }}>
-              🌟
-            </span>
-          ),
-        }
-      );
-      return; // Exit if the button is on cooldown
+      toast.error("Please wait a bit before toggling favorites!", {
+        icon: <span role="img" aria-label="star" style={{ fontSize: "20px" }}>🌟</span>,
+      });
+      return;
     }
 
-    setIsCooldown(true); // Set cooldown
-    setTimeout(() => setIsCooldown(false), 1000); // Reset cooldown after 1 second
+    setIsCooldown(true);
+    setTimeout(() => setIsCooldown(false), 1000);
 
     const response = await fetch("/api/favorite/create_favorite", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId,
-        foodId,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, foodId }),
     });
 
     if (response.ok) {
       setIsFavorited(true);
-      toast.success(
-        <>
-          <strong>{foodName}</strong> has been favorited!
-        </>,
-        {
-          icon: (
-            <span role="img" aria-label="heart" style={{ fontSize: "20px" }}>
-              ❤️
-            </span>
-          ),
-        }
-      );
+      toast.success(<><strong>{foodName}</strong> has been favorited!</>, {
+        icon: <span role="img" aria-label="heart" style={{ fontSize: "20px" }}>❤️</span>,
+      });
     } else {
       console.error("Failed to favorite");
       toast.error("Failed to favorite food.");
@@ -85,38 +55,22 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
   };
 
   const handleUnfavorite = async () => {
-    if (isCooldown) {
-      return; // Exit if the button is on cooldown
-    }
+    if (isCooldown) return;
 
-    setIsCooldown(true); // Set cooldown
-    setTimeout(() => setIsCooldown(false), 1000); // Reset cooldown after 1 second
+    setIsCooldown(true);
+    setTimeout(() => setIsCooldown(false), 1000);
 
     const response = await fetch("/api/favorite/delete_favorite", {
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId,
-        foodId,
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ userId, foodId }),
     });
 
     if (response.ok) {
       setIsFavorited(false);
-      toast.success(
-        <>
-          <strong>{foodName}</strong> removed from favorites.
-        </>,
-        {
-          icon: (
-            <span role="img" aria-label="trash" style={{ fontSize: "20px" }}>
-              🗑️
-            </span>
-          ),
-        }
-      );
+      toast.success(<><strong>{foodName}</strong> removed from favorites.</>, {
+        icon: <span role="img" aria-label="trash" style={{ fontSize: "20px" }}>🗑️</span>,
+      });
     } else {
       console.error("Failed to unfavorite");
       toast.error("Failed to unfavorite food.");
@@ -132,10 +86,9 @@ const FavoriteBtn: React.FC<FavoriteBtnProps> = ({
   };
 
   return (
-    <div className="relative">
+    <div className={`relative ${className}`}>
       <label className="swap">
         <input type="checkbox" checked={isFavorited} onChange={handleToggle} disabled={isCooldown} />
-
         {/* Heart full icon */}
         <svg
           className="swap-on fill-current w-10 h-10 text-red-500"

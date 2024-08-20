@@ -1,69 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FaTimes, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { useAuth } from "@/components/layout/auth.service";
 import { MdPerson } from "react-icons/md";
 import { toast } from "react-toastify";
+import { FoodImage } from "@/pages/food/[id]";
 
 interface ImageCarouselProps {
-  foodId: string;
+  images: FoodImage[];
 }
 
-interface ImageData {
-  id: number;
-  url: string;
-  userId: string;
-  userName: string;
-  description: string;
-  likes: number;
-  created_at: string;
-}
-
-const fetchUserName = async (userId: string) => {
-  const res = await fetch(`/api/user/get_user?id=${userId}`);
-  const data = await res.json();
-  return data.success ? data.data.name : "Unknown";
-};
-
-const ImageCarousel: React.FC<ImageCarouselProps> = ({ foodId }) => {
+const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
   const { user } = useAuth();
-  const [images, setImages] = useState<ImageData[]>([]);
-  const [selectedImage, setSelectedImage] = useState<ImageData | null>(null);
+  const [selectedImage, setSelectedImage] = useState<FoodImage | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    if (!foodId) {
-      return;
-    }
-    const fetchImages = async () => {
-      try {
-        console.log('Fetching images for foodId:', foodId);
-        const res = await fetch(`/api/image/get_images?foodIds=${foodId}`);
-        if (!res.ok) {
-          throw new Error('Failed to fetch images');
-        }
-        const data = await res.json();
-        console.log('Received image data:', data);
-        if (data.success && data.images && data.images[foodId]) {
-          const imagesWithUserNames = await Promise.all(
-            data.images[foodId].map(async (image: ImageData) => {
-              const userName = await fetchUserName(image.userId);
-              return { ...image, userName };
-            })
-          );
-          console.log('Images with usernames:', imagesWithUserNames);
-          setImages(imagesWithUserNames);
-        } else {
-          console.log("No images found for this food item");
-          setImages([]);
-        }
-      } catch (error) {
-        console.error('Failed to fetch images:', error);
-        setImages([]);
-      }
-    };
-
-    fetchImages();
-  }, [foodId]);
 
   const closeModal = () => {
     setSelectedImage(null);
@@ -132,7 +81,6 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ foodId }) => {
 
   return (
     <div className="mt-8">
-      <h2 className="text-2xl font-custombold mb-2">Food Images</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {images.length > 0 ? (
           images.map((image) => (

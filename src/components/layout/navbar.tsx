@@ -44,7 +44,7 @@ export const Navbar: React.FC<NavbarProps> = ({ className }) => {
     <nav
       className={`${
         isMobile ? "hidden" : ""
-      } fixed bg-uiucblue text-white w-full z-10 ${className}`}
+      } fixed bg-uiucblue text-white w-full ontop ${className}`}
     >
       <div className="px-5 xl:px-12 py-6 flex w-full items-center shadow-xl justify-center">
         <div className="flex items-center absolute left-5">

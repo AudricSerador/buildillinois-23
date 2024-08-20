@@ -40,7 +40,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <>
       <SEO title="IllinEats" description="The better UIUC dining hall experience." />
       <AuthProvider>
-        <div className="flex flex-col min-h-screen w-full bg-background font-custom">
+        <div className="flex flex-col min-h-screen w-full bg-custombg font-custom">
           {showNavbarAndFooter && (
             <>
               <Navbar className="hidden md:block" />
