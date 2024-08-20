@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback, Suspense, useMemo } from "react";
 import NutritionFacts from "@/components/nutrition_facts";
 import { EntriesDisplay } from "@/components/entries_display";
 import LoadingSpinner from "@/components/loading_spinner";
@@ -12,7 +12,14 @@ import Image from "next/image";
 import { Skeleton } from "@/components/ui/skeleton";
 import ServingAlert from "@/components/serving_alert";
 import { Button } from "@/components/ui/button";
-import { FaCamera } from "react-icons/fa";
+import { FaCamera, FaTimes } from "react-icons/fa";
+import { ScrollArea } from "@/components/ui/scroll-area"
+import { Separator } from "@/components/ui/separator"
+import { Input } from "@/components/ui/input"
+import React from "react";
+import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { IngredientsSection } from "@/components/IngredientsSection";
 
 export interface FoodItem {
   id: string;
@@ -39,7 +46,7 @@ export interface FoodItem {
     count: number;
     averageRating: number;
   };
-  topImage?: Image;
+  topImage?: any;
 }
 
 export interface FoodImage {
@@ -58,7 +65,7 @@ export interface MealEntry {
   diningFacility: string;
   mealType: string;
 }
-
+  
 export default function FoodItemPage() {
   const router = useRouter();
   const { id: foodId } = router.query;
@@ -66,284 +73,338 @@ export default function FoodItemPage() {
   const [images, setImages] = useState<FoodImage[]>([]);
   const [mealEntries, setMealEntries] = useState<MealEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSticky, setIsSticky] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
   const { user } = useAuth();
-  const headerRef = useRef<HTMLDivElement>(null);
   const [activeSection, setActiveSection] = useState("nutrition");
   const [isNavSticky, setIsNavSticky] = useState(false);
+  const [isBannerSticky, setIsBannerSticky] = useState(false);
+  const [searchIngredient, setSearchIngredient] = useState("");
+  const [ingredientsDialogOpen, setIngredientsDialogOpen] = useState(false);
+
   const navRef = useRef<HTMLDivElement>(null);
+  const bannerRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
 
-  useEffect(() => {
-    const fetchFoodItem = async () => {
-      if (foodId) {
-        const res = await fetch(`/api/food/${foodId}`);
+  const fetchData = useCallback(async () => {
+    if (foodId && typeof foodId === 'string') {
+      setIsLoading(true);
+      try {
+        const [foodItemData, imagesData, favoriteStatus] = await Promise.all([
+          fetchFoodItem(foodId),
+          fetchImages(foodId),
+          user?.id ? fetchFavoriteStatus(user.id, foodId) : Promise.resolve(false)
+        ]);
 
-        if (!res.ok) {
-          router.push("/404");
-          return;
-        }
-
-        const data = await res.json();
-
-        if (data.mealEntries) {
-          data.mealEntries
-            .sort(
-              (a: any, b: any) =>
-                (new Date(a.dateServed) as any) -
-                (new Date(b.dateServed) as any)
-            )
-            .reverse();
-        }
-
-        setFoodItem(data);
-        setMealEntries(data.mealEntries || []);
+        setFoodItem(foodItemData);
+        setImages(imagesData);
+        setIsFavorited(favoriteStatus);
+        setMealEntries(foodItemData?.mealEntries || []);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
         setIsLoading(false);
       }
-    };
+    }
+  }, [foodId, user?.id]);
 
-    const fetchImages = async () => {
-      if (foodId) {
-        try {
-          const res = await fetch(`/api/image/get_images?foodIds=${foodId}`);
-          if (!res.ok) {
-            throw new Error('Failed to fetch images');
-          }
-          const data = await res.json();
-          if (data.success && data.images && data.images[foodId as string]) {
-            const sortedImages = data.images[foodId as string].sort((a: FoodImage, b: FoodImage) => b.likes - a.likes);
-            setImages(sortedImages);
-          }
-        } catch (error) {
-          console.error('Error fetching images:', error);
-        }
-      }
-    };
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-    const fetchFavoriteStatus = async () => {
-      if (user?.id && foodId) {
-        try {
-          const res = await fetch(`/api/favorite/get_favorite?userId=${user.id}&foodId=${foodId}`);
-          const data = await res.json();
-          setIsFavorited(data.success && data.data !== null);
-        } catch (error) {
-          console.error('Error fetching favorite status:', error);
-        }
-      }
-    };
+  const handleScroll = useCallback(() => {
+    if (titleRef.current && bannerRef.current) {
+      const titleBottom = titleRef.current.getBoundingClientRect().bottom;
+      setIsBannerSticky(titleBottom <= 0);
+    }
+    if (navRef.current) {
+      const navTop = navRef.current.getBoundingClientRect().top;
+      setIsNavSticky(navTop <= (isBannerSticky ? 64 : 0));
+    }
+  }, [isBannerSticky]);
 
-    const handleScroll = () => {
-      if (headerRef.current) {
-        const headerBottom = headerRef.current.getBoundingClientRect().bottom;
-        setIsSticky(headerBottom <= 0);
-      }
-    };
-
-    const handleNavScroll = () => {
-      if (navRef.current) {
-        const navTop = navRef.current.getBoundingClientRect().top;
-        setIsNavSticky(navTop <= 64); // 64px to account for the existing sticky header
-      }
-    };
-
+  useEffect(() => {
     window.addEventListener('scroll', handleScroll);
-    window.addEventListener('scroll', handleNavScroll);
-    fetchFoodItem();
-    fetchImages();
-    fetchFavoriteStatus();
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('scroll', handleNavScroll);
     };
-  }, [foodId, router, user?.id]);
+  }, [handleScroll]);
 
-  const scrollToSection = (sectionId: string) => {
+  const scrollToSection = useCallback((sectionId: string) => {
     const section = document.getElementById(`${sectionId}-divider`);
     if (section) {
-      const yOffset = -96; // Adjust this value to account for the sticky headers
+      const yOffset = -96;
       const y = section.getBoundingClientRect().top + window.pageYOffset + yOffset;
       window.scrollTo({top: y, behavior: 'smooth'});
       setActiveSection(sectionId);
     }
-  };
+  }, []);
+
+  const formatIngredients = useCallback((ingredients: string) => {
+    const result: string[] = [];
+    let currentIngredient = '';
+    let parenthesesCount = 0;
+
+    for (let i = 0; i < ingredients.length; i++) {
+      const char = ingredients[i];
+      currentIngredient += char;
+
+      if (char === '(') {
+        parenthesesCount++;
+      } else if (char === ')') {
+        parenthesesCount--;
+      }
+
+      if ((char === ',' && parenthesesCount === 0) || i === ingredients.length - 1) {
+        const trimmed = currentIngredient.trim().replace(/,$/, '');
+        const [main, ...details] = trimmed.split(/\s*\(/);
+        const mainFormatted = main.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
+        const detailsFormatted = details.length > 0 ? `(${details.join('(')}` : '';
+        result.push(`${mainFormatted} ${detailsFormatted}`.trim());
+        currentIngredient = '';
+      }
+    }
+
+    return result;
+  }, []);
+
+  const filteredIngredients = useMemo(() => {
+    return foodItem?.ingredients 
+      ? formatIngredients(foodItem.ingredients).filter(ingredient => 
+          ingredient.toLowerCase().includes(searchIngredient.toLowerCase())
+        )
+      : [];
+  }, [foodItem?.ingredients, searchIngredient, formatIngredients]);
+
+  const allergens = useMemo(() => {
+    return foodItem?.allergens ? foodItem.allergens.split(', ').filter(a => a.trim() !== '' && a.toLowerCase() !== 'n/a') : [];
+  }, [foodItem?.allergens]);
+
+  const preferences = useMemo(() => {
+    return foodItem?.preferences ? foodItem.preferences.split(' ') : [];
+  }, [foodItem?.preferences]);
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-screen">
-        <LoadingSpinner text="Loading food data" />
-      </div>
-    );
+    return <LoadingSpinner text="Loading food data" />;
   }
 
   const topImages = images.slice(0, 3);
 
   return (
-    <div className="font-custom">
-      <div ref={headerRef} className="relative h-64 w-full flex flex-col justify-end">
-        {isLoading ? (
-          <div className="absolute inset-0 flex">
-            {[...Array(3)].map((_, index) => (
-              <Skeleton 
-                key={index}
-                className={`h-full flex-grow ${
-                  index === 1 ? 'border-l border-r border-white' : ''
-                }`}
-              />
-            ))}
-          </div>
-        ) : topImages.length === 0 ? (
-          <div className="absolute inset-0 bg-gray-800" />
-        ) : topImages.length === 1 ? (
-          <Image
-            src={topImages[0].url}
-            alt={`${foodItem?.name} image`}
-            layout="fill"
-            objectFit="cover"
-          />
-        ) : (
-          <div className="absolute inset-0 flex">
-            {topImages.map((image, index) => (
-              <div 
-                key={image.id} 
-                className={`relative flex-grow ${
-                  index === 1 ? 'border-l border-r border-white' : ''
-                }`}
-              >
-                <Image
-                  src={image.url}
-                  alt={`${foodItem?.name} image ${index + 1}`}
-                  layout="fill"
-                  objectFit="cover"
+    <Suspense fallback={<LoadingSpinner text="Loading food data" />}>
+      <div className="font-custom">
+        <div ref={bannerRef} className="relative h-64 w-full flex flex-col justify-end">
+          {isLoading ? (
+            <div className="absolute inset-0 flex">
+              {[...Array(3)].map((_, index) => (
+                <Skeleton 
+                  key={index}
+                  className={`h-full flex-grow ${
+                    index === 1 ? 'border-l border-r border-white' : ''
+                  }`}
                 />
-              </div>
-            ))}
+              ))}
+            </div>
+          ) : topImages.length === 0 ? (
+            <div className="absolute inset-0 bg-gray-800" />
+          ) : topImages.length === 1 ? (
+            <Image
+              src={topImages[0].url}
+              alt={`${foodItem?.name} image`}
+              layout="fill"
+              objectFit="cover"
+            />
+          ) : (
+            <div className="absolute inset-0 flex">
+              {topImages.map((image, index) => (
+                <div 
+                  key={image.id} 
+                  className={`relative flex-grow ${
+                    index === 1 ? 'border-l border-r border-white' : ''
+                  }`}
+                >
+                  <Image
+                    src={image.url}
+                    alt={`${foodItem?.name} image ${index + 1}`}
+                    layout="fill"
+                    objectFit="cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-70 z-10"></div>
+          <div className="relative z-20 container mx-auto px-4 sm:px-8 md:px-16 lg:px-64 pb-8">
+            <div className="flex items-end space-x-4">
+              {isLoading ? (
+                <Skeleton className="h-24 w-2/3" />
+              ) : (
+                <>
+                  <h1 ref={titleRef} className="text-5xl font-custombold text-white max-w-2xl leading-tight">
+                    {foodItem?.name}
+                  </h1>
+                  <FavoriteBtn
+                    userId={user?.id || ''}
+                    foodId={foodId as string}
+                    foodName={foodItem?.name as string}
+                    isFavorited={isFavorited}
+                    setIsFavorited={setIsFavorited}
+                    className="text-4xl text-white flex-shrink-0"
+                  />
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+        {isBannerSticky && (
+          <div className="fixed top-0 left-0 right-0 h-16 bg-primary z-50 shadow-md">
+            <div className="container mx-auto px-4 sm:px-8 md:px-16 lg:px-64 h-full flex items-center justify-between">
+              <h2 className="text-lg font-custombold text-white truncate max-w-2xl">
+                {foodItem?.name}
+              </h2>
+              <FavoriteBtn
+                userId={user?.id || ''}
+                foodId={foodId as string}
+                foodName={foodItem?.name as string}
+                isFavorited={isFavorited}
+                setIsFavorited={setIsFavorited}
+                className="text-xl text-white"
+              />
+            </div>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black opacity-70 z-10"></div>
-        <div className="relative z-20 container mx-auto px-4 sm:px-8 md:px-16 lg:px-64 pb-8">
-          <div className="flex items-end space-x-4">
-            {isLoading ? (
-              <Skeleton className="h-24 w-2/3" />
+        <div className="container mx-auto px-4 sm:px-8 md:px-16 lg:px-64 mt-4">
+          <ServingAlert mealEntries={mealEntries} />
+          
+          <div 
+            ref={navRef} 
+            className={`bg-custombg transition-all duration-300 ${
+              isNavSticky ? 'fixed top-16 left-0 right-0 z-40 px-4 sm:px-8 md:px-16 lg:px-64' : ''
+            }`}
+          >
+            <div className="flex justify-start space-x-2 sm:pt-4 pt-2 overflow-x-auto">
+              <button
+                className={`btn btn-sm ${activeSection === "nutrition" ? "btn-primary" : "btn-outline"} px-4 py-2 h-auto min-h-2`}
+                onClick={() => scrollToSection("nutrition")}
+              >
+                Nutrition
+              </button>
+              <button
+                className={`btn btn-sm ${activeSection === "reviews" ? "btn-primary" : "btn-outline"} px-4 py-2 h-auto min-h-2`}
+                onClick={() => scrollToSection("reviews")}
+              >
+                Reviews
+              </button>
+              <button
+                className={`btn btn-sm ${activeSection === "photos" ? "btn-primary" : "btn-outline"} px-4 py-2 h-auto min-h-2`}
+                onClick={() => scrollToSection("photos")}
+              >
+                Photos
+              </button>
+              <button
+                className={`btn btn-sm ${activeSection === "servings" ? "btn-primary" : "btn-outline"} px-4 py-2 h-auto min-h-2`}
+                onClick={() => scrollToSection("servings")}
+              >
+                Servings
+              </button>
+            </div>
+            <div className="divider m-0 p-0"></div>
+          </div>
+          
+          {isNavSticky && <div style={{ height: '64px' }} />}
+
+          <div id="nutrition-divider" className="divider invisible"></div>
+          <div id="nutrition">
+            <h2 className="text-4xl font-custombold my-4">Nutrition</h2>
+            <div className="lg:flex lg:gap-4">
+              {foodItem && <NutritionFacts foodItem={foodItem} />}
+              <IngredientsSection 
+                ingredients={filteredIngredients}
+                allergens={allergens}
+                searchIngredient={searchIngredient}
+                setSearchIngredient={setSearchIngredient}
+              />
+            </div>
+          </div>
+
+          <div id="reviews-divider" className="divider"></div>
+          <div id="reviews">
+            <h2 className="text-4xl font-custombold my-4">Reviews</h2>
+            {foodItem && <ReviewSection foodId={foodItem.id} />}
+          </div>
+
+          <div id="photos-divider" className="divider"></div>
+          <div id="photos">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-4xl font-custombold">Photos</h2>
+              <button 
+                className="btn btn-primary"
+                onClick={() => setShowUploadModal(true)}
+              >
+                <FaCamera className="mr-2" /> Add a Photo
+              </button>
+            </div>
+            <ImageCarousel images={images} />
+            {user && (
+              <UploadImageModal
+                isOpen={showUploadModal}
+                onClose={() => setShowUploadModal(false)}
+                foodId={foodItem?.id ?? ''}
+                userId={user.id}
+              />
+            )}
+          </div>
+
+          <div id="servings-divider" className="divider"></div>
+          <div id="servings">
+            <h2 className="text-4xl font-custombold my-4">Servings</h2>
+            {mealEntries.length > 0 ? (
+              <EntriesDisplay mealEntries={mealEntries} />
             ) : (
-              <>
-                <h1 className="text-5xl font-custombold text-white max-w-2xl leading-tight">
-                  {foodItem?.name}
-                </h1>
-                <FavoriteBtn
-                  userId={user?.id || ''}
-                  foodId={foodId as string}
-                  foodName={foodItem?.name as string}
-                  isFavorited={isFavorited}
-                  setIsFavorited={setIsFavorited}
-                  className="text-4xl text-white flex-shrink-0"
-                />
-              </>
+              <div className="max-w-2xl my-8 font-custom text-lg text-center">
+                <p>This food item has not been served yet.</p>
+              </div>
             )}
           </div>
         </div>
       </div>
-      {isSticky && (
-        <div className="fixed top-0 left-0 right-0 h-16 bg-primary z-50 shadow-md">
-          <div className="container mx-auto px-4 sm:px-8 md:px-16 lg:px-64 h-full flex items-center justify-between">
-            <h2 className="text-lg font-custombold text-white truncate max-w-2xl">
-              {foodItem?.name}
-            </h2>
-            <FavoriteBtn
-              userId={user?.id || ''}
-              foodId={foodId as string}
-              foodName={foodItem?.name as string}
-              isFavorited={isFavorited}
-              setIsFavorited={setIsFavorited}
-              className="text-xl text-white"
-            />
-          </div>
-        </div>
-      )}
-      <div className="container mx-auto px-4 sm:px-8 md:px-16 lg:px-64 mt-4">
-        <ServingAlert mealEntries={mealEntries} />
-        
-        <div ref={navRef} className={`bg-custombg ${isNavSticky ? 'sticky top-16 z-40' : ''}`}>
-          <div className="flex justify-between">
-            <button
-              className={`btn btn-sm ${activeSection === "nutrition" ? "btn-primary" : "btn-outline"} px-4 py-2 h-auto min-h-2`}
-              onClick={() => scrollToSection("nutrition")}
-            >
-              Nutrition
-            </button>
-            <button
-              className={`btn btn-sm ${activeSection === "reviews" ? "btn-primary" : "btn-outline"} px-4 py-2 h-auto min-h-2`}
-              onClick={() => scrollToSection("reviews")}
-            >
-              Reviews
-            </button>
-            <button
-              className={`btn btn-sm ${activeSection === "photos" ? "btn-primary" : "btn-outline"} px-4 py-2 h-auto min-h-2`}
-              onClick={() => scrollToSection("photos")}
-            >
-              Photos
-            </button>
-            <button
-              className={`btn btn-sm ${activeSection === "servings" ? "btn-primary" : "btn-outline"} px-4 py-2 h-auto min-h-2`}
-              onClick={() => scrollToSection("servings")}
-            >
-              Servings
-            </button>
-          </div>
-          <div className="divider m-0"></div>
-        </div>
-
-        <div id="nutrition-divider" className="divider invisible"></div>
-        <div id="nutrition">
-          <h2 className="text-2xl font-custombold my-4">Nutrition</h2>
-          {foodItem && <NutritionFacts foodItem={foodItem} />}
-          <p className="mb-4 font-custombold">
-            Ingredients: <span className="font-custom">{foodItem?.ingredients}</span>
-            <br />
-            Allergens: <span className="font-custom">{foodItem?.allergens}</span>
-          </p>
-        </div>
-
-        <div id="reviews-divider" className="divider"></div>
-        <div id="reviews">
-          <h2 className="text-2xl font-custombold my-4">Reviews</h2>
-          {foodItem && <ReviewSection foodId={foodItem.id} />}
-        </div>
-
-        <div id="photos-divider" className="divider"></div>
-        <div id="photos">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-custombold">Photos</h2>
-            <button 
-              className="btn btn-primary"
-              onClick={() => setShowUploadModal(true)}
-            >
-              <FaCamera className="mr-2" /> Add a Photo
-            </button>
-          </div>
-          <ImageCarousel images={images} />
-          {user && (
-            <UploadImageModal
-              isOpen={showUploadModal}
-              onClose={() => setShowUploadModal(false)}
-              foodId={foodItem?.id ?? ''}
-              userId={user.id}
-            />
-          )}
-        </div>
-
-        <div id="servings-divider" className="divider"></div>
-        <div id="servings">
-          <h2 className="text-2xl font-custombold my-4">Servings</h2>
-          {mealEntries.length > 0 ? (
-            <EntriesDisplay mealEntries={mealEntries} />
-          ) : (
-            <div className="max-w-2xl my-8 font-custom text-lg text-center">
-              <p>This food item has not been served yet.</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+    </Suspense>
   );
+}
+
+async function fetchFoodItem(foodId: string) {
+  const res = await fetch(`/api/food/${foodId}`);
+  if (!res.ok) {
+    console.error('Failed to fetch food item');
+    return null;
+  }
+  return res.json();
+}
+
+async function fetchImages(foodId: string) {
+  const res = await fetch(`/api/image/get_images?foodIds=${foodId}`);
+  if (!res.ok) {
+    console.error('Failed to fetch images');
+    return [];
+  }
+  const data = await res.json();
+  return data.success && data.images && data.images[foodId] 
+    ? data.images[foodId].sort((a: FoodImage, b: FoodImage) => b.likes - a.likes)
+    : [];
+}
+
+async function fetchFavoriteStatus(userId: string, foodId: string) {
+  if (!userId || !foodId) return false;
+  try {
+    const res = await fetch(`/api/favorite/get_favorite?userId=${userId}&foodId=${foodId}`);
+    if (!res.ok) {
+      console.error('Failed to fetch favorite status');
+      return false;
+    }
+    const data = await res.json();
+    return data.success && data.data !== null;
+  } catch (error) {
+    console.error('Error fetching favorite status:', error);
+    return false;
+  }
 }

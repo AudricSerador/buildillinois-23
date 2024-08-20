@@ -9,8 +9,9 @@ interface ImageCarouselProps {
   images: FoodImage[];
 }
 
-const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
+const ImageCarousel: React.FC<ImageCarouselProps> = ({ images: initialImages }) => {
   const { user } = useAuth();
+  const [images, setImages] = useState<FoodImage[]>(initialImages);
   const [selectedImage, setSelectedImage] = useState<FoodImage | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
