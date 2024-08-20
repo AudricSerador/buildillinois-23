@@ -15,6 +15,7 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, fo
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [description, setDescription] = useState<string>('');
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -29,6 +30,8 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, fo
       toast.error('Please select an image to upload.');
       return;
     }
+
+    setIsUploading(true);
 
     new Compressor(image, {
       quality: 0.8,
@@ -58,10 +61,13 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, fo
           } else {
             toast.error('An unknown error occurred while uploading the image.');
           }
+        } finally {
+          setIsUploading(false);
         }
       },
       error(err) {
         toast.error('Compression failed: ' + err.message);
+        setIsUploading(false);
       },
     });
   };
@@ -88,7 +94,6 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, fo
               <div className="border-dashed border-4 border-gray-200 rounded-lg p-4 text-center">
                 <Image height={100} width={100} src="/images/upload.png" alt="Upload" className="mx-auto mb-2" />
                 <p>Select a photo to upload</p>
-                <button className="btn btn-primary mt-2">Browse Files</button>
               </div>
             </label>
           </div>
@@ -99,14 +104,21 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, fo
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
-                    <div className="alert alert-warning text-sm border mb-4">
-              <FaInfoCircle size={15} />
-              <span>
-                Your NetID will be recorded. Please ensure that the image is appropriate and relevant to the food item.
-              </span>
-            </div>
+        <div className="alert alert-warning text-sm border mb-4">
+          <FaInfoCircle size={15} />
+          <span>
+            Your NetID will be recorded. Please ensure that the image is appropriate and relevant to the food item.
+          </span>
+        </div>
         <div className="modal-action">
-          <button className="btn btn-primary" onClick={handleUpload}>Upload</button>
+          <button 
+            className={`btn btn-primary ${isUploading ? 'btn-disabled' : ''}`} 
+            onClick={handleUpload}
+            disabled={isUploading}
+          >
+            {isUploading && <span className="loading loading-spinner loading-sm mr-2"></span>}
+            {isUploading ? 'Uploading...' : 'Upload'}
+          </button>
           <button className="btn" onClick={onClose}>Close</button>
         </div>
       </div>

@@ -41,7 +41,7 @@ function calculatePercentage(
 
 const NutritionFacts: React.FC<NutritionFactsProps> = ({ foodItem }) => {
   return (
-    <section className="font-custom text-base leading-normal max-w-xs p-1 border bg-white border-black h-auto">
+    <section className="font-custom text-base leading-normal w-full p-1 border bg-white border-black h-auto">
       <header>
         <h1 className="text-4xl font-custombold leading-relaxed text-normal">
           Nutrition Facts

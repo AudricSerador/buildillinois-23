@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { FaTimes, FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { FaHeart, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { useAuth } from "@/components/layout/auth.service";
 import { MdPerson } from "react-icons/md";
 import { toast } from "react-toastify";
 import { FoodImage } from "@/pages/food/[id]";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface ImageCarouselProps {
   images: FoodImage[];
@@ -12,28 +14,18 @@ interface ImageCarouselProps {
 const ImageCarousel: React.FC<ImageCarouselProps> = ({ images: initialImages }) => {
   const { user } = useAuth();
   const [images, setImages] = useState<FoodImage[]>(initialImages);
-  const [selectedImage, setSelectedImage] = useState<FoodImage | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  const closeModal = () => {
-    setSelectedImage(null);
-  };
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handlePrev = () => {
     setCurrentIndex((prevIndex) =>
       prevIndex === 0 ? images.length - 1 : prevIndex - 1
-    );
-    setSelectedImage(
-      images[currentIndex === 0 ? images.length - 1 : currentIndex - 1]
     );
   };
 
   const handleNext = () => {
     setCurrentIndex((prevIndex) =>
       prevIndex === images.length - 1 ? 0 : prevIndex + 1
-    );
-    setSelectedImage(
-      images[currentIndex === images.length - 1 ? 0 : currentIndex + 1]
     );
   };
 
@@ -80,21 +72,37 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images: initialImages }) 
     }
   };
 
+  const handleOpenDialog = (index: number) => {
+    setCurrentIndex(index);
+    setIsDialogOpen(true);
+  };
+
   return (
     <div className="mt-8">
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {images.length > 0 ? (
-          images.map((image) => (
-            <div key={image.id} className="relative">
+          images.map((image, index) => (
+            <div
+              key={image.id}
+              className="relative group cursor-pointer"
+              onClick={() => handleOpenDialog(index)}
+            >
               <img
                 src={image.url}
-                className="w-full h-64 object-cover cursor-pointer"
-                onClick={() => {
-                  setSelectedImage(image);
-                  setCurrentIndex(images.indexOf(image));
-                }}
+                className="w-full h-64 object-cover"
                 alt="Food Image"
               />
+              <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                <button
+                  className="btn btn-ghost text-white"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleLike(image.id);
+                  }}
+                >
+                  <FaHeart className="mr-2" /> {image.likes}
+                </button>
+              </div>
             </div>
           ))
         ) : (
@@ -102,68 +110,55 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images: initialImages }) 
         )}
       </div>
 
-      {selectedImage && (
-        <div className="modal modal-open fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="relative max-w-6xl w-full h-auto md:h-5/6 p-4 rounded-lg flex flex-col md:flex-row items-center justify-center bg-white">
-            <div className="relative w-full md:w-5/6 h-80 md:h-full bg-black flex items-center justify-center rounded-t-lg md:rounded-l-lg md:rounded-r-none">
-              <button
-                className="absolute top-4 right-4 md:hidden text-2xl text-white"
-                onClick={closeModal}
-              >
-                <FaTimes />
-              </button>
-              <button
-                className="btn text-white glass btn-md rounded-full absolute left-4 top-1/2 transform -translate-y-1/2 text-2xl"
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="max-w-6xl w-11/12 h-[80vh] p-4">
+          <div className="flex flex-col md:flex-row h-full">
+            <div className="relative w-full md:w-2/3 h-1/2 md:h-full flex items-center justify-center bg-black">
+              <div className="absolute inset-0 flex items-center justify-center">
+                <img
+                  src={images[currentIndex]?.url}
+                  alt="Full Image"
+                  className="max-w-full max-h-full w-auto h-auto object-contain"
+                />
+              </div>
+              <Button
+                variant="ghost"
+                className="absolute left-2 top-1/2 -translate-y-1/2 text-white z-10"
                 onClick={handlePrev}
               >
-                <FaArrowLeft size={15} />
-              </button>
-              <img
-                src={selectedImage.url}
-                alt="Full Image"
-                className="w-full h-full object-contain"
-              />
-              <button
-                className="btn text-white glass btn-md rounded-full absolute right-4 top-1/2 transform -translate-y-1/2 text-2xl"
+                <FaArrowLeft />
+              </Button>
+              <Button
+                variant="ghost"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-white z-10"
                 onClick={handleNext}
               >
-                <FaArrowRight size={15} />
-              </button>
+                <FaArrowRight />
+              </Button>
             </div>
-            <div className="w-full md:w-1/3 h-80 md:h-full p-4 flex flex-col justify-between rounded-b-lg md:rounded-r-lg md:rounded-l-none">
-              <button
-                className="absolute btn btn-ghost top-4 right-4 hidden md:block text-2xl text-gray-700"
-                onClick={closeModal}
-              >
-                <FaTimes />
-              </button>
+            <div className="w-full md:w-1/3 h-1/2 md:h-full p-4 flex flex-col justify-between overflow-y-auto bg-white">
               <div>
                 <div className="flex items-center mb-2">
                   <MdPerson size={24} className="mr-2" />
-                  <p className="font-bold">{selectedImage.userName}</p>
+                  <p className="font-bold">{images[currentIndex]?.userName}</p>
                 </div>
                 <p className="text-gray-600">
-                  {new Date(selectedImage.created_at).toLocaleDateString()}
+                  {new Date(images[currentIndex]?.created_at).toLocaleDateString()}
                 </p>
-                <p className="mt-2">{selectedImage.description}</p>
+                <p className="mt-2">{images[currentIndex]?.description}</p>
               </div>
-              <div className="flex items-center mt-2">
-                <span className="text-gray-700 mr-2">
-                  {selectedImage.likes} likes
-                </span>
-                {user && (
-                  <button
-                    className="text-blue-500"
-                    onClick={() => handleLike(selectedImage.id)}
-                  >
-                    Like
-                  </button>
-                )}
-              </div>
+              <Button
+                variant="outline"
+                className="w-full mt-4"
+                onClick={() => handleLike(images[currentIndex]?.id)}
+                disabled={!user}
+              >
+                <FaHeart className="mr-2" /> {images[currentIndex]?.likes} likes
+              </Button>
             </div>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

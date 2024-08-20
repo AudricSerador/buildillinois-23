@@ -3,15 +3,15 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
-    const { imageId } = req.body;
+    const { id } = req.body; 
 
-    if (!imageId) {
+    if (!id) {
       return res.status(400).json({ success: false, message: 'Missing image ID' });
     }
 
     try {
       const image = await prisma.foodImage.update({
-        where: { id: imageId },
+        where: { id: parseInt(id) }, 
         data: {
           likes: {
             increment: 1,

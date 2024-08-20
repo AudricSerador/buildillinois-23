@@ -40,16 +40,15 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState<'likes' | 'recent'>('likes');
   const [filterRating, setFilterRating] = useState<'all' | 'bad' | 'mid' | 'good'>('all');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchReviews = async () => {
     try {
-      console.log('Fetching reviews for foodId:', foodId);
       const res = await fetch(`/api/review/get_reviews?foodIds=${foodId}`);
       if (!res.ok) {
         throw new Error('Failed to fetch reviews');
       }
       const data = await res.json();
-      console.log('Received review data:', data);
       if (data.success && data.data && data.data[foodId]) {
         const reviewsWithUserNames = await Promise.all(
           data.data[foodId].map(async (review: Review) => {
@@ -57,10 +56,8 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
             return { ...review, userName };
           })
         );
-        console.log('Reviews with usernames:', reviewsWithUserNames);
         setReviews(reviewsWithUserNames);
       } else {
-        console.log("No reviews found for this food item");
         setReviews([]);
       }
     } catch (error) {
@@ -86,41 +83,37 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
       return;
     }
 
-    const today = new Date().toISOString().split('T')[0];
+    setIsSubmitting(true);
 
-    const existingReview = reviews.find(
-      (review) =>
-        review.userId !== user.id &&
-        review.createdAt.split('T')[0] === today
-    );
+    try {
+      const res = await fetch("/api/review/create_review", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user.id,
+          foodId,
+          rating,
+          text,
+        }),
+      });
 
-    if (existingReview) {
-      toast.error("You have already submitted a review for this food item today.");
-      return;
-    }
-
-    const res = await fetch("/api/review/create_review", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        userId: user.id,
-        foodId,
-        rating,
-        text,
-      }),
-    });
-
-    if (res.ok) {
-      toast.success("Review submitted successfully!");
-      const newReview = await res.json();
-      const userName = await fetchUserName(user.id);
-      setReviews([{ ...newReview.data, userName, likes: 0 }, ...reviews]);
-      setRating(null);
-      setText("");
-    } else {
-      toast.error("Failed to submit review.");
+      if (res.ok) {
+        const newReview = await res.json();
+        const userName = await fetchUserName(user.id);
+        setReviews([{ ...newReview.data, userName, likes: 0 }, ...reviews]);
+        setRating(null);
+        setText("");
+        toast.success("Review submitted successfully!");
+      } else {
+        toast.error("Failed to submit review.");
+      }
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      toast.error("An error occurred while submitting the review.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -241,7 +234,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
                         className={`btn btn-ghost ${rating === 'mid' ? 'btn-active' : ''}`}
                         onClick={() => setRating('mid')}
                       >
-                        <FaMeh className="text-4xl text-yellow-500" />
+                        <FaMeh className="text-4xl text-yellow-500" />  
                       </button>
                       <button
                         className={`btn btn-ghost ${rating === 'good' ? 'btn-active' : ''}`}
@@ -263,13 +256,11 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
                   </div>
                   <button
                     onClick={handleReviewSubmit}
-                    className="btn btn-secondary mt-2"
-                    disabled={
-                      text.length > MAX_REVIEW_LENGTH ||
-                      rating === null
-                    }
+                    className={`btn btn-secondary mt-2 ${isSubmitting ? 'btn-disabled' : ''}`}
+                    disabled={isSubmitting || text.length > MAX_REVIEW_LENGTH || rating === null}
                   >
-                    Submit Review
+                    {isSubmitting && <span className="loading loading-spinner loading-sm mr-2"></span>}
+                    {isSubmitting ? 'Submitting...' : 'Submit Review'}
                   </button>
                 </div>
               ) : (

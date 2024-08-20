@@ -168,16 +168,27 @@ export const EntriesDisplay: React.FC<EntriesDisplayProps> = ({
     }
   };
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const sortedDates = Object.keys(groupedEntries)
+    .filter(date => new Date(date) >= today)
+    .sort((a, b) => { 
+      if (isToday(new Date(a))) return -1;
+      if (isToday(new Date(b))) return 1;
+      return new Date(a).getTime() - new Date(b).getTime();
+    });
+
   return (
     <div className="max-w-4xl mx-auto my-8 font-custom">
       <Accordion type="single" collapsible className="w-full space-y-2">
-        {Object.entries(groupedEntries).reverse().map(([date, diningHalls], index, array) => (
+        {sortedDates.map((date) => (
           <AccordionItem key={date} value={date} className="rounded-lg overflow-hidden">
             <AccordionTrigger className="bg-uiucorange text-white p-4 rounded-t-lg">
               <h1 className="text-xl font-custombold">{formatDate(date)}</h1>
             </AccordionTrigger>
             <AccordionContent className="bg-white rounded-b-lg shadow p-4">
-              {Object.entries(diningHalls as { [key: string]: any }).map(
+              {Object.entries(groupedEntries[date] as { [key: string]: any }).map(
                 ([hall, facilities]) => (
                   <DiningHall key={hall} hall={hall} facilities={facilities} />
                 )

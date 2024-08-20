@@ -40,13 +40,13 @@ export interface FoodItem {
   name: string;
   ingredients: string;
   allergens: string;
-  preferences: string;
   mealEntries: any[];
   reviewSummary?: {
     count: number;
     averageRating: number;
   };
   topImage?: any;
+  preferences?: string;
 }
 
 export interface FoodImage {
@@ -180,10 +180,6 @@ export default function FoodItemPage() {
     return foodItem?.allergens ? foodItem.allergens.split(', ').filter(a => a.trim() !== '' && a.toLowerCase() !== 'n/a') : [];
   }, [foodItem?.allergens]);
 
-  const preferences = useMemo(() => {
-    return foodItem?.preferences ? foodItem.preferences.split(' ') : [];
-  }, [foodItem?.preferences]);
-
   if (isLoading) {
     return <LoadingSpinner text="Loading food data" />;
   }
@@ -316,14 +312,18 @@ export default function FoodItemPage() {
           <div id="nutrition-divider" className="divider invisible"></div>
           <div id="nutrition">
             <h2 className="text-4xl font-custombold my-4">Nutrition</h2>
-            <div className="lg:flex lg:gap-4">
-              {foodItem && <NutritionFacts foodItem={foodItem} />}
-              <IngredientsSection 
-                ingredients={filteredIngredients}
-                allergens={allergens}
-                searchIngredient={searchIngredient}
-                setSearchIngredient={setSearchIngredient}
-              />
+            <div className="flex flex-col lg:flex-row lg:gap-4">
+              <div className="w-full sm:w-auto lg:max-w-xs mb-4 sm:mb-0">
+                {foodItem && <NutritionFacts foodItem={foodItem} />}
+              </div>
+              <div className="w-full lg:flex-1">
+                <IngredientsSection 
+                  ingredients={filteredIngredients}
+                  allergens={allergens}
+                  searchIngredient={searchIngredient}
+                  setSearchIngredient={setSearchIngredient}
+                />
+              </div>
             </div>
           </div>
 

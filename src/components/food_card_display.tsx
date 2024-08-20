@@ -279,7 +279,7 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({
           <div className="h-4 md:h-6 mb-4">
             {!loading && (
               <PreferenceIcons
-                preferences={foodItem.preferences}
+                preferences={foodItem?.preferences || ''}
                 allergens={foodItem.allergens}
               />
             )}
