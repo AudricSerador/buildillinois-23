@@ -27,7 +27,7 @@ export const diningHallTimes: { [key: string]: { [key: string]: string } } = {
     },
     "InfiniTEA": {
       "A la Carte--APP DISPLAY": "7:00AM - 11:30PM",
-      "A la Carte--POS Feed": "7:00AM - 10:30PM",
+      "A la Carte--POS Feed": "7:00AM - 11:30PM",
     },
     "Urbana South Market": {
       "A la Carte--APP DISPLAY": "10:00AM - 9:00PM",
@@ -40,6 +40,52 @@ export const diningHallTimes: { [key: string]: { [key: string]: string } } = {
     "TerraByte": {
       "A la Carte--APP DISPLAY": "10:00AM - 10:30PM",
       "A la Carte--POS Feed": "10:00AM - 10:30PM",
+    },
+  };
+
+  export const simplifiedDiningHallTimes = {
+    "Ikenberry Dining Center (Ike)": {
+      "Breakfast": { start: "07:00", end: "10:00" },
+      "Lunch": { start: "10:30", end: "13:30" },
+      "Light Lunch": { start: "13:30", end: "15:00" },
+      "Dinner": { start: "16:30", end: "20:00" },
+    },
+    "Illinois Street Dining Center (ISR)": {
+      "Breakfast": { start: "07:00", end: "10:00" },
+      "Lunch": { start: "10:30", end: "14:00" },
+      "Dinner": { start: "16:30", end: "20:00" },
+    },
+    "Pennsylvania Avenue Dining Hall (PAR)": {
+      "Breakfast": { start: "07:00", end: "10:00" },
+      "Lunch": { start: "10:30", end: "14:30" },
+      "Dinner": { start: "16:30", end: "20:00" },
+    },
+    "Lincoln Avenue Dining Hall (Allen)": {
+      "Breakfast": { start: "07:00", end: "10:00" },
+      "Lunch": { start: "10:30", end: "14:00" },
+      "Dinner": { start: "16:30", end: "20:00" },
+    },
+    "Field of Greens (LAR)": {
+      "Lunch": { start: "10:30", end: "14:00" },
+      "Dinner": { start: "16:30", end: "20:00" },
+    }, 
+    "InfiniTEA": {
+      "Lunch": { start: "10:30", end: "14:00" },
+      "Dinner": { start: "16:30", end: "20:00" },
+    },
+    "Urbana South Market": {
+      "Breakfast": { start: "07:00", end: "10:00" },
+      "Lunch": { start: "10:30", end: "14:00" },
+      "Dinner": { start: "16:30", end: "20:00" },
+    },
+    "57 North": {
+      "Breakfast": { start: "07:30", end: "11:00" },
+      "Lunch": { start: "11:00", end: "23:00" },
+    },
+    "TerraByte": {
+      "Breakfast": { start: "07:30", end: "10:30" },
+      "Lunch": { start: "10:30", end: "14:00" },
+      "Dinner": { start: "16:30", end: "22:00" },
     },
   };
 

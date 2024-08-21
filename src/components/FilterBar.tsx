@@ -73,7 +73,13 @@ export function FilterBar({ availableDates, debouncedFetchFoodItems }: FilterBar
   const handleFilterChange = (filterType: string, value: string | string[]) => {
     switch (filterType) {
       case 'diningHall':
-        setDiningHall(value as string);
+        if (value === 'all_dining_halls') {
+          setDiningHall('all_dining_halls');
+        } else if (value === 'all_dining_shops') {
+          setDiningHall('all_dining_shops');
+        } else {
+          setDiningHall(value as string);
+        }
         break;
       case 'mealType':
         setMealType(value as string);

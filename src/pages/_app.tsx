@@ -23,6 +23,8 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth < 768);
+      document.body.style.overflow = window.innerWidth < 768 ? 'hidden' : '';
+      document.documentElement.style.overflow = window.innerWidth < 768 ? 'hidden' : '';
     };
     checkIsMobile();
     window.addEventListener('resize', checkIsMobile);

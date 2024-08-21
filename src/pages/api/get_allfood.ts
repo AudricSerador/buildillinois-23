@@ -1,52 +1,47 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../../lib/prisma';
-import { diningHallTimes, FoodItem } from '@/utils/constants';
-import { format, parse, isWithinInterval, set, addDays, compareAsc, isFuture } from 'date-fns';
+import { simplifiedDiningHallTimes, FoodItem } from '@/utils/constants';
+import { format, parse, isEqual } from 'date-fns';
 import { Prisma } from '@prisma/client';
 
+// Add this type definition at the top of your file
+type DiningHall = keyof typeof simplifiedDiningHallTimes;
+type MealType<T extends DiningHall> = keyof typeof simplifiedDiningHallTimes[T];
+
 const getCurrentCSTTime = (): Date => {
-  return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+  return new Date(new Date().toLocaleString("en-US", { timeZone: "America/Chicago" }));
 };
 
-const parseTime = (timeString: string): Date => {
-  const [time, period] = timeString.split(' ');
-  const [hours, minutes] = time.split(':').map(Number);
-  const date = new Date();
-  date.setHours(period === 'PM' && hours !== 12 ? hours + 12 : hours === 12 && period === 'AM' ? 0 : hours);
-  date.setMinutes(minutes);
-  date.setSeconds(0);
-  date.setMilliseconds(0);
-  return date;
+const currentTime = getCurrentCSTTime();
+const currentTimeString = format(currentTime, 'HH:mm');
+
+const isWithinRange = (time: string, start: string, end: string): boolean => {
+  const buffer = 15; // 15 minutes buffer
+  const timeMinutes = parseInt(time.split(':')[0]) * 60 + parseInt(time.split(':')[1]);
+  const startMinutes = parseInt(start.split(':')[0]) * 60 + parseInt(start.split(':')[1]) - buffer;
+  const endMinutes = parseInt(end.split(':')[0]) * 60 + parseInt(end.split(':')[1]) + buffer;
+  return timeMinutes >= startMinutes && timeMinutes <= endMinutes;
+};
+
+const parseTime = (time: string): Date => {
+  const [timePart, modifier] = time.split(' ');
+  let [hours, minutes] = timePart.split(':').map(Number);
+
+  if (modifier === 'PM' && hours !== 12) {
+    hours += 12;
+  } else if (modifier === 'AM' && hours === 12) {
+    hours = 0;
+  }
+
+  const parsedTime = new Date();
+  parsedTime.setHours(hours, minutes, 0, 0);
+  return parsedTime;
 };
 
 const isNowBetween = (startTime: string, endTime: string, currentTime: Date): boolean => {
   const start = parseTime(startTime);
   const end = parseTime(endTime);
   return currentTime >= start && currentTime <= end;
-};
-
-const getServingStatus = (mealEntry: any, currentTime: Date): string => {
-  const currentDateString = format(currentTime, 'EEEE, MMMM d, yyyy');
-
-  const entryDate = parse(mealEntry.dateServed, 'EEEE, MMMM d, yyyy', new Date());
-  if (format(entryDate, 'yyyy-MM-dd') === format(currentTime, 'yyyy-MM-dd')) {
-    const mealTimes = diningHallTimes[mealEntry.diningHall]?.[mealEntry.mealType];
-    if (!mealTimes) {
-      return 'not_available';
-    }
-
-    const [start, end] = mealTimes.split(" - ");
-
-    if (isNowBetween(start, end, currentTime)) {
-      return 'now';
-    } else if (parseTime(start) > currentTime) {
-      return 'later';
-    }
-  } else if (isFuture(entryDate)) {
-    return 'later';
-  }
-
-  return 'not_available';
 };
 
 // Update the ExtendedFoodInfo interface
@@ -65,28 +60,45 @@ interface ExtendedFoodInfo {
   cholesterol: number;
   sodium: number;
   totalCarbohydrates: number;
-  dietaryFiber: number;
+  fiber: number;
   sugars: number;
   protein: number;
-  vitaminDV: number;
   calciumDV: number;
   ironDV: number;
-  mealEntries: any[]; // Replace 'any' with a more specific type if possible
-  Review: any[]; // Replace 'any' with a more specific type if possible
-  FoodImage: any[]; // Replace 'any' with a more specific type if possible
+  mealEntries: {
+    id: number;
+    diningHall: string;
+    diningFacility: string;
+    mealType: string;
+    dateServed: string;
+    foodId: string;
+  }[];
+  Review: {
+    id: number;
+    createdAt: Date;
+    userId: string;
+    foodId: string;
+    rating: string;
+    text: string | null;
+    likes: number;
+  }[];
+  FoodImage: {
+    id: number;
+    created_at: Date;
+    userId: string;
+    foodId: string;
+    url: string;
+    description: string | null;
+    likes: number;
+  }[];
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  const { page, pageSize, sortFields, diningHall, mealType, searchTerm, dateServed, allergens, preferences, serving, ratingFilter, includeUnavailable } = req.query;
+  const { page, pageSize, sortFields, diningHall, mealType, searchTerm, dateServed, allergens, preferences, serving, ratingFilter } = req.query;
 
   try {
     const pageNumber = parseInt(page as string) || 1;
     const pageSizeNumber = parseInt(pageSize as string) || 10;
-    const includeUnavailableFood = includeUnavailable === 'true';
 
     let parsedSortFields: { field: string; order: 'asc' | 'desc' }[] = [];
     if (sortFields) {
@@ -98,37 +110,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const currentTime = getCurrentCSTTime();
-    const todayDate = format(currentTime, 'EEEE, MMMM d, yyyy');
+    const today = format(currentTime, 'EEEE, MMMM d, yyyy');
+    const currentTimeString = format(currentTime, 'HH:mm');
 
-    let targetDate = dateServed as string || (serving as string);
-    if (serving === 'now' || serving === 'later') {
-      targetDate = todayDate;
-    }
-
-    let mealDetailsQuery: any = {};
-
-    // Only apply date filter if targetDate is specified
-    if (targetDate) {
-      mealDetailsQuery.where = {
-        dateServed: targetDate
-      };
-    }
-
-    if (diningHall) {
-      mealDetailsQuery.where = {
-        ...mealDetailsQuery.where,
-        diningHall: diningHall as string
-      };
-    }
-    if (mealType) {
-      mealDetailsQuery.where = {
-        ...mealDetailsQuery.where,
-        mealType: mealType as string
-      };
-    }
-
-    const mealDetails = await prisma.mealDetails.findMany(mealDetailsQuery);
-    const foodIds = [...new Set(mealDetails.map(md => md.foodId))];
+    console.log('Query parameters:', { serving, dateServed, diningHall, mealType });
+    console.log('Current time:', currentTime);
+    console.log('Today:', today);
 
     let foodQuery: any = {
       include: {
@@ -138,12 +125,66 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           orderBy: { likes: 'desc' }
         },
         mealEntries: true
+      },
+      where: {
+        mealEntries: {
+          some: {}
+        }
       }
     };
 
-    // Only filter by foodIds if we have a date filter
-    if (targetDate) {
-      foodQuery.where = { id: { in: foodIds } };
+    if (serving === 'now' || serving === 'later') {
+      console.log('Filtering for today:', today);
+      foodQuery.where.mealEntries.some.dateServed = today;
+    } else if (serving) {
+      console.log('Filtering for date:', serving);
+      foodQuery.where.mealEntries.some.dateServed = serving as string;
+    }
+
+    if (diningHall) {
+      if (diningHall === 'all_dining_halls') {
+        foodQuery.where.mealEntries = {
+          ...foodQuery.where.mealEntries,
+          some: {
+            ...foodQuery.where.mealEntries?.some,
+            diningHall: {
+              in: ['Ikenberry Dining Center (Ike)', 'Illinois Street Dining Center (ISR)', 
+                   'Pennsylvania Avenue Dining Hall (PAR)', 'Lincoln Avenue Dining Hall (Allen)', 
+                   'Field of Greens (LAR)']
+            }
+          }
+        };
+      } else if (diningHall === 'all_dining_shops') {
+        foodQuery.where.mealEntries = {
+          ...foodQuery.where.mealEntries,
+          some: {
+            ...foodQuery.where.mealEntries?.some,
+            diningHall: {
+              notIn: ['Ikenberry Dining Center (Ike)', 'Illinois Street Dining Center (ISR)', 
+                      'Pennsylvania Avenue Dining Hall (PAR)', 'Lincoln Avenue Dining Hall (Allen)', 
+                      'Field of Greens (LAR)', '']
+            }
+          }
+        };
+      } else {
+        foodQuery.where.mealEntries = {
+          ...foodQuery.where.mealEntries,
+          some: {
+            ...foodQuery.where.mealEntries?.some,
+            diningHall: diningHall as string
+          }
+        };
+      }
+    }
+
+    if (mealType) {
+      foodQuery.where.mealEntries = {
+        ...foodQuery.where.mealEntries,
+        some: {
+          ...foodQuery.where.mealEntries?.some,
+          mealType: mealType as string
+        }
+      };
     }
 
     if (searchTerm) {
@@ -183,12 +224,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       foodQuery.orderBy = orderBy;
     }
 
-    let foodItems: any[] = await prisma.foodInfo.findMany(foodQuery);
+    console.log('Food query:', JSON.stringify(foodQuery, null, 2));
+    // Get all food items without pagination
+    let allFoodItems = await prisma.foodInfo.findMany({
+      ...foodQuery,
+      include: {
+        mealEntries: true,
+        Review: true,
+        FoodImage: true
+      }
+    }) as unknown as ExtendedFoodInfo[];
+    console.log('All food items fetched:', allFoodItems.length);
 
-    let processedFood = foodItems.map((item: ExtendedFoodInfo) => {
-      const servingStatuses = item.mealEntries.map((entry: any) => getServingStatus(entry, currentTime));
-      const servingStatus = servingStatuses.includes('now') ? 'now' : 
-                            servingStatuses.includes('later') ? 'later' : 'not_available';
+    // Process and filter food items
+    let processedFood = allFoodItems.map((item: ExtendedFoodInfo) => {
+      let servingStatus = 'not_available';
+      if (serving === 'now' || serving === 'later') {
+        const relevantEntries = item.mealEntries?.filter((entry: { dateServed: string }) => entry.dateServed === today) || [];
+        for (const entry of relevantEntries) {
+          const diningHall = entry.diningHall as DiningHall;
+          const mealType = entry.mealType as MealType<typeof diningHall>;
+
+          if (simplifiedDiningHallTimes[diningHall] && simplifiedDiningHallTimes[diningHall][mealType]) {
+            const mealTimes = simplifiedDiningHallTimes[diningHall][mealType];
+            if (serving === 'now' && isWithinRange(currentTimeString, mealTimes.start, mealTimes.end)) {
+              servingStatus = 'now';
+              break;
+            } else if (serving === 'later' && currentTimeString < mealTimes.end) {
+              servingStatus = 'later';
+              break;
+            }
+          }
+        }
+      } else if (serving) {
+        servingStatus = 'available';
+      }
 
       return {
         ...item,
@@ -202,16 +272,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       };
     });
 
-    // Only sort by review count and rating if ratingFilter is 'rated_only'
-    if (ratingFilter === 'rated_only') {
-      processedFood.sort((a, b) => {
-        if (b.reviewSummary.count !== a.reviewSummary.count) {
-          return b.reviewSummary.count - a.reviewSummary.count;
-        }
-        return b.reviewSummary.averageRating - a.reviewSummary.averageRating;
-      });
-    }
-
     // Filter based on serving status
     if (serving === 'now') {
       processedFood = processedFood.filter(item => item.servingStatus === 'now');
@@ -219,10 +279,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       processedFood = processedFood.filter(item => item.servingStatus === 'later');
     }
 
-    const totalCount = processedFood.length;
-    const totalPages = Math.ceil(totalCount / pageSizeNumber);
+    console.log('Processed food items:', processedFood.length);
 
-    processedFood = processedFood.slice((pageNumber - 1) * pageSizeNumber, pageNumber * pageSizeNumber);
+    // Apply pagination after processing and filtering
+    const totalCount = processedFood.length;
+    const startIndex = (pageNumber - 1) * pageSizeNumber;
+    const endIndex = startIndex + pageSizeNumber;
+    const paginatedFood = processedFood.slice(startIndex, endIndex);
+
+    const totalPages = Math.ceil(totalCount / pageSizeNumber);
 
     const allMealEntries = await prisma.mealDetails.findMany({
       select: { dateServed: true },
@@ -233,8 +298,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .map(entry => entry.dateServed)
       .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
 
-      res.status(200).json({ 
-      foodItems: processedFood, 
+    res.status(200).json({ 
+      foodItems: paginatedFood, 
       totalPages: totalPages,
       currentPage: pageNumber,
       totalItems: totalCount,
