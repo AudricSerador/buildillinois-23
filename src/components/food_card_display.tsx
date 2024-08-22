@@ -86,21 +86,13 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({
   sortFields,
   disableVerticalLayout = false // Default to false
 }) => {
-  console.log('Rendering FoodItemCard:', foodItem.name);
-
   const renderRating = () => {
-    console.log('Rendering rating for food item:', foodItem.name);
-    console.log('Review summary:', foodItem.reviewSummary);
-
     if (!foodItem.reviewSummary) {
-      console.log('No review summary available');
       return null;
     }
 
     const { count, averageRating } = foodItem.reviewSummary;
     const scorePercentage = Math.round(averageRating * 100);
-
-    console.log('Calculated score percentage:', scorePercentage);
 
     return (
       <div className="flex items-center">
@@ -251,7 +243,6 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({
             height={300}
             className="w-full h-full object-cover object-center"
             onError={(e) => {
-              console.error('Image failed to load:', foodItem.topImage?.url);
               e.currentTarget.onerror = null;
               e.currentTarget.src = '/placeholder-image.jpg';
             }}

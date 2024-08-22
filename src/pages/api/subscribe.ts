@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 
 // Set up VAPID keys for web push
 webpush.setVapidDetails(
-  'mailto:audricciel@example.com',
+  'mailto:audricciel@gmail.com',
   process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
   process.env.VAPID_PRIVATE_KEY!
 );
@@ -54,10 +54,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       await webpush.sendNotification(subscription, payload);
 
-      res.status(201).json({ message: 'Subscription added successfully' });
+      // Return a success response
+      res.status(201).json({ 
+        message: 'Subscription added successfully',
+        toast: {
+          type: 'success',
+          message: 'You have successfully subscribed to push notifications!'
+        }
+      });
     } catch (error) {
       console.error('Error handling subscription:', error);
-      res.status(500).json({ error: 'Failed to process subscription' });
+      res.status(500).json({ 
+        error: 'Failed to process subscription',
+        toast: {
+          type: 'error',
+          message: 'Failed to subscribe to push notifications. Please try again.'
+        }
+      });
     }
   } else {
     res.setHeader('Allow', ['POST']);

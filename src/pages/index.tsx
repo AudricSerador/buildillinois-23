@@ -5,29 +5,42 @@ import { useAuth } from "@/components/layout/auth.service";
 import { FoodCarousel } from "@/components/FoodCarousel";
 
 const subscribeToNotifications = async (userId: string | undefined) => {
+  console.log('subscribeToNotifications called');
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    console.log("Push notifications are not supported in this browser.");
     alert("Push notifications are not supported in your browser.");
     return;
   }
 
   try {
+    console.log('Requesting notification permission');
     const permission = await Notification.requestPermission();
+    console.log('Permission status:', permission);
     if (permission !== 'granted') {
+      console.log('Notification permission denied');
       alert("Notification permission denied. You won't receive push notifications.");
       return;
     }
 
+    console.log('Getting service worker registration');
     const registration = await navigator.serviceWorker.ready;
+    console.log('Service worker registration:', registration);
+
+    console.log('Subscribing to push notifications');
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
       applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
     });
-    
-    await fetch('/api/subscribe', {
+    console.log('Push subscription:', subscription);
+
+    console.log('Sending subscription to server');
+    const response = await fetch('/api/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId, subscription }),
     });
+    const responseData = await response.json();
+    console.log('Server response:', responseData);
 
     alert("Successfully subscribed to push notifications!");
   } catch (error) {
