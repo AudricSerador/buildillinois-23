@@ -4,7 +4,6 @@ import { simplifiedDiningHallTimes, FoodItem } from '@/utils/constants';
 import { format, parse, isEqual } from 'date-fns';
 import { Prisma } from '@prisma/client';
 
-// Add this type definition at the top of your file
 type DiningHall = keyof typeof simplifiedDiningHallTimes;
 type MealType<T extends DiningHall> = keyof typeof simplifiedDiningHallTimes[T];
 
@@ -105,17 +104,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       try {
         parsedSortFields = JSON.parse(sortFields as string);
       } catch (error) {
-        console.error('Error parsing sortFields:', error);
+        // Error parsing sortFields
       }
     }
 
     const currentTime = getCurrentCSTTime();
     const today = format(currentTime, 'EEEE, MMMM d, yyyy');
     const currentTimeString = format(currentTime, 'HH:mm');
-
-    console.log('Query parameters:', { serving, dateServed, diningHall, mealType });
-    console.log('Current time:', currentTime);
-    console.log('Today:', today);
 
     let foodQuery: any = {
       include: {
@@ -134,10 +129,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     };
 
     if (serving === 'now' || serving === 'later') {
-      console.log('Filtering for today:', today);
       foodQuery.where.mealEntries.some.dateServed = today;
     } else if (serving) {
-      console.log('Filtering for date:', serving);
       foodQuery.where.mealEntries.some.dateServed = serving as string;
     }
 
@@ -224,7 +217,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       foodQuery.orderBy = orderBy;
     }
 
-    console.log('Food query:', JSON.stringify(foodQuery, null, 2));
     // Get all food items without pagination
     let allFoodItems = await prisma.foodInfo.findMany({
       ...foodQuery,
@@ -234,7 +226,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         FoodImage: true
       }
     }) as unknown as ExtendedFoodInfo[];
-    console.log('All food items fetched:', allFoodItems.length);
 
     // Process and filter food items
     let processedFood = allFoodItems.map((item: ExtendedFoodInfo) => {
@@ -279,8 +270,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       processedFood = processedFood.filter(item => item.servingStatus === 'later');
     }
 
-    console.log('Processed food items:', processedFood.length);
-
     // Apply pagination after processing and filtering
     const totalCount = processedFood.length;
     const startIndex = (pageNumber - 1) * pageSizeNumber;
@@ -307,7 +296,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
   } catch (error) {
-    console.error('Error in get_allfood:', error);
     res.status(500).json({ error: 'An error occurred while fetching food data' });
   }
 }

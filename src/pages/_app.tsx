@@ -23,8 +23,6 @@ export default function App({ Component, pageProps }: AppProps) {
   useEffect(() => {
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth < 768);
-      document.body.style.overflow = window.innerWidth < 768 ? 'hidden' : '';
-      document.documentElement.style.overflow = window.innerWidth < 768 ? 'hidden' : '';
     };
     checkIsMobile();
     window.addEventListener('resize', checkIsMobile);
@@ -51,9 +49,6 @@ export default function App({ Component, pageProps }: AppProps) {
           )}
           {!isMainPage && <BackButton />}
           <main className="flex-grow pb-16 md:pb-0">
-            {/* {showFeedbackBanner && !isFeedbackBannerClosed && (
-              <FeedbackBanner onClose={handleCloseFeedbackBanner} />
-            )} */}
             <Component {...pageProps} />
             <Analytics />
             <SpeedInsights />
@@ -78,6 +73,19 @@ export default function App({ Component, pageProps }: AppProps) {
           )}
         </div>
       </AuthProvider>
+      <style jsx global>{`
+        @media (max-width: 767px) {
+          body {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          body::-webkit-scrollbar {
+            display: none;
+          }
+        }
+      `}</style>
     </>
   );
 }
