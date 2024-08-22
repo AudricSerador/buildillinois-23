@@ -39,6 +39,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <SEO title="IllinEats" description="The better UIUC dining hall experience." />
+      <meta name="viewport" content="minimum-scale=1, initial-scale=1, width=device-width, shrink-to-fit=no, user-scalable=no, viewport-fit=cover" />
       <AuthProvider>
         <div className="flex flex-col min-h-screen w-full bg-custombg font-custom">
           {showNavbarAndFooter && (
