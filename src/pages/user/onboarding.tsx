@@ -4,6 +4,7 @@ import { useAuth } from "@/components/layout/auth.service";
 import { dietaryPreferences, allergens, locationPreferences } from "@/components/icon_legend";
 import Image from "next/image";
 import Select from 'react-select';
+import { generateRecommendations } from "@/utils/create_recommendation";
 
 const dietaryGoalOptions = [
   { value: "bulk", label: "I want to bulk/build muscle" },
@@ -67,6 +68,12 @@ export default function Onboarding(): JSX.Element {
   const [isFading, setIsFading] = useState(false);
   const [showWelcomeText, setShowWelcomeText] = useState(false);
   const [showAdditionalText, setShowAdditionalText] = useState(false);
+
+  useEffect(() => {
+    if (user && user.email !== "asera3@illinois.edu") {
+      router.push("/");
+    }
+  }, [user, router]);
 
   useEffect(() => {
     if (user && !user.isNew) {
@@ -135,6 +142,7 @@ export default function Onboarding(): JSX.Element {
       const data = await response.json();
       
       if (data.success) {
+        generateRecommendations(user.id);
         router.push("/user/dashboard");
       } else {
         console.error(data.error);

@@ -1,8 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { FoodItemDisplay } from "@/components/allfood/food_item_display";
+import { FoodItemCard } from "@/components/food_card_display";
 import { diningHallTimes } from "@/components/entries_display";
-import { IconLegend } from "@/components/icon_legend";
 import LoadingSpinner from "@/components/loading_spinner";
 import { GetServerSideProps } from "next";
 import prisma from "../../../lib/prisma";
@@ -108,7 +107,17 @@ export default function HallFoodPage({
   };
   useEffect(() => {
     setDateServed(foodDates[dateIndex]);
-  }, [dateIndex]);
+  }, [dateIndex, foodDates]);
+
+  // Add this new state variable
+  const [futureDates, setFutureDates] = useState<string[]>([]);
+
+  // Add this useEffect to update futureDates when foodDates changes
+  useEffect(() => {
+    const currentDate = new Date();
+    const filteredDates = foodDates.filter(date => new Date(date) >= currentDate);
+    setFutureDates(filteredDates);
+  }, [foodDates]);
 
   useEffect(() => {
     const fetchFoodData = async () => {
@@ -134,9 +143,6 @@ export default function HallFoodPage({
   return (
     <div className="px-4 sm:px-8 font-custom md:px-16 lg:px-64 mt-4">
       <p className="text-4xl font-custombold mt-4 mb-4">{id}</p>
-      <div className="mb-4">
-        <IconLegend />
-      </div>
       <div className="bg-cloud p-2">
         <div className="flex items-center justify-center space-x-4 mb-4">
           <button
@@ -310,7 +316,7 @@ export default function HallFoodPage({
         <div className="flex flex-col p-4">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center h-screen">
-              <LoadingSpinner />
+              <LoadingSpinner text="Loading hall data"/>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center justify-center h-screen">
@@ -321,7 +327,7 @@ export default function HallFoodPage({
           ) : Object.entries(foodData).length === 0 ? (
             <div className="flex flex-col items-center justify-center h-16">
               <div className="font-custombold text-xl text-gray-500">
-                No food data found :(
+                No food data found :&#40;
               </div>
             </div>
           ) : (
@@ -358,10 +364,11 @@ export default function HallFoodPage({
                     <div className="grid grid-cols-1 md:grid-cols-2 px-2 py-2 lg:grid-cols-3 gap-x-4">
                       {foodItems &&
                         (foodItems as any[]).map((foodItem: any) => (
-                          <FoodItemDisplay
+                          <FoodItemCard
                             key={foodItem.id}
                             foodItem={foodItem}
-                            includeEntries={false}
+                            loading={false}
+                            futureDates={futureDates} // Add this line
                           />
                         ))}
                     </div>

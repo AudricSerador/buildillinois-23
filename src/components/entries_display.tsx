@@ -1,7 +1,21 @@
-import React, { useState } from "react";
+import React from "react";
+import { format, isToday, parseISO } from "date-fns";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+
+interface MealEntry {
+  dateServed: string;
+  diningHall: string;
+  diningFacility: string;
+  mealType: string;
+}
 
 interface EntriesDisplayProps {
-  mealEntries: any[];
+  mealEntries: MealEntry[];
 }
 
 export const diningHallTimes: { [key: string]: { [key: string]: string } } = {
@@ -49,105 +63,71 @@ export const diningHallTimes: { [key: string]: { [key: string]: string } } = {
   },
 };
 
-const EntriesDates: React.FC<{ diningHalls: { [key: string]: any } }> = ({
-  diningHalls,
-}) => {
-  return (
-    <div className="pt-0">
-      {Object.entries(diningHalls as { [key: string]: any }).map(
-        ([hall, facilities]) => (
-          <div key={hall} className="border border-gray-300 p-3">
-            <h2 className="text-xl font-custombold mb-2 text-center mt-1">
-              {hall}
-            </h2>
-            <div className="grid grid-cols-2 gap-4">
-              {Object.entries(facilities).map(([facility, entries]) => (
-                <div key={facility}>
-                  <h2 className="font-bold mb-2">
-                    {[
-                      "InfiniTEA",
-                      "Urbana South Market",
-                      "TerraByte",
-                      "57 North",
-                    ].includes(facility)
-                      ? "Daily Menu"
-                      : facility.startsWith("Build Your Own")
-                      ? `${facility.substring(0, facility.indexOf(" ("))}: ${
-                          (entries as any[])[0].mealType
-                        }`
-                      : facility.includes("(")
-                      ? facility.substring(0, facility.indexOf("("))
-                      : facility}
-                  </h2>
-                  <ul className="list-disc pl-5">
-                    {(entries as any[]).map((entry: any) => {
-                      const mealTypes = [
-                        "Breakfast",
-                        "Lunch",
-                        "Light Lunch",
-                        "Kosher Lunch",
-                        "Kosher Dinner",
-                        "Dinner",
-                        "A la Carte--APP DISPLAY",
-                        "A la Carte--POS Feed",
-                      ];
-                      const defaultMealTypes = ["Breakfast", "Lunch", "Dinner"];
-                      if (hall === "Ikenberry Dining Center (Ike)") {
-                        defaultMealTypes.push("Light Lunch");
-                      } else if (hall === "Lincoln Avenue Dining Hall (Allen)") {
-                        defaultMealTypes.push("Kosher Lunch", "Kosher Dinner");
-                      }
-                      let displayMealType;
-                      if (mealTypes.includes(entry.mealType)) {
-                        displayMealType = [
-                          {
-                            type: entry.mealType.startsWith("A la Carte")
-                              ? entry.mealType.substring(
-                                  0,
-                                  entry.mealType.indexOf("--")
-                                )
-                              : entry.mealType,
-                            time:
-                              (diningHallTimes[hall] &&
-                                diningHallTimes[hall][entry.mealType]) ||
-                              "Not Available",
-                          },
-                        ];
-                      } else {
-                        let existingMealTypes = (entries as any[]).map(
-                          (entry: any) => entry.mealType
-                        );
-                        displayMealType = defaultMealTypes
-                          .filter(
-                            (mealType) => !existingMealTypes.includes(mealType)
-                          )
-                          .map((mealType) => ({
-                            type: mealType,
-                            time:
-                              (diningHallTimes[hall] &&
-                                diningHallTimes[hall][mealType]) ||
-                              "Not Available",
-                          }));
-                        (entries as any[]).push(
-                          ...displayMealType.map((meal) => ({
-                            mealType: meal.type,
-                          }))
-                        );
-                      }
+const MealTimeDisplay: React.FC<{ mealType: string; time: string }> = ({ mealType, time }) => (
+  <div className="flex justify-between items-center py-1">
+    <span className="font-medium">{mealType}</span>
+    <span className="text-sm text-gray-600">{time}</span>
+  </div>
+);
 
-                      return displayMealType.map((meal, index) => (
-                        <li key={index}>
-                          {meal.type} ({meal.time})
-                        </li>
-                      ));
-                    })}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        )
-      )}
+const DiningFacility: React.FC<{ facility: string; entries: MealEntry[]; diningHall: string }> = ({
+  facility,
+  entries,
+  diningHall,
+}) => {
+  const facilityName = [
+    "InfiniTEA",
+    "Urbana South Market",
+    "TerraByte",
+    "57 North",
+  ].includes(facility)
+    ? "Daily Menu"
+    : facility.startsWith("Build Your Own")
+    ? `${facility.substring(0, facility.indexOf(" ("))}: ${
+        (entries as any[])[0].mealType
+      }`
+    : facility.includes("(")
+    ? facility.substring(0, facility.indexOf("("))
+    : facility;
+
+  // Get unique meal types from the actual entries
+  const availableMealTypes = [...new Set(entries.map(entry => entry.mealType))];
+
+  return (
+    <div className="mb-4 border rounded-lg overflow-hidden">
+      <div className="bg-gray-100 px-4 py-2 font-semibold">{facilityName}</div>
+      <div className="px-4 py-2">
+        {availableMealTypes.map(mealType => (
+          <MealTimeDisplay 
+            key={mealType}
+            mealType={mealType}
+            time={diningHallTimes[diningHall]?.[mealType] || "Not Available"}
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const DiningHall: React.FC<{ hall: string; facilities: { [key: string]: MealEntry[] } }> = ({
+  hall,
+  facilities,
+}) => {
+  const facilitiesCount = Object.keys(facilities).length;
+
+  return (
+    <div className="mb-6">
+      <h2 className="text-xl font-bold mb-2">{hall}</h2>
+      <div className={`grid ${facilitiesCount === 1 ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'} gap-4`}>
+        {Object.entries(facilities).map(([facility, entries]) => (
+          <DiningFacility 
+            key={facility} 
+            facility={facility} 
+            entries={entries} 
+            diningHall={hall}
+          />
+        ))}
+      </div>
     </div>
   );
 };
@@ -155,7 +135,7 @@ const EntriesDates: React.FC<{ diningHalls: { [key: string]: any } }> = ({
 export const EntriesDisplay: React.FC<EntriesDisplayProps> = ({
   mealEntries,
 }) => {
-  const groupedEntries = mealEntries.reduce((acc: any, entry: any) => {
+  const groupedEntries = mealEntries.reduce((acc: any, entry: MealEntry) => {
     if (!acc[entry.dateServed]) {
       acc[entry.dateServed] = {};
     }
@@ -169,36 +149,54 @@ export const EntriesDisplay: React.FC<EntriesDisplayProps> = ({
     return acc;
   }, {});
 
-  const [expandedDate, setExpandedDate] = useState<string | null>(null);
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      
+      if (isNaN(date.getTime())) {
+        throw new Error('Invalid date');
+      }
+      
+      if (isToday(date)) {
+        return "Today";
+      }
+      
+      return format(date, "EEEE, MMMM d, yyyy");
+    } catch (error) {
+      console.error("Error parsing date:", dateString, error);
+      return dateString; // Fall back to the original string if parsing fails
+    }
+  };
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const sortedDates = Object.keys(groupedEntries)
+    .filter(date => new Date(date) >= today)
+    .sort((a, b) => { 
+      if (isToday(new Date(a))) return -1;
+      if (isToday(new Date(b))) return 1;
+      return new Date(a).getTime() - new Date(b).getTime();
+    });
 
   return (
-    <div className="max-w-2xl my-8 font-custom">
-      {Object.entries(groupedEntries).reverse().map(([date, diningHalls]) => (
-        <div key={date} className="mb-3">
-          <div
-            className={`bg-uiucorange text-white p-4 flex justify-between items-center cursor-pointer ${
-              expandedDate === date ? "rounded-t-lg" : "rounded-lg"
-            }`}
-            onClick={() =>
-              setExpandedDate((currentDate) =>
-                currentDate === date ? null : date
-              )
-            }
-          >
-            <h1 className="text-xl font-custombold">{date}</h1>
-            <span className="text-white">
-              {expandedDate === date ? "▲" : "▼"}
-            </span>
-          </div>
-          <div
-            className={`collapse-css-transition bg-cloud rounded-b-lg shadow ${
-              expandedDate === date ? "open" : ""
-            }`}
-          >
-            <EntriesDates diningHalls={diningHalls as { [key: string]: any }} />
-          </div>
-        </div>
-      ))}
+    <div className="max-w-4xl mx-auto my-8 font-custom">
+      <Accordion type="single" collapsible className="w-full space-y-2">
+        {sortedDates.map((date) => (
+          <AccordionItem key={date} value={date} className="rounded-lg overflow-hidden">
+            <AccordionTrigger className="bg-uiucorange text-white p-4 rounded-t-lg">
+              <h1 className="text-xl font-custombold">{formatDate(date)}</h1>
+            </AccordionTrigger>
+            <AccordionContent className="bg-white rounded-b-lg shadow p-4">
+              {Object.entries(groupedEntries[date] as { [key: string]: any }).map(
+                ([hall, facilities]) => (
+                  <DiningHall key={hall} hall={hall} facilities={facilities} />
+                )
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        ))}
+      </Accordion>
     </div>
   );
 };

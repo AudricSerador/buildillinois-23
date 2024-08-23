@@ -1,40 +1,60 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { FoodItemDisplay } from "../components/allfood/food_item_display";
-import { useRouter } from "next/router";
-import LoadingSpinner from "../components/loading_spinner";
-import { Filters } from "../components/allfood/filters";
-import { IconLegend } from "@/components/icon_legend";
-
-function debounce(fn: Function, delay: number) {
-  let timer: NodeJS.Timeout;
-  return function (this: any, ...args: any[]) {
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      fn.apply(this, args);
-    }, delay);
-  };
-}
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { FoodItemCard } from "@/components/food_card_display";
+import { FilterBar } from "@/components/FilterBar";
+import { useAtom } from 'jotai';
+import {
+  sortFieldsAtom, diningHallAtom, mealTypeAtom,
+  searchTermAtom, dateServedAtom, allergensAtom, preferencesAtom, datesAtom, servingAtom, availableDatesAtom, ratingFilterAtom
+} from '@/atoms/filterAtoms';
+import { FoodItem } from '@/utils/constants';
+import { useInView } from 'react-intersection-observer';
+import debounce from 'lodash/debounce';
 
 export default function AllFood(): JSX.Element {
-  const router = useRouter();
   const pageSize = 10;
-  const pageNumber = router.query.page
-    ? parseInt(router.query.page as string)
-    : 1;
-  const [sortField, setSortField] = useState("");
-  const [sortOrder, setSortOrder] = useState("");
-  const [diningHall, setDiningHall] = useState("");
-  const [mealType, setMealType] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [dateServed, setDateServed] = useState("");
-  const [allergens, setAllergens] = useState<string[]>([]);
-  const [preferences, setPreferences] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [food, setFood] = useState([]);
-  const [foodCount, setFoodCount] = useState(0);
-  const [dates, setDates] = useState<string[]>([]);
-  const [error, setError] = useState(null);
+  const [sortFields] = useAtom(sortFieldsAtom);
+  const [diningHall] = useAtom(diningHallAtom);
+  const [mealType] = useAtom(mealTypeAtom);
+  const [searchTerm, setSearchTerm] = useAtom(searchTermAtom);
+  const [dateServed] = useAtom(dateServedAtom);
+  const [allergens] = useAtom(allergensAtom);
+  const [preferences] = useAtom(preferencesAtom);
+  const [dates, setDates] = useAtom(datesAtom);
+  const [serving] = useAtom(servingAtom);
+  const [availableDates, setAvailableDates] = useAtom(availableDatesAtom);
+  const [ratingFilter] = useAtom(ratingFilterAtom);
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const maxPages = 5;
+
+  const isFetchingRef = useRef(false);
+  const prevFiltersRef = useRef({ sortFields, diningHall, mealType, debouncedSearchTerm, dateServed, allergens, preferences, serving, ratingFilter });
+
+  const { ref, inView } = useInView({
+    threshold: 0,
+  });
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+
+    return () => window.removeEventListener('resize', checkIsMobile);
+  }, []);
 
   const debouncedFetchData = useCallback(
     debounce((value: string) => {
@@ -43,127 +63,148 @@ export default function AllFood(): JSX.Element {
     [setDebouncedSearchTerm]
   );
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setSortField(localStorage.getItem("sortField") || "");
-      setSortOrder(localStorage.getItem("sortOrder") || "");
-      setDiningHall(localStorage.getItem("diningHall") || "");
-      setMealType(localStorage.getItem("mealType") || "");
-      setSearchTerm(localStorage.getItem("searchTerm") || "");
-      setDateServed(localStorage.getItem("dateServed") || "");
-      setPreferences(localStorage.getItem("preferences") || "");
-
-      const allergensFromLocalStorage = localStorage.getItem("allergens");
-      if (allergensFromLocalStorage) {
-        setAllergens(JSON.parse(allergensFromLocalStorage));
-      } else {
-        setAllergens([]);
-      }
+  const fetchFoodItems = useCallback(async (loadMore = false) => {
+    if (isFetchingRef.current || (!loadMore && foodItems.length > 0 && !hasMore)) return;
+    isFetchingRef.current = true;
+    setIsLoadingMore(loadMore);
+    if (!loadMore) {
+      setIsLoading(true);
+      setFoodItems([]); // Always clear food items when fetching new data
     }
+
+    try {
+      const queryParams = new URLSearchParams({
+        page: loadMore ? (page + 1).toString() : '1',
+        pageSize: pageSize.toString(),
+        sortFields: JSON.stringify(sortFields),
+        diningHall: diningHall || '',
+        mealType: mealType || '',
+        searchTerm: debouncedSearchTerm,
+        dateServed: dateServed || '',
+        allergens: Array.isArray(allergens) ? allergens.join(',') : allergens || '',
+        preferences: Array.isArray(preferences) ? preferences.join(',') : preferences || '',
+        serving: serving || '',
+        ratingFilter: ratingFilter || 'any'
+      });
+
+      const response = await fetch(`/api/get_allfood?${queryParams.toString()}`);
+      if (!response.ok) throw new Error('Failed to fetch food items');
+
+      const data = await response.json();
+
+      const processedFoodItems = data.foodItems.map((item: FoodItem) => ({
+        ...item,
+        reviewSummary: item.reviewSummary || { count: 0, averageRating: 0 }
+      }));
+
+      let newFoodItems;
+      if (loadMore) {
+        newFoodItems = [...foodItems, ...processedFoodItems];
+        setPage(prevPage => prevPage + 1);
+      } else {
+        newFoodItems = processedFoodItems;
+        setPage(1);
+      }
+
+      setTotalPages(data.totalPages);
+      setTotalItems(data.totalItems);
+      setAvailableDates(data.availableDates || []);
+      setHasMore(data.currentPage < data.totalPages);
+
+      // Fetch images for all food items, including newly loaded ones
+      if (newFoodItems.length > 0) {
+        const foodIds = newFoodItems.map((item: FoodItem) => item.id).join(',');
+        const imagesResponse = await fetch(`/api/image/get_images?foodIds=${foodIds}`);
+        const imagesData = await imagesResponse.json();
+
+        newFoodItems = newFoodItems.map((item: FoodItem) => ({
+          ...item,
+          topImage: imagesData.images?.[item.id]?.[0] || null
+        }));
+      }
+
+      setFoodItems(newFoodItems);
+
+    } catch (error) {
+      setError('Failed to fetch food items. Please try again later.');
+    } finally {
+      isFetchingRef.current = false;
+      setIsLoading(false);
+      setIsLoadingMore(false);
+    }
+  }, [sortFields, diningHall, mealType, debouncedSearchTerm, dateServed, allergens, preferences, serving, ratingFilter, page, pageSize, foodItems]);
+
+  const debouncedFetchFoodItems = useCallback(
+    debounce(() => {
+      fetchFoodItems();
+    }, 300),
+    [fetchFoodItems]
+  );
+
+  useEffect(() => {
+    const currentFilters = { sortFields, diningHall, mealType, debouncedSearchTerm, dateServed, allergens, preferences, serving, ratingFilter };
+    const prevFilters = prevFiltersRef.current;
+
+    if (JSON.stringify(currentFilters) !== JSON.stringify(prevFilters)) {
+      console.log('Filters changed, fetching new data');
+      setPage(1);
+      setHasMore(true);
+      fetchFoodItems(); // This will now always clear and refetch food items
+      prevFiltersRef.current = currentFilters;
+    }
+  }, [sortFields, diningHall, mealType, debouncedSearchTerm, dateServed, allergens, preferences, serving, ratingFilter]);
+
+  useEffect(() => {
+    return () => {
+      debouncedFetchFoodItems.cancel();
+    };
+  }, [debouncedFetchFoodItems]);
+
+  useEffect(() => {
+    fetchFoodItems();
   }, []);
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("sortField", sortField);
-      localStorage.setItem("sortOrder", sortOrder);
-      localStorage.setItem("diningHall", diningHall);
-      localStorage.setItem("mealType", mealType);
-      localStorage.setItem("searchTerm", searchTerm);
-      localStorage.setItem("dateServed", dateServed);
-      localStorage.setItem("preferences", preferences);
-      localStorage.setItem("allergens", JSON.stringify(allergens));
+    if (!isInitialLoad) {
+      setPage(1);
+      setFoodItems([]);
+      setHasMore(true);
+      fetchFoodItems();
     }
-  }, [sortField, sortOrder, diningHall, mealType, searchTerm, dateServed, preferences, allergens]);
+  }, [sortFields, diningHall, mealType, debouncedSearchTerm, dateServed, allergens, preferences, serving, ratingFilter, fetchFoodItems, isInitialLoad]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      try {
-        const allergensString = allergens.join(",");
+    if (!isInitialLoad && page > 1) {
+      fetchFoodItems(true);
+    }
+  }, [page, isInitialLoad, fetchFoodItems]);
 
-        const res = await fetch(
-          `/api/get_allfood?page=${pageNumber}&sortField=${sortField}&sortOrder=${sortOrder}&diningHall=${diningHall}&mealType=${encodeURIComponent(mealType)}&searchTerm=${debouncedSearchTerm}&dateServed=${dateServed}&allergens=${allergensString}&preferences=${preferences}`
-        );
+  useEffect(() => {
+    if (inView && isMobile && !isLoadingMore && hasMore && foodItems.length > 0) {
+      fetchFoodItems(true);
+    }
+  }, [inView, isMobile, isLoadingMore, hasMore, fetchFoodItems, foodItems.length]);
 
-        if (!res.ok) {
-          throw Error(res.statusText);
-        }
-        const data = await res.json();
-        setFood(data.food);
-        setFoodCount(data.foodCount);
-        setDates(data.dates);
-        setIsLoading(false);
-      } catch (error) {
-        setError(error as null);
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, [
-    pageNumber,
-    sortField,
-    sortOrder,
-    diningHall,
-    mealType,
-    debouncedSearchTerm,
-    dateServed,
-    allergens,
-    preferences,
-  ]);
-
-  const handlePageChange = (newPageNumber: number) => {
-    router.push({
-      pathname: "/allfood",
-      query: {
-        page: newPageNumber,
-        sortField: sortField,
-        sortOrder: sortOrder,
-        diningHall: diningHall,
-        mealType: mealType,
-        searchTerm: searchTerm,
-      },
-    });
+  const handleShowMore = () => {
+    if (!isLoadingMore && hasMore) {
+      setIsLoadingMore(true);
+      fetchFoodItems(true);
+    }
   };
 
-  const totalPages = Math.ceil(foodCount / pageSize);
-  const startPage = Math.min(
-    Math.max(1, pageNumber - 2),
-    Math.max(1, totalPages - 4)
-  );
-  const endPage = Math.max(
-    Math.min(totalPages, pageNumber + 2),
-    Math.min(totalPages, startPage + 4)
-  );
-
   return (
-    <div className="px-4 sm:px-8 md:px-16 lg:px-64 mt-4">
-      <IconLegend />
-      <p className="text-4xl font-custombold mt-4 mb-4">Filters</p>
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 font-custom">        
-      <Filters
-          sortField={sortField}
-          setSortField={setSortField}
-          sortOrder={sortOrder}
-          setSortOrder={setSortOrder}
-          selectedAllergens={allergens}
-          setSelectedAllergens={setAllergens}
-          diningHall={diningHall}
-          setDiningHall={setDiningHall}
-          mealType={mealType}
-          setMealType={setMealType}
-          selectedPreference={preferences}
-          setSelectedPreference={setPreferences}
-          dateServed={dateServed}
-          setDateServed={setDateServed}
-          dates={dates}
+    <div className="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32 mt-4">
+      <div className="pt-4">
+        <FilterBar 
+          availableDates={availableDates} 
+          debouncedFetchFoodItems={debouncedFetchFoodItems}
         />
       </div>
-
-      <div className="flex justify-between items-center">
-        <p className="text-4xl font-custombold mt-4">All Food ({foodCount})</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+        <p className="text-4xl font-custombold mt-4">All Food ({totalItems})</p>
         <input
           type="text"
-          className="w-48 md:w-64 lg:w-96 xl:w-128 sm:w-auto ml-auto mt-4 block bg-white border border-gray-200 font-custom text-gray-700 py-3 px-4 pr-8 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500"
+          className="input input-bordered w-full sm:w-64 md:w-80 lg:w-96 mt-4 sm:mt-0"
           value={searchTerm}
           onChange={(e) => {
             setSearchTerm(e.target.value);
@@ -172,75 +213,43 @@ export default function AllFood(): JSX.Element {
           placeholder="Search food..."
         />
       </div>
-      <div
-        style={{
-          paddingBottom: "1rem",
-          borderBottom: "4px solid black",
-          marginBottom: "1rem",
-        }}
-      ></div>
-      {isLoading ? (
-        <LoadingSpinner />
-      ) : error ? (
-        <p className="font-custom text-center my-6">
-          Error loading dining hall data: {error}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {foodItems.map((foodItem: FoodItem) => (
+          <FoodItemCard 
+            key={foodItem.id} 
+            foodItem={{
+              ...foodItem,
+              reviewSummary: foodItem.reviewSummary || { count: 0, averageRating: 0 }
+            }} 
+            loading={false} 
+            sortFields={sortFields} 
+            futureDates={availableDates} 
+          />
+        ))}
+        {(isLoading || isLoadingMore) && 
+          Array(10).fill(null).map((_, index) => (
+            <FoodItemCard key={`skeleton-${index}`} foodItem={{} as FoodItem} loading={true} sortFields={sortFields} futureDates={availableDates} />
+          ))
+        }
+      </div>
+      {!isLoading && foodItems.length === 0 && (
+        <p className="font-custom text-center my-6 col-span-full">
+          No results found. Please try again with a different filter query.
         </p>
-      ) : (
-        <>
-          <ul>
-            {food.length > 0 ? (
-              food.map((foodItem: any) => (
-                <FoodItemDisplay
-                  key={foodItem.id}
-                  foodItem={foodItem}
-                  includeEntries={true}
-                />
-              ))
-            ) : (
-              <p className="font-custom text-center my-6">
-                No results found. Please try again with a different filter
-                query.
-              </p>
-            )}
-          </ul>
-          <div className="flex items-center justify-center space-x-2 mt-4 mb-8">
+      )}
+      {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+      {hasMore && (
+        <div ref={ref} className="mt-4 flex justify-center">
+          {!isMobile && (
             <button
-              onClick={() => handlePageChange(pageNumber - 1)}
-              className={`px-4 py-2 rounded-md text-white font-custom ${
-                pageNumber === 1
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-uiucorange hover:bg-orange-600"
-              }`}
-              disabled={pageNumber === 1}
+              onClick={handleShowMore}
+              className="btn btn-primary"
+              disabled={isLoadingMore}
             >
-              Back
+              {isLoadingMore ? 'Loading...' : 'Show More'}
             </button>
-            {[...Array(Math.max(0, endPage + 1 - startPage))].map((e, i) => (
-              <button
-                key={i}
-                onClick={() => handlePageChange(i + startPage)}
-                className={`px-4 py-2 rounded-md text-white font-custom ${
-                  pageNumber === i + startPage
-                    ? "bg-uiucorange"
-                    : "bg-gray-300 hover:bg-orange-600"
-                }`}
-              >
-                {i + startPage}
-              </button>
-            ))}
-            <button
-              onClick={() => handlePageChange(pageNumber + 1)}
-              className={`px-4 py-2 rounded-md text-white font-custom ${
-                pageNumber === totalPages
-                  ? "bg-gray-300 cursor-not-allowed"
-                  : "bg-uiucorange hover:bg-orange-600"
-              }`}
-              disabled={pageNumber === totalPages}
-            >
-              Next
-            </button>
-          </div>
-        </>
+          )}
+        </div>
       )}
     </div>
   );

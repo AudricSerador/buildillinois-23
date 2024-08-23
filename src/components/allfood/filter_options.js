@@ -1,5 +1,4 @@
 export const sortFields = [
-  { value: "", label: "All" },
   { value: "calories", label: "Calories" },
   { value: "totalCarbohydrates", label: "Carbohydrates" },
   { value: "protein", label: "Protein" },
@@ -112,4 +111,11 @@ export const mealTypeOptions = [
       { value: "Condiments", label: "Condiments" },
     ],
   }
+];
+
+export const servingOptions = [
+  { value: "", label: "Anytime" },
+  { value: "now", label: "Right Now" },
+  { value: "later", label: "Later Today" },
+  // Future dates will be dynamically added in the FilterBar component
 ];

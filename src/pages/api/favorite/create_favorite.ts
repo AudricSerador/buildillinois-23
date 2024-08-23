@@ -9,16 +9,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
       const newFavorite = await prisma.favorite.create({
         data: {
-          user: {
-            connect: {
-              id: userId,
-            },
-          },
-          food: {
-            connect: {
-              id: foodId,
-            },
-          },
+          userId: userId,
+          foodId: foodId,
         },
       });
 
