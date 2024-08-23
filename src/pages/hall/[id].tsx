@@ -5,6 +5,8 @@ import { diningHallTimes } from "@/components/entries_display";
 import LoadingSpinner from "@/components/loading_spinner";
 import { GetServerSideProps } from "next";
 import prisma from "../../../lib/prisma";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   try {
@@ -141,13 +143,15 @@ export default function HallFoodPage({
   }, [id, mealType, dateServed]);
 
   return (
-    <div className="px-4 sm:px-8 font-custom md:px-16 lg:px-64 mt-4">
-      <p className="text-4xl font-custombold mt-4 mb-4">{id}</p>
-      <div className="bg-cloud p-2">
-        <div className="flex items-center justify-center space-x-4 mb-4">
+    <Card className="mx-auto max-w-4xl mt-8">
+      <CardHeader>
+        <CardTitle className="text-4xl font-custombold text-center">{id}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="flex items-center justify-center space-x-4 mb-6">
           <button
             onClick={decrementDate}
-            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 focus:outline-none"
+            className="btn btn-circle btn-outline"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -169,7 +173,7 @@ export default function HallFoodPage({
           </span>
           <button
             onClick={incrementDate}
-            className="p-2 rounded-full bg-gray-200 hover:bg-gray-300 focus:outline-none"
+            className="btn btn-circle btn-outline"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -187,7 +191,8 @@ export default function HallFoodPage({
             </svg>
           </button>
         </div>
-        <div className="flex flex-wrap justify-center px-4">
+
+        <div className="flex flex-wrap justify-center gap-2 mb-4">
           {[
             "TerraByte",
             "57 North",
@@ -195,32 +200,26 @@ export default function HallFoodPage({
             "InfiniTEA",
           ].includes(id as string) ? (
             <button
-              className={`m-2 px-4 py-2 text-xl rounded-full focus:outline-none whitespace-nowrap ${
-                mealType === "A la Carte"
-                  ? "bg-uiucblue text-white"
-                  : "bg-white text-uiucblue border border-uiucblue"
+              className={`btn ${
+                mealType === "A la Carte" ? "btn-primary" : "btn-outline"
               }`}
               onClick={() => setMealType("A la Carte")}
             >
               A la Carte
             </button>
           ) : (
-            <div className="flex flex-wrap justify-center px-4">
+            <>
               <button
-                className={`m-2 px-4 py-2 text-xl rounded-full focus:outline-none whitespace-nowrap ${
-                  mealType === "Breakfast"
-                    ? "bg-uiucblue text-white"
-                    : "bg-white text-uiucblue border border-uiucblue"
+                className={`btn ${
+                  mealType === "Breakfast" ? "btn-primary" : "btn-outline"
                 }`}
                 onClick={() => setMealType("Breakfast")}
               >
                 Breakfast
               </button>
               <button
-                className={`m-2 px-4 py-2 text-xl rounded-full focus:outline-none whitespace-nowrap ${
-                  mealType === "Lunch"
-                    ? "bg-uiucblue text-white"
-                    : "bg-white text-uiucblue border border-uiucblue"
+                className={`btn ${
+                  mealType === "Lunch" ? "btn-primary" : "btn-outline"
                 }`}
                 onClick={() => setMealType("Lunch")}
               >
@@ -228,10 +227,8 @@ export default function HallFoodPage({
               </button>
               {id === "Ikenberry Dining Center (Ike)" && (
                 <button
-                  className={`m-2 px-4 py-2 text-xl rounded-full focus:outline-none whitespace-nowrap ${
-                    mealType === "Light Lunch"
-                      ? "bg-uiucblue text-white"
-                      : "bg-white text-uiucblue border border-uiucblue"
+                  className={`btn ${
+                    mealType === "Light Lunch" ? "btn-primary" : "btn-outline"
                   }`}
                   onClick={() => setMealType("Light Lunch")}
                 >
@@ -240,47 +237,37 @@ export default function HallFoodPage({
               )}
               {id === "Lincoln Avenue Dining Hall (Allen, LAR)" && (
                 <button
-                  className={`m-2 px-4 py-2 text-xl rounded-full focus:outline-none whitespace-nowrap ${
-                    mealType === "Kosher Lunch"
-                      ? "bg-uiucblue text-white"
-                      : "bg-white text-uiucblue border border-uiucblue"
+                  className={`btn ${
+                    mealType === "Kosher Lunch" ? "btn-primary" : "btn-outline"
                   }`}
                   onClick={() => setMealType("Kosher Lunch")}
                 >
                   Kosher Lunch
                 </button>
               )}
-              <div className="text-center">
-                <button
-                  className={`m-2 px-4 py-2 text-xl rounded-full focus:outline-none whitespace-nowrap ${
-                    mealType === "Dinner"
-                      ? "bg-uiucblue text-white"
-                      : "bg-white text-uiucblue border border-uiucblue"
-                  }`}
-                  onClick={() => setMealType("Dinner")}
-                >
-                  Dinner
-                </button>
-              </div>
+              <button
+                className={`btn ${
+                  mealType === "Dinner" ? "btn-primary" : "btn-outline"
+                }`}
+                onClick={() => setMealType("Dinner")}
+              >
+                Dinner
+              </button>
               {id === "Lincoln Avenue Dining Hall (Allen/LAR)" && (
-                <div className="text-center">
-                  <button
-                    className={`m-2 px-4 py-2 text-xl rounded-full focus:outline-none whitespace-nowrap ${
-                      mealType === "Kosher Dinner"
-                        ? "bg-uiucblue text-white"
-                        : "bg-white text-uiucblue border border-uiucblue"
-                    }`}
-                    onClick={() => setMealType("Kosher Dinner")}
-                  >
-                    Kosher Dinner
-                  </button>
-                </div>
+                <button
+                  className={`btn ${
+                    mealType === "Kosher Dinner" ? "btn-primary" : "btn-outline"
+                  }`}
+                  onClick={() => setMealType("Kosher Dinner")}
+                >
+                  Kosher Dinner
+                </button>
               )}
-            </div>
+            </>
           )}
         </div>
 
-        <div className="flex flex-wrap justify-center">
+        <div className="flex flex-wrap justify-center gap-2 mb-4">
           {mealTypes &&
             mealTypes
               .filter(
@@ -289,10 +276,8 @@ export default function HallFoodPage({
               .map((mealTypeItem) => (
                 <button
                   key={mealTypeItem}
-                  className={`m-2 px-2 py-1 text-lg focus:outline-none ${
-                    mealType === mealTypeItem
-                      ? "bg-uiucblue text-white"
-                      : "bg-white text-uiucblue border border-uiucblue"
+                  className={`btn btn-sm ${
+                    mealType === mealTypeItem ? "btn-primary" : "btn-outline"
                   }`}
                   onClick={() => setMealType(mealTypeItem)}
                 >
@@ -300,6 +285,7 @@ export default function HallFoodPage({
                 </button>
               ))}
         </div>
+
         <p className="font-custombold text-center text-xl mt-2 text-uiucblue">
           {mealType === ""
             ? "Select a meal above"
@@ -313,13 +299,14 @@ export default function HallFoodPage({
                 diningHallTimes[id as string]?.["Dinner"].split(" - ")[1]
               } (Open for all meals)`}
         </p>
-        <div className="flex flex-col p-4">
+
+        <div className="mt-6">
           {isLoading ? (
-            <div className="flex flex-col items-center justify-center h-screen">
+            <div className="flex flex-col items-center justify-center h-64">
               <LoadingSpinner text="Loading hall data"/>
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center justify-center h-screen">
+            <div className="flex flex-col items-center justify-center h-64">
               <div className="font-custombold text-xl text-red-500">
                 Error loading data: {error}
               </div>
@@ -331,54 +318,31 @@ export default function HallFoodPage({
               </div>
             </div>
           ) : (
-            <div className="w-auto my-8 font-custom">
-              {Object.entries(foodData).map(([facility, foodItems]) => (
-                <div key={facility} className="mb-3">
-                  <div
-                    className={`bg-uiucblue text-white p-4 flex justify-between items-center cursor-pointer ${
-                      expandedFacility === facility
-                        ? "rounded-t-lg"
-                        : "rounded-lg"
-                    }`}
-                    onClick={() =>
-                      setExpandedFacility((currentFacility) =>
-                        currentFacility === facility ? null : facility
-                      )
-                    }
-                  >
-                    <h1 className="text-xl font-custombold">{facility}</h1>
-                    <span className="text-white">
-                      {expandedFacility === facility ? "▲" : "▼"}
-                    </span>
-                  </div>
-                  <div
-                    className={`collapse-css-transition bg-cloud rounded-b-lg shadow ${
-                      expandedFacility === facility ? "open" : ""
-                    }`}
-                    style={
-                      expandedFacility === facility
-                        ? { maxHeight: "60vh", overflowY: "auto" }
-                        : {}
-                    }
-                  >
-                    <div className="grid grid-cols-1 md:grid-cols-2 px-2 py-2 lg:grid-cols-3 gap-x-4">
+            <Accordion type="single" collapsible className="w-full">
+              {Object.entries(foodData).map(([facility, foodItems], index) => (
+                <AccordionItem key={facility} value={`item-${index}`}>
+                  <AccordionTrigger className="text-xl font-custombold">
+                    {facility}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {foodItems &&
                         (foodItems as any[]).map((foodItem: any) => (
                           <FoodItemCard
                             key={foodItem.id}
                             foodItem={foodItem}
                             loading={false}
-                            futureDates={futureDates} // Add this line
+                            futureDates={futureDates}
                           />
                         ))}
                     </div>
-                  </div>
-                </div>
+                  </AccordionContent>
+                </AccordionItem>
               ))}
-            </div>
+            </Accordion>
           )}
         </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

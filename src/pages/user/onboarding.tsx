@@ -4,7 +4,6 @@ import { useAuth } from "@/components/layout/auth.service";
 import { dietaryPreferences, allergens, locationPreferences } from "@/components/icon_legend";
 import Image from "next/image";
 import Select from 'react-select';
-import { generateRecommendations } from "@/utils/create_recommendation";
 
 const dietaryGoalOptions = [
   { value: "bulk", label: "I want to bulk/build muscle" },
@@ -41,13 +40,25 @@ const BackButton = ({ step, handleBack }: { step: number; handleBack: () => void
 const StepLayout = ({ children, step, handleBack, fadeClass }: { children: React.ReactNode; step: number; handleBack: () => void, fadeClass: string }) => (
   <div className="flex flex-col font-custom items-center justify-center min-h-screen">
     <div className="w-full flex items-center justify-center h-16 mt-4 top-0 fixed">
-      <ul className="steps">
-        <li className={`step ${step >= 1 && "step-primary"}`}>Name</li>
-        <li className={`step ${step >= 2 && "step-primary"}`}>Allergens</li>
-        <li className={`step ${step >= 3 && "step-primary"}`}>Restrictions</li>
-        <li className={`step ${step >= 4 && "step-primary"}`}>Location</li>
-        <li className={`step ${step >= 5 && "step-primary"}`}>Goals</li>
-        <li className="step">Finish</li>
+      <ul className="steps steps-horizontal">
+        <li className={`step ${step >= 1 && "step-primary"}`}>
+          <span className="hidden sm:inline">Name</span>
+        </li>
+        <li className={`step ${step >= 2 && "step-primary"}`}>
+          <span className="hidden sm:inline">Allergens</span>
+        </li>
+        <li className={`step ${step >= 3 && "step-primary"}`}>
+          <span className="hidden sm:inline">Restrictions</span>
+        </li>
+        <li className={`step ${step >= 4 && "step-primary"}`}>
+          <span className="hidden sm:inline">Location</span>
+        </li>
+        <li className={`step ${step >= 5 && "step-primary"}`}>
+          <span className="hidden sm:inline">Goals</span>
+        </li>
+        <li className="step">
+          <span className="hidden sm:inline">Finish</span>
+        </li>
       </ul>
     </div>
     <div className={`transition-container ${fadeClass}`}>
@@ -58,7 +69,7 @@ const StepLayout = ({ children, step, handleBack, fadeClass }: { children: React
 
 export default function Onboarding(): JSX.Element {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, handleUserSignedIn } = useAuth();
   const [step, setStep] = useState(0); // Start at step 0 for the welcome screen
   const [name, setName] = useState("");
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
@@ -142,8 +153,9 @@ export default function Onboarding(): JSX.Element {
       const data = await response.json();
       
       if (data.success) {
-        generateRecommendations(user.id);
-        router.push("/user/dashboard");
+        // Update the user state in the AuthContext
+        await handleUserSignedIn();
+        router.push("/");
       } else {
         console.error(data.error);
       }
@@ -186,14 +198,13 @@ export default function Onboarding(): JSX.Element {
               <button
                 key={label}
                 onClick={() => handleToggle(selectedAllergens, setSelectedAllergens, label)}
-                className={`inline-flex items-center justify-center rounded-full py-2 px-6 m-2 text-sm font-medium w-36 ${selectedAllergens.includes(label) ? "bg-uiucorange text-white" : "bg-clouddark text-gray-700"} transition-colors duration-200`}
+                className={`inline-flex items-center justify-center rounded-full py-2 px-6 m-2 text-sm font-medium w-36 ${selectedAllergens.includes(label) ? "bg-info text-white" : "bg-clouddark text-gray-700"} transition-colors duration-200`}
               >
                 <Image src={src} alt={label} width={24} height={24} className="mr-2" />
                 {label}
               </button>
             ))}
           </div>
-          <p className="w-full text-center">Don&apos;t see your food allergy? Please let us know in the feedback form!</p>
           <BackButton step={step} handleBack={handleBack} />
           <StepButton onClick={handleNext} text="Next" />
         </div>
@@ -207,14 +218,13 @@ export default function Onboarding(): JSX.Element {
               <button
                 key={label}
                 onClick={() => handleToggle(selectedPreferences, setSelectedPreferences, label)}
-                className={`flex flex-col items-center justify-center border border-gray-300 rounded m-2 w-40 h-40 ${selectedPreferences.includes(label) ? "bg-uiucorange text-white" : "bg-gray-200 text-gray-700"} transition-colors duration-200`}
+                className={`flex flex-col items-center justify-center border border-gray-300 rounded m-2 w-40 h-40 ${selectedPreferences.includes(label) ? "bg-info text-white" : "bg-gray-200 text-gray-700"} transition-colors duration-200`}
               >
                 <Image src={src} alt={label} width={72} height={72} className="mb-2" />
                 <span>{label}</span>
               </button>
             ))}
           </div>
-          <p className="w-full text-center">Don&apos;t see your dietary restriction? Please let us know in the feedback form!</p>
           <BackButton step={step} handleBack={handleBack} />
           <StepButton onClick={handleNext} text="Next" />
         </div>
@@ -228,7 +238,7 @@ export default function Onboarding(): JSX.Element {
               <button
                 key={label}
                 onClick={() => handleToggle(selectedLocations, setSelectedLocations, label)}
-                className={`flex flex-col items-center justify-center border border-gray-300 rounded m-2 w-40 h-40 ${selectedLocations.includes(label) ? "bg-uiucorange text-white" : "bg-gray-200 text-gray-700"} transition-colors duration-200`}
+                className={`flex flex-col items-center justify-center border border-gray-300 rounded m-2 w-40 h-40 ${selectedLocations.includes(label) ? "bg-info text-white" : "bg-gray-200 text-gray-700"} transition-colors duration-200`}
               >
                 <Image src={src} alt={label} width={72} height={72} className="mb-2" />
                 <span>{label}</span>

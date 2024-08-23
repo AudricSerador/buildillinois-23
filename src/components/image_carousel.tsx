@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaHeart, FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { useAuth } from "@/components/layout/auth.service";
 import { MdPerson } from "react-icons/md";
@@ -9,9 +9,10 @@ import { Button } from "@/components/ui/button";
 
 interface ImageCarouselProps {
   images: FoodImage[];
+  loading: boolean;
 }
 
-const ImageCarousel: React.FC<ImageCarouselProps> = ({ images: initialImages }) => {
+const ImageCarousel: React.FC<ImageCarouselProps> = ({ images: initialImages, loading }) => {
   const { user } = useAuth();
   const [images, setImages] = useState<FoodImage[]>(initialImages);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -80,7 +81,12 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images: initialImages }) 
   return (
     <div className="mt-8">
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {images.length > 0 ? (
+        {loading ? (
+          // Loading skeleton
+          Array.from({ length: 4 }).map((_, index) => (
+            <div key={index} className="w-full h-64 bg-gray-200 animate-pulse"></div>
+          ))
+        ) : images.length > 0 ? (
           images.map((image, index) => (
             <div
               key={image.id}

@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/components/layout/auth.service";
 import { FoodCarousel } from "@/components/FoodCarousel";
-import { FaSync } from 'react-icons/fa';
+// import { FaSync } from 'react-icons/fa';
 
 export default function Home(): JSX.Element {
   const [isVisible, setIsVisible] = useState(false);
@@ -25,12 +25,9 @@ export default function Home(): JSX.Element {
       const response = await fetch(`/api/recommendation/get_recommendations?userId=${user.id}`);
       if (!response.ok) throw new Error('Failed to fetch recommendations');
       const data = await response.json();
-      console.log("Fetched recommendations data:", data);
       if (Array.isArray(data.foodItems) && data.foodItems.length > 0) {
         setRecommendations(data.foodItems);
-        console.log("Set recommendations:", data.foodItems);
       } else {
-        console.log("No recommendations in response");
         setRecommendations([]);
       }
     } catch (error) {
@@ -44,43 +41,6 @@ export default function Home(): JSX.Element {
   const handleRefresh = () => {
     fetchRecommendations();
   };
-
-  const subscribeToNotifications = async (userId: string) => {
-    try {
-      const permission = await Notification.requestPermission();
-      if (permission !== 'granted') {
-        console.log('Notification permission denied');
-        return;
-      }
-
-      const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-      });
-
-      const response = await fetch('/api/subscribe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          subscription: subscription,
-          userId: userId,
-        }),
-      });
-
-      if (response.ok) {
-        console.log('Subscription successful');
-      } else {
-        console.error('Subscription failed');
-      }
-    } catch (error) {
-      console.error('Error subscribing to notifications:', error);
-    }
-  };
-
-  console.log("Rendering Home component, recommendations:", recommendations);
 
   return (
     <div className="flex flex-col items-stretch">
@@ -98,51 +58,53 @@ export default function Home(): JSX.Element {
         </Link>
       </div>
 
-      <div
-        className="hero min-h-[40vh] bg-cover bg-center"
-        style={{
-          backgroundImage: "url(/images/dininghall.jpg)",
-        }}>
-        <div className="hero-overlay bg-opacity-70 bg-black"></div>
-        <div className="hero-content text-neutral-content text-center py-8">
-          <div className="max-w-2xl">
-            <h1 className={`mb-4 text-4xl sm:text-6xl font-custombold text-uiucorange transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              Find your favorite dining hall food in <i>seconds</i>.
-            </h1>
-            <p className={`mb-4 text-md sm:text-xl font-custom transition-all duration-700 ease-out delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              Tired of going to dining halls and finding nothing you like?
-              Find food that YOU want to eat with IllinEats. Search across all UIUC
-              dining halls and get personalized recommendations.
-            </p>
-            <div className={`flex justify-center mt-6 transition-all duration-700 ease-out delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              {!user && (
-                <Link href="/login">
-                  <button className="btn btn-accent font-custombold mr-4">
-                    Login with your NetID
+      <div className="relative">
+        <div
+          className="hero min-h-[40vh] bg-cover bg-center"
+          style={{
+            backgroundImage: "url(/images/dininghall.jpg)",
+          }}>
+          <div className="absolute inset-0 bg-black opacity-70"></div>
+          <div className="relative z-10 hero-content text-neutral-content text-center py-8">
+            <div className="max-w-2xl">
+              <h1 className={`mb-4 text-4xl sm:text-6xl font-custombold text-uiucorange transition-all duration-700 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                Find your favorite dining hall food in <i>seconds</i>.
+              </h1>
+              <p className={`mb-4 text-md sm:text-xl font-custom transition-all duration-700 ease-out delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                Tired of going to dining halls and finding nothing you like?
+                Find food that YOU want to eat with IllinEats. Search across all UIUC
+                dining halls and get personalized recommendations.
+              </p>
+              <div className={`flex justify-center items-center mt-6 transition-all duration-700 ease-out delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                {!user && (
+                  <Link href="/login">
+                    <button className="btn btn-accent font-custombold mr-4">
+                      Login with your NetID
+                    </button>
+                  </Link>
+                )}
+                {user && (
+                  <button
+                    className="btn btn-primary font-custombold mr-4"
+                    onClick={() => window.open('https://docs.google.com/forms/d/e/1FAIpQLScIAB14S8DdCi_xxFExLLl20vwsKQG5RDniBhZP1gT5U0JJSw/viewform', '_blank', 'noopener,noreferrer')}
+                  >
+                    Give Feedback
                   </button>
-                </Link>
-              )}
-              {user && (
+                )}
                 <button
-                  className="btn btn-primary font-custombold mr-4"
-                  onClick={() => subscribeToNotifications(user.id)}
+                  className="btn btn-warning text-black font-custombold mr-4"
+                  onClick={() => window.open('https://buymeacoffee.com/audricserador', '_blank', 'noopener,noreferrer')}
                 >
-                  Enable Notifications
+                  ☕ Support the project
                 </button>
-              )}
-              <button
-                className="btn btn-warning text-black font-custombold"
-                onClick={() => window.open('https://buymeacoffee.com/audricserador', '_blank', 'noopener,noreferrer')}
-              >
-                ☕ Support the project
-              </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <div className="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32">
-        {user && (
+        {/* {user && (
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-2xl font-bold">Recommended for You</h2>
             <button
@@ -155,7 +117,7 @@ export default function Home(): JSX.Element {
               {isLoading ? 'Loading...' : 'Refresh'}
             </button>
           </div>
-        )}
+        )} */}
         {user && (
           <FoodCarousel 
             title="Recommended for You"

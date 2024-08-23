@@ -67,7 +67,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <main className="flex-grow pb-16 md:pb-0">
             <Component {...pageProps} />
             <Analytics />
-            <SpeedInsights />
+            {/* <SpeedInsights /> */}
             <ToastContainer
               position="bottom-right"
               autoClose={3000}

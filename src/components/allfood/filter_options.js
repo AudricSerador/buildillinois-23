@@ -99,18 +99,18 @@ export const mealTypeOptions = [
       { value: "A la Carte", label: "A la Carte" },
     ],
   },
-  {
-    label: "Food Stations (Always Available)",
-    options: [
-      { value: "Deli & Bagel Bar", label: "Deli & Bagel Bar" },
-      { value: "Waffle Bar", label: "Waffle Bar" },
-      { value: "Salad Bar", label: "Salad Bar" },
-      { value: "Cereal", label: "Cereal" },
-      { value: "Ice Cream", label: "Ice Cream" },
-      { value: "Beverages", label: "Beverages" },
-      { value: "Condiments", label: "Condiments" },
-    ],
-  }
+  // {
+  //   label: "Food Stations (Always Available)",
+  //   options: [
+  //     { value: "Deli & Bagel Bar", label: "Deli & Bagel Bar" },
+  //     { value: "Waffle Bar", label: "Waffle Bar" },
+  //     { value: "Salad Bar", label: "Salad Bar" },
+  //     { value: "Cereal", label: "Cereal" },
+  //     { value: "Ice Cream", label: "Ice Cream" },
+  //     { value: "Beverages", label: "Beverages" },
+  //     { value: "Condiments", label: "Condiments" },
+  //   ],
+  // }
 ];
 
 export const servingOptions = [

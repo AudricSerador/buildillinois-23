@@ -90,7 +90,41 @@ interface ExtendedFoodInfo {
     description: string | null;
     likes: number;
   }[];
+  reviewSummary?: {
+    count: number;
+    averageRating: number;
+  };
+  topImage?: {
+    id: number;
+    created_at: Date;
+    userId: string;
+    foodId: string;
+    url: string;
+    description: string | null;
+    likes: number;
+  } | null;
+  servingStatus?: string;
 }
+
+// Add this custom sorting function
+const customSort = (items: ExtendedFoodInfo[], sortFields: { field: string; order: 'asc' | 'desc' }[]): ExtendedFoodInfo[] => {
+  return items.sort((a, b) => {
+    for (const { field, order } of sortFields) {
+      const aValue = a[field as keyof ExtendedFoodInfo];
+      const bValue = b[field as keyof ExtendedFoodInfo];
+      
+      if (aValue !== bValue) {
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+          return order === 'asc' ? aValue - bValue : bValue - aValue;
+        } else {
+          const comparison = String(aValue).localeCompare(String(bValue));
+          return order === 'asc' ? comparison : -comparison;
+        }
+      }
+    }
+    return 0;
+  });
+};
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { page, pageSize, sortFields, diningHall, mealType, searchTerm, dateServed, allergens, preferences, serving, ratingFilter } = req.query;
@@ -119,11 +153,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           take: 1,
           orderBy: { likes: 'desc' }
         },
-        mealEntries: true
+        mealEntries: {
+          where: {
+            dateServed: {
+              gte: today
+            }
+          }
+        }
       },
       where: {
         mealEntries: {
-          some: {}
+          some: {
+            dateServed: {
+              gte: today
+            }
+          }
         }
       }
     };
@@ -206,18 +250,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       };
     }
 
-    // Add sorting logic
-    let orderBy: Prisma.FoodInfoOrderByWithRelationInput[] = [];
-    if (parsedSortFields.length > 0) {
-      orderBy = parsedSortFields.map((field) => ({
-        [field.field]: field.order
-      }));
-    }
-    if (orderBy.length > 0) {
-      foodQuery.orderBy = orderBy;
-    }
-
-    // Get all food items without pagination
+    // Get all food items without pagination and sorting
     let allFoodItems = await prisma.foodInfo.findMany({
       ...foodQuery,
       include: {
@@ -227,8 +260,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }) as unknown as ExtendedFoodInfo[];
 
-    // Process and filter food items
-    let processedFood = allFoodItems.map((item: ExtendedFoodInfo) => {
+    // Process food items
+    let processedFood: ExtendedFoodInfo[] = allFoodItems.map((item: ExtendedFoodInfo) => {
       let servingStatus = 'not_available';
       if (serving === 'now' || serving === 'later') {
         const relevantEntries = item.mealEntries?.filter((entry: { dateServed: string }) => entry.dateServed === today) || [];
@@ -263,6 +296,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       };
     });
 
+    // Apply custom sorting
+    if (parsedSortFields.length > 0) {
+      processedFood = customSort(processedFood, parsedSortFields);
+    }
+
     // Filter based on serving status
     if (serving === 'now') {
       processedFood = processedFood.filter(item => item.servingStatus === 'now');
@@ -270,7 +308,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       processedFood = processedFood.filter(item => item.servingStatus === 'later');
     }
 
-    // Apply pagination after processing and filtering
+    // Apply pagination after processing, sorting, and filtering
     const totalCount = processedFood.length;
     const startIndex = (pageNumber - 1) * pageSizeNumber;
     const endIndex = startIndex + pageSizeNumber;
@@ -281,6 +319,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const allMealEntries = await prisma.mealDetails.findMany({
       select: { dateServed: true },
       distinct: ['dateServed'],
+      where: {
+        dateServed: {
+          gte: today
+        }
+      }
     });
 
     const availableDates = allMealEntries

@@ -1,6 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
 import { diningHallTimes } from "@/components/entries_display";
 import Link from "next/link";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export default function DiningHalls(): JSX.Element {
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -124,98 +126,75 @@ export default function DiningHalls(): JSX.Element {
   };
 
   return (
-    <div className="px-4 sm:px-8 md:px-16 lg:px-64 mt-4 font-custom">
-      <p className="text-4xl font-custombold mt-4 mb-4">
-        Open Now (
-        {currentTime.toLocaleTimeString([], {
-          hour: "numeric",
-          minute: "numeric",
-        })}
-        )
-      </p>
-
-      <div className="flex items-center overflow-hidden">
-        <button onClick={() => scroll(-1)} className="md:block hidden">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            className="h-6 w-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-        </button>
-        <div
-          ref={scrollContainer}
-          className="flex overflow-x-auto pb-4 scrollbar-hide p-4 bg-gray-100 border border-gray-300 rounded-lg min-h-[200px] w-full"
-        >
-          {openDiningHalls.length > 0 ? (
-            openDiningHalls.map(({ hall, message }) => (
-              <Link key={hall} href={`/hall/${hall}`}>
-                <div className="flex-none w-64 h-36 m-3 bg-white shadow-md rounded-lg overflow-hidden flex flex-col">
-                  <div className="h-2 bg-uiucorange"></div>
-                  <div className="p-6 flex flex-col justify-between h-full">
-                    <h2 className="text-xl font-bold mb-2">
-                      {getHallName(hall)}
-                    </h2>
-                    <div></div>
-                    <p className="text-gray-700 text-sm">{message}</p>
-                  </div>
+    <div className="container mx-auto px-4 sm:px-32 mt-8 font-custom">
+      <Card className="mb-8 bg-cloud">
+        <CardHeader>
+          <CardTitle className="text-4xl font-custombold text-uiucblue">
+            Open Now (
+            {currentTime.toLocaleTimeString([], {
+              hour: "numeric",
+              minute: "numeric",
+            })}
+            )
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="w-full whitespace-nowrap rounded-md border">
+            <div className="flex space-x-4 p-4">
+              {openDiningHalls.length > 0 ? (
+                openDiningHalls.map(({ hall, message }) => (
+                  <Link key={hall} href={`/hall/${hall}`}>
+                    <Card className="w-[250px] flex-shrink-0 bg-white">
+                      <CardHeader className="p-4">
+                        <CardTitle className="text-lg text-uiucblue">{getHallName(hall)}</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-gray-600">{message}</p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ))
+              ) : (
+                <div className="flex items-center justify-center w-full h-[200px]">
+                  <p className="text-uiucblue">No dining halls open :(</p>
                 </div>
+              )}
+            </div>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-cloud">
+        <CardHeader>
+          <CardTitle className="text-4xl font-custombold text-uiucblue">All Dining Halls</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {allDiningHalls.map(({ hall, message }) => (
+              <Link
+                key={hall}
+                href={`/hall/${hall}`}
+                className="block"
+              >
+                <Card className="h-full bg-white">
+                  <CardContent className="p-0">
+                    <img
+                      src="https://via.placeholder.com/150"
+                      alt="Dining Hall"
+                      className="w-full h-32 object-cover object-center rounded-t-lg"
+                    />
+                    <div className="p-4">
+                      <h2 className="text-xl font-bold mb-2 text-uiucblue">{getHallName(hall)}</h2>
+                      <p className="text-sm text-gray-600">{message}</p>
+                    </div>
+                  </CardContent>
+                </Card>
               </Link>
-            ))
-          ) : (
-            <div className="grid place-items-center w-full h-[200px]">
-              <p>No dining halls open :(</p>
-            </div>
-          )}
-        </div>
-        <button onClick={() => scroll(1)} className="md:block hidden">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            className="h-6 w-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </button>
-      </div>
-      <p className="text-4xl font-custombold mt-4 mb-4">All Dining Halls</p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {allDiningHalls.map(({ hall, message }) => (
-          <Link
-            key={hall}
-            href={`/hall/${hall}`}
-            className="card bg-white shadow-md rounded-lg overflow-hidden h-full"
-          >
-            <div>
-              <img
-                src="https://via.placeholder.com/150"
-                alt="Dining Hall"
-                className="w-full h-32 object-cover"
-              />
-              <div className="h-2 bg-uiucorange"></div>
-              <div className="p-6 h-32">
-                <h2 className="text-xl font-bold mb-2">{getHallName(hall)}</h2>
-                <p className="text-gray-700 text-sm">{message}</p>
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { FaInfoCircle, FaThumbsUp, FaFrown, FaMeh, FaSmile, } from "react-icons/
 import { FaFaceMehBlank } from "react-icons/fa6";
 import { MdPerson } from "react-icons/md";
 import * as timeago from "timeago.js";
+import { Filter } from 'bad-words';
 
 interface Review {
   id: number;
@@ -41,6 +42,8 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
   const [sortBy, setSortBy] = useState<'likes' | 'recent'>('likes');
   const [filterRating, setFilterRating] = useState<'all' | 'bad' | 'mid' | 'good'>('all');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [filter] = useState(() => new Filter());
+  const [canReview, setCanReview] = useState(true);
 
   const fetchReviews = async () => {
     try {
@@ -70,11 +73,36 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
 
   useEffect(() => {
     fetchReviews();
+    checkReviewEligibility();
   }, [foodId]);
+
+  const checkReviewEligibility = () => {
+    if (!user) return;
+
+    const reviewHistory = JSON.parse(localStorage.getItem('reviewHistory') || '{}');
+    const lastReviewDate = reviewHistory[`${user.id}_${foodId}`];
+
+    if (lastReviewDate) {
+      const lastReview = new Date(lastReviewDate);
+      const today = new Date();
+      if (lastReview.toDateString() === today.toDateString()) {
+        setCanReview(false);
+      } else {
+        setCanReview(true);
+      }
+    } else {
+      setCanReview(true);
+    }
+  };
 
   const handleReviewSubmit = async () => {
     if (!user) {
       toast.error("You need to log in to submit a review.");
+      return;
+    }
+
+    if (!canReview) {
+      toast.error("You can only submit one review per day for this item.");
       return;
     }
 
@@ -84,6 +112,8 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
     }
 
     setIsSubmitting(true);
+
+    const filteredText = filter.clean(text);
 
     try {
       const res = await fetch("/api/review/create_review", {
@@ -95,7 +125,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
           userId: user.id,
           foodId,
           rating,
-          text,
+          text: filteredText,
         }),
       });
 
@@ -106,6 +136,13 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
         setRating(null);
         setText("");
         toast.success("Review submitted successfully!");
+
+        // Update localStorage with the new review date
+        const reviewHistory = JSON.parse(localStorage.getItem('reviewHistory') || '{}');
+        reviewHistory[`${user.id}_${foodId}`] = new Date().toISOString();
+        localStorage.setItem('reviewHistory', JSON.stringify(reviewHistory));
+
+        setCanReview(false);
       } else {
         toast.error("Failed to submit review.");
       }
@@ -213,7 +250,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
             <div className="alert alert-warning border mb-4">
               <FaInfoCircle size={20} />
               <span>
-                Your NetID will be recorded when you submit a review.
+                Your NetID will be recorded when you submit a review. You can only submit one review per day for this item.
               </span>
             </div>
           )}
@@ -222,46 +259,55 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
               {user ? (
                 <div className="mb-4 bg-base-100 p-4 rounded-lg border shadow-md h-full">
                   <h3 className="text-xl font-custombold">How was the food?</h3>
-                  <div className="flex items-center mb-2">
-                    <div className="flex space-x-4 justify-center items-center w-full">
+                  {canReview ? (
+                    <>
+                      <div className="flex items-center mb-2">
+                        <div className="flex space-x-4 justify-center items-center w-full">
+                          <button
+                            className={`btn btn-ghost ${rating === 'bad' ? 'btn-active' : ''}`}
+                            onClick={() => setRating('bad')}
+                          >
+                            <FaFrown className="text-4xl text-red-500" />
+                          </button>
+                          <button
+                            className={`btn btn-ghost ${rating === 'mid' ? 'btn-active' : ''}`}
+                            onClick={() => setRating('mid')}
+                          >
+                            <FaMeh className="text-4xl text-yellow-500" />  
+                          </button>
+                          <button
+                            className={`btn btn-ghost ${rating === 'good' ? 'btn-active' : ''}`}
+                            onClick={() => setRating('good')}
+                          >
+                            <FaSmile className="text-4xl text-green-500" />
+                          </button>
+                        </div>
+                      </div>
+                      <textarea
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        placeholder="Share your thoughts (optional)"
+                        className="textarea textarea-bordered w-full textarea-base-200"
+                        maxLength={MAX_REVIEW_LENGTH}
+                      />
+                      <div className={`text-right ${text.length > MAX_REVIEW_LENGTH ? 'text-red-500' : ''}`}>
+                        {MAX_REVIEW_LENGTH - text.length} characters left
+                      </div>
                       <button
-                        className={`btn btn-ghost ${rating === 'bad' ? 'btn-active' : ''}`}
-                        onClick={() => setRating('bad')}
+                        onClick={handleReviewSubmit}
+                        className={`btn btn-secondary mt-2 ${isSubmitting ? 'btn-disabled' : ''}`}
+                        disabled={isSubmitting || text.length > MAX_REVIEW_LENGTH || rating === null}
                       >
-                        <FaFrown className="text-4xl text-red-500" />
+                        {isSubmitting && <span className="loading loading-spinner loading-sm mr-2"></span>}
+                        {isSubmitting ? 'Submitting...' : 'Submit Review'}
                       </button>
-                      <button
-                        className={`btn btn-ghost ${rating === 'mid' ? 'btn-active' : ''}`}
-                        onClick={() => setRating('mid')}
-                      >
-                        <FaMeh className="text-4xl text-yellow-500" />  
-                      </button>
-                      <button
-                        className={`btn btn-ghost ${rating === 'good' ? 'btn-active' : ''}`}
-                        onClick={() => setRating('good')}
-                      >
-                        <FaSmile className="text-4xl text-green-500" />
-                      </button>
+                    </>
+                  ) : (
+                    <div className="alert alert-info">
+                      <FaInfoCircle size={20} />
+                      <span>You have already submitted a review for this item today. Please come back tomorrow to leave another review.</span>
                     </div>
-                  </div>
-                  <textarea
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="Share your thoughts (optional)"
-                    className="textarea textarea-bordered w-full textarea-base-200"
-                    maxLength={MAX_REVIEW_LENGTH}
-                  />
-                  <div className={`text-right ${text.length > MAX_REVIEW_LENGTH ? 'text-red-500' : ''}`}>
-                    {MAX_REVIEW_LENGTH - text.length} characters left
-                  </div>
-                  <button
-                    onClick={handleReviewSubmit}
-                    className={`btn btn-secondary mt-2 ${isSubmitting ? 'btn-disabled' : ''}`}
-                    disabled={isSubmitting || text.length > MAX_REVIEW_LENGTH || rating === null}
-                  >
-                    {isSubmitting && <span className="loading loading-spinner loading-sm mr-2"></span>}
-                    {isSubmitting ? 'Submitting...' : 'Submit Review'}
-                  </button>
+                  )}
                 </div>
               ) : (
                 <div className="alert alert-info shadow-lg h-full">
@@ -372,7 +418,7 @@ const ReviewSection: React.FC<ReviewSectionProps> = ({ foodId }) => {
                     </button>
                   </div>
                 </div>
-                <p>{review.text}</p>
+                <p>{filter.clean(review.text || '')}</p>
               </div>
             ))
           ) : (

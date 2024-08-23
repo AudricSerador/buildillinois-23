@@ -11,6 +11,8 @@ interface UploadImageModalProps {
   foodId: string;
   userId: string;
 }
+const MAX_DESCRIPTION_LENGTH = 200;
+
 const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, foodId, userId }) => {
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -22,6 +24,13 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, fo
     if (file) {
       setImage(file);
       setPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleDescriptionChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newDescription = e.target.value;
+    if (newDescription.length <= MAX_DESCRIPTION_LENGTH) {
+      setDescription(newDescription);
     }
   };
 
@@ -86,6 +95,7 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, fo
             <input
               type="file"
               accept="image/*"
+              capture="environment"
               onChange={handleImageChange}
               className="hidden"
               id="file-upload"
@@ -93,17 +103,23 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, fo
             <label htmlFor="file-upload" className="cursor-pointer">
               <div className="border-dashed border-4 border-gray-200 rounded-lg p-4 text-center">
                 <Image height={100} width={100} src="/images/upload.png" alt="Upload" className="mx-auto mb-2" />
-                <p>Select a photo to upload</p>
+                <p>Take a photo or select from gallery</p>
               </div>
             </label>
           </div>
         )}
-        <textarea
-          className="textarea textarea-bordered w-full mb-4"
-          placeholder="Add a description (optional)"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
+        <div className="mb-4">
+          <textarea
+            className="textarea textarea-bordered w-full"
+            placeholder="Add a description (optional)"
+            value={description}
+            onChange={handleDescriptionChange}
+            maxLength={MAX_DESCRIPTION_LENGTH}
+          />
+          <div className={`text-right ${description.length > MAX_DESCRIPTION_LENGTH ? 'text-red-500' : ''}`}>
+            {MAX_DESCRIPTION_LENGTH - description.length} characters left
+          </div>
+        </div>
         <div className="alert alert-warning text-sm border mb-4">
           <FaInfoCircle size={15} />
           <span>

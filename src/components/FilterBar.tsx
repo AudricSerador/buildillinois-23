@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
-import { FaCheck, FaChevronDown, FaTimes, FaArrowUp, FaArrowDown, FaSearch, FaStar } from 'react-icons/fa';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
+import { Checkbox } from "@/components/ui/checkbox";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { FaFilter, FaTimes, FaChevronDown, FaCheck, FaArrowUp, FaArrowDown, FaMinus } from 'react-icons/fa';
 import { useAtom } from 'jotai';
-import {
-  sortFieldsAtom, diningHallAtom, mealTypeAtom,
-  dateServedAtom, allergensAtom, preferencesAtom,
-  servingAtom, availableDatesAtom, ratingFilterAtom
-} from '@/atoms/filterAtoms';
+import { filterAtom } from '@/atoms/filterAtoms';
 import {
   sortFields as sortFieldOptions, allergenOptions, 
   preferenceOptions, diningOptions, mealTypeOptions,
 } from "./allfood/filter_options";
+import { allergens as allergenIcons } from '@/components/icon_legend';
+import { isEqual } from 'lodash';
+import { useMediaQuery } from '@/hooks/use_media_query';
 
 const nutrientLabels: { [key: string]: string } = {
   calories: "Calories",
@@ -26,419 +28,317 @@ const nutrientLabels: { [key: string]: string } = {
   rating: "Rating",
 };
 
-interface FilterBarProps {
-  availableDates: string[];
-  debouncedFetchFoodItems: () => void;
+interface Filter {
+  sortFields: { field: string; order: 'asc' | 'desc' }[];
+  diningHall: string;
+  mealType: string;
+  dateServed: string;
+  allergens: string[];
+  preferences: string;
+  serving: string;
+  ratingFilter: string;
 }
 
-export function FilterBar({ availableDates, debouncedFetchFoodItems }: FilterBarProps) {
-  const [sortFields, setSortFields] = useAtom(sortFieldsAtom);
-  const [diningHall, setDiningHall] = useAtom(diningHallAtom);
-  const [mealType, setMealType] = useAtom(mealTypeAtom);
-  const [dateServed, setDateServed] = useAtom(dateServedAtom);
-  const [allergens, setAllergens] = useAtom(allergensAtom);
-  const [preferences, setPreferences] = useAtom(preferencesAtom);
-  const [serving, setServing] = useAtom(servingAtom);
-  const [ratingFilter, setRatingFilter] = useAtom(ratingFilterAtom);
+interface FilterBarProps {
+  onApplyFilters: () => void;
+  availableDates: string[];
+  renderButton?: (onClick: () => void) => React.ReactNode;
+}
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [localSearchTerm, setLocalSearchTerm] = useState('');
+export function FilterBar({ onApplyFilters, availableDates, renderButton }: FilterBarProps): JSX.Element {
+  const [filters, setFilters] = useAtom(filterAtom);
+  const [pendingFilters, setPendingFilters] = useState<Filter>({
+    ...filters,
+    sortFields: filters.sortFields as Filter['sortFields'],
+    allergens: filters.allergens as string[]
+  });
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [hasChanges, setHasChanges] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
-  const servingOptions = [
-    { value: "", label: "Anytime" },
-    { value: "now", label: "Right Now" },
-    { value: "later", label: "Later Today" },
-    ...availableDates.map(date => ({ value: date, label: date }))
-  ];
+  useEffect(() => {
+    setHasChanges(!isEqual(filters, pendingFilters));
+  }, [filters, pendingFilters]);
+
+  const closeFilters = () => {
+    setPendingFilters(filters);
+    setIsFilterOpen(false);
+  };
+
+  const applyFilters = () => {
+    setFilters(pendingFilters);
+    setIsFilterOpen(false);
+    onApplyFilters();
+  };
+
+  const clearAllFilters = () => {
+    setPendingFilters({
+      sortFields: [],
+      diningHall: '',
+      mealType: '',
+      dateServed: '',
+      allergens: [],
+      preferences: '',
+      serving: '',
+      ratingFilter: 'any'
+    });
+  };
+
+  const renderFilterSection = (title: string, content: React.ReactNode) => (
+    <div className="mb-4">
+      <h3 className="text-lg font-semibold mb-2">{title}</h3>
+      {content}
+    </div>
+  );
+
+  const renderButtonGroup = (options: { value: string; label: string }[], currentValue: string, onChange: (value: string) => void) => (
+    <div className="flex flex-wrap gap-2">
+      {options.map((option) => (
+        <Button
+          key={option.value}
+          variant={currentValue === option.value ? "default" : "outline"}
+          onClick={() => onChange(option.value)}
+        >
+          {option.label}
+        </Button>
+      ))}
+    </div>
+  );
+
+  const renderCheckboxGroup = (options: { value: string; label: string; src?: string }[], currentValues: string[], onChange: (values: string[]) => void) => (
+    <div className="flex flex-wrap gap-2">
+      {options.map((option) => (
+        <div key={option.value} className="flex items-center">
+          <Checkbox
+            id={option.value}
+            checked={currentValues.includes(option.value)}
+            onCheckedChange={(checked) => {
+              if (checked) {
+                onChange([...currentValues, option.value]);
+              } else {
+                onChange(currentValues.filter(v => v !== option.value));
+              }
+            }}
+          />
+          <label htmlFor={option.value} className="ml-2 flex items-center">
+            {option.src && <img src={option.src} alt={option.label} className="w-6 h-6 mr-2" />}
+            <span>{option.label}</span>
+          </label>
+        </div>
+      ))}
+    </div>
+  );
 
   const toggleSort = (field: string) => {
-    setSortFields(prevSortFields => {
-      const existingSort = prevSortFields.find(s => s.field === field);
+    setPendingFilters(prevFilters => {
+      const existingSort = prevFilters.sortFields.find(s => s.field === field);
       if (existingSort) {
         if (existingSort.order === 'desc') {
-          return prevSortFields.map(s => s.field === field ? {...s, order: 'asc'} : s);
+          return { ...prevFilters, sortFields: prevFilters.sortFields.map(s => s.field === field ? {...s, order: 'asc'} : s) };
         } else {
-          return prevSortFields.filter(s => s.field !== field);
+          return { ...prevFilters, sortFields: prevFilters.sortFields.filter(s => s.field !== field) };
         }
       } else {
-        return [...prevSortFields, { field, order: 'desc' }];
+        return { ...prevFilters, sortFields: [...prevFilters.sortFields, { field, order: 'desc' }] };
       }
     });
   };
 
   const removeSort = (field: string) => {
-    setSortFields(prevSortFields => prevSortFields.filter(s => s.field !== field));
+    setPendingFilters(prevFilters => ({ ...prevFilters, sortFields: prevFilters.sortFields.filter(s => s.field !== field) }));
   };
 
-  const handleFilterChange = (filterType: string, value: string | string[]) => {
-    switch (filterType) {
-      case 'diningHall':
-        if (value === 'all_dining_halls') {
-          setDiningHall('all_dining_halls');
-        } else if (value === 'all_dining_shops') {
-          setDiningHall('all_dining_shops');
-        } else {
-          setDiningHall(value as string);
-        }
-        break;
-      case 'mealType':
-        setMealType(value as string);
-        break;
-      case 'allergens':
-        setAllergens(value as string[]);
-        break;
-      case 'preferences':
-        setPreferences(value as string);
-        break;
-      case 'serving':
-        setServing(value as string);
-        break;
-    }
-    // Immediately trigger a re-fetch
-    debouncedFetchFoodItems();
+  const removeFilter = (type: string, value: string) => {
+    setPendingFilters(prev => {
+      const newFilters = { ...prev };
+      switch (type) {
+        case 'sort':
+          newFilters.sortFields = prev.sortFields.filter(s => `${nutrientLabels[s.field] || s.field} ${s.order === 'desc' ? '↓' : '↑'}` !== value);
+          break;
+        case 'diningHall':
+          newFilters.diningHall = '';
+          break;
+        case 'mealType':
+          newFilters.mealType = '';
+          break;
+        case 'allergen':
+          newFilters.allergens = prev.allergens.filter(a => a !== value);
+          break;
+        case 'preference':
+          newFilters.preferences = '';
+          break;
+        case 'serving':
+          newFilters.serving = '';
+          break;
+        case 'rating':
+          newFilters.ratingFilter = 'any';
+          break;
+      }
+      return newFilters;
+    });
   };
 
-  const renderSortPopover = () => (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" className="mr-2 mb-2">
-          Sort by <FaChevronDown className="ml-2 h-4 w-4" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-64">
-        {sortFieldOptions.map((field) => (
-          <Button
-            key={field.value}
-            variant="ghost"
-            className="w-full justify-between mb-2"
-            onClick={() => toggleSort(field.value)}
-          >
-            <span>{nutrientLabels[field.value] || field.label}</span>
-            {sortFields.some(s => s.field === field.value) ? 
-              (sortFields.find(s => s.field === field.value)?.order === 'desc' ? <FaArrowUp /> : <FaArrowDown />) : 
-              <FaChevronDown className="opacity-0" />}
-          </Button>
-        ))}
-      </PopoverContent>
-    </Popover>
-  );
-
-  const renderFilterPopover = (
-    title: string, 
-    options: { value: string; label: string }[] | { label: string; options: { value: string; label: string }[] }[], 
-    currentValue: string | string[], 
-    onChange: (value: string | string[]) => void, 
-    isMulti = false
-  ) => {
-    // Remove the useState hook from here
-
-    if (title === "Dining Hall") {
-      const allOptions = (options as { label: string; options: { value: string; label: string }[] }[]).flatMap(group => group.options);
-      const diningHalls = allOptions.filter(option => 
-        ['Ikenberry Dining Center (Ike)', 'Illinois Street Dining Center (ISR)', 
-         'Pennsylvania Avenue Dining Hall (PAR)', 'Lincoln Avenue Dining Hall (Allen)', 
-         'Field of Greens (LAR)'].includes(option.label)
-      );
-      const diningShops = allOptions.filter(option => !diningHalls.includes(option) && option.value !== '');
-
-      return (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="mr-2 mb-2">
-              {title} <FaChevronDown className="ml-2 h-4 w-4" />
+  const filterContent = (
+    <ScrollArea className="h-full">
+      {renderFilterSection('Nutrients', 
+        <div className="space-y-2">
+          {sortFieldOptions.map((option) => (
+            <Button
+              key={option.value}
+              variant="ghost"
+              className="w-full justify-between"
+              onClick={() => toggleSort(option.value)}
+            >
+              <span>{nutrientLabels[option.value] || option.label}</span>
+              <span className="flex items-center">
+                {!pendingFilters.sortFields.find(s => s.field === option.value) && <FaMinus className="mr-2" />}
+                {pendingFilters.sortFields.find(s => s.field === option.value)?.order === 'desc' && <>High to Low <FaArrowDown className="ml-2" /></>}
+                {pendingFilters.sortFields.find(s => s.field === option.value)?.order === 'asc' && <>Low to High <FaArrowUp className="ml-2" /></>}
+              </span>
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-72 p-0">
-            <div className="grid grid-cols-1 gap-1 p-2 max-h-[75vh] overflow-y-auto">
-              {/* All Dining Places option */}
-              <Button
-                variant="ghost"
-                className="justify-start w-full text-left py-2"
-                onClick={() => onChange('')}
-              >
-                <div className="flex items-center w-full">
-                  {currentValue === '' && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
-                  <span className="text-sm font-bold">All Dining Places</span>
-                </div>
-              </Button>
-
-              {/* Dining Halls */}
-              <div className="font-bold text-sm mt-2 mb-1">Dining Halls</div>
-              <Button
-                variant="ghost"
-                className="justify-start w-full text-left py-2"
-                onClick={() => onChange('all_dining_halls')}
-              >
-                <div className="flex items-center w-full">
-                  {currentValue === 'all_dining_halls' && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
-                  <span className="text-sm">All Dining Halls</span>
-                </div>
-              </Button>
-              {diningHalls.map((option) => (
-                <Button
-                  key={option.value}
-                  variant="ghost"
-                  className="justify-start w-full text-left py-2 pl-6"
-                  onClick={() => onChange(option.value)}
-                >
-                  <div className="flex items-center w-full">
-                    {currentValue === option.value && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
-                    <span className="text-sm">{option.label}</span>
-                  </div>
-                </Button>
-              ))}
-
-              {/* Dining Shops (D$) */}
-              <div className="font-bold text-sm mt-2 mb-1">Dining Shops (D$)</div>
-              <Button
-                variant="ghost"
-                className="justify-start w-full text-left py-2"
-                onClick={() => onChange('all_dining_shops')}
-              >
-                <div className="flex items-center w-full">
-                  {currentValue === 'all_dining_shops' && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
-                  <span className="text-sm">All Dining Shops</span>
-                </div>
-              </Button>
-              {diningShops.map((option) => (
-                <Button
-                  key={option.value}
-                  variant="ghost"
-                  className="justify-start w-full text-left py-2 pl-6"
-                  onClick={() => onChange(option.value)}
-                >
-                  <div className="flex items-center w-full">
-                    {currentValue === option.value && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
-                    <span className="text-sm">{option.label}</span>
-                  </div>
-                </Button>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
-      );
-    } else if (title === "Meal Type") {
-      return (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="mr-2 mb-2">
-              {title} <FaChevronDown className="ml-2 h-4 w-4" />
+          ))}
+        </div>
+      )}
+      {renderFilterSection('Place', (
+        <>
+          <div className="mb-4">
+            <Button
+              variant={pendingFilters.diningHall === '' ? "default" : "outline"}
+              onClick={() => setPendingFilters(prev => ({ ...prev, diningHall: '' }))}
+              className="mb-2"
+            >
+              All Places
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-72 p-0">
-            <div className="grid grid-cols-1 gap-1 p-2 max-h-[75vh] overflow-y-auto">
-              {(options as { label: string; options: { value: string; label: string }[] }[]).map((group, groupIndex) => (
-                <div key={groupIndex}>
-                  <div className="font-bold text-sm mt-2 mb-1">{group.label}</div>
-                  {group.options.map((option) => (
-                    <Button
-                      key={option.value}
-                      variant="ghost"
-                      className="justify-start w-full text-left py-2 pl-6"
-                      onClick={() => onChange(option.value)}
-                    >
-                      <div className="flex items-center w-full">
-                        {currentValue === option.value && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
-                        <span className="text-sm">{option.label}</span>
-                      </div>
-                    </Button>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
-      );
-    } else if (title === "Allergens") {
-      const filteredOptions = (options as { value: string; label: string }[]).filter(option => 
-        option.label.toLowerCase().includes(localSearchTerm.toLowerCase())
-      );
-
-      return (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="mr-2 mb-2">
-              {title} <FaChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-64">
-            <div className="max-h-[75vh] overflow-y-auto">
-              <div className="mb-2 relative">
-                <input
-                  type="text"
-                  placeholder="Search allergens..."
-                  value={localSearchTerm}
-                  onChange={(e) => setLocalSearchTerm(e.target.value)}
-                  className="w-full p-2 pr-8 border rounded"
-                />
-                <FaSearch className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400" />
-              </div>
-              {filteredOptions.map((option) => (
-                <Button
-                  key={option.value}
-                  variant="ghost"
-                  className="w-full justify-between mb-2"
-                  onClick={() => {
-                    const currentValues = currentValue as string[];
-                    const newValue = currentValues.includes(option.value)
-                      ? currentValues.filter(v => v !== option.value)
-                      : [...currentValues, option.value];
-                    onChange(newValue);
-                  }}
-                >
-                  <div className="flex items-center w-full">
-                    <input
-                      type="checkbox"
-                      checked={(currentValue as string[]).includes(option.value)}
-                      readOnly
-                      className="mr-2"
-                    />
-                    <span>{option.label}</span>
-                  </div>
-                </Button>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
-      );
-    } else if (title === "Serving") {
-      return (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="mr-2 mb-2">
-              {title} <FaChevronDown className="ml-2 h-4 w-4" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-64">
-            <div className="max-h-[75vh] overflow-y-auto">
-              {servingOptions.map((option) => (
-                <Button
-                  key={option.value}
-                  variant="ghost"
-                  className="w-full justify-between mb-2"
-                  onClick={() => onChange(option.value)}
-                >
-                  <div className="flex items-center w-full">
-                    {currentValue === option.value && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
-                    <span>{option.label}</span>
-                  </div>
-                </Button>
-              ))}
-            </div>
-          </PopoverContent>
-        </Popover>
-      );
-    }
-
-    // Default rendering for other filters
-    return (
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button variant="outline" className="mr-2 mb-2">
-            {title} <FaChevronDown className="ml-2 h-4 w-4" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-64">
-          <div className="max-h-[75vh] overflow-y-auto">
-            {(options as { value: string; label: string }[]).map((option) => (
-              <Button
-                key={option.value}
-                variant="ghost"
-                className="w-full justify-between mb-2"
-                onClick={() => onChange(option.value)}
-              >
-                <div className="flex items-center w-full">
-                  {currentValue === option.value && <FaCheck className="mr-2 h-4 w-4 flex-shrink-0" />}
-                  <span>{option.label}</span>
-                </div>
-              </Button>
-            ))}
           </div>
-        </PopoverContent>
-      </Popover>
-    );
-  };
-
-  const renderRatingPopover = () => (
-    <Popover>
-      <PopoverTrigger asChild>
-        <Button variant="outline" className="mr-2 mb-2">
-          Rating <FaChevronDown className="ml-2 h-4 w-4" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-64">
-        {[
-          { value: 'any', label: 'Any Rating' },
-          { value: 'rated_only', label: 'Rated Only' }
-        ].map((option) => (
-          <Button
-            key={option.value}
-            variant="ghost"
-            className="w-full justify-between mb-2"
-            onClick={() => {
-              console.log(`Setting rating filter to: ${option.value}`);
-              setRatingFilter(option.value as "rated_only" | "any");
-            }}
-          >
-            <span>{option.label}</span>
-            {ratingFilter === option.value && <FaCheck className="ml-2 h-4 w-4" />}
-          </Button>
-        ))}
-      </PopoverContent>
-    </Popover>
+          <div className="mb-4">
+            <h4 className="text-sm font-semibold mb-2">Dining Halls</h4>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={pendingFilters.diningHall === 'all_dining_halls' ? "default" : "outline"}
+                onClick={() => setPendingFilters(prev => ({ ...prev, diningHall: 'all_dining_halls' }))}
+                className="mb-2"
+              >
+                All Dining Halls
+              </Button>
+              {diningOptions.find(group => group.label === 'Dining Halls')?.options.slice(1).map((option) => (
+                <Button
+                  key={option.value}
+                  variant={pendingFilters.diningHall === option.value ? "default" : "outline"}
+                  onClick={() => setPendingFilters(prev => ({ ...prev, diningHall: option.value }))}
+                >
+                  {option.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <h4 className="text-sm font-semibold mb-2">Dining Shops</h4>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={pendingFilters.diningHall === 'all_dining_shops' ? "default" : "outline"}
+                onClick={() => setPendingFilters(prev => ({ ...prev, diningHall: 'all_dining_shops' }))}
+                className="mb-2"
+              >
+                All Dining Shops
+              </Button>
+              {diningOptions.find(group => group.label === 'A la Carte')?.options.map((option) => (
+                <Button
+                  key={option.value}
+                  variant={pendingFilters.diningHall === option.value ? "default" : "outline"}
+                  onClick={() => setPendingFilters(prev => ({ ...prev, diningHall: option.value }))}
+                >
+                  {option.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </>
+      ))}
+      {renderFilterSection('Meal Type', renderButtonGroup(mealTypeOptions.flatMap(group => group.options), pendingFilters.mealType, value => setPendingFilters(prev => ({ ...prev, mealType: value }))))}
+      {renderFilterSection('Allergens', renderCheckboxGroup(
+        allergenOptions.map(allergen => ({ 
+          value: allergen.value, 
+          label: allergen.label, 
+          src: allergenIcons.find(a => a.label.toLowerCase() === allergen.value.toLowerCase())?.src 
+        })),
+        pendingFilters.allergens,
+        values => setPendingFilters(prev => ({ ...prev, allergens: values }))
+      ))}
+      {renderFilterSection('Restriction', (
+        <div className="flex flex-wrap gap-2">
+          {(preferenceOptions as Array<{ value: string; label: string; src?: string }>).map((option) => (
+            <Button
+              key={option.value}
+              variant={pendingFilters.preferences === option.value ? "default" : "outline"}
+              onClick={() => setPendingFilters(prev => ({ ...prev, preferences: prev.preferences === option.value ? '' : option.value }))}
+              className="flex items-center"
+            >
+              {option.src && <img src={option.src} alt={option.label} className="w-6 h-6 mr-2" />}
+              {option.label}
+            </Button>
+          ))}
+        </div>
+      ))}
+      {renderFilterSection('Serving', renderButtonGroup([
+        { value: "", label: "Anytime" },
+        { value: "now", label: "Right Now" },
+        { value: "later", label: "Later Today" },
+        ...availableDates.map(date => ({ value: date, label: date }))
+      ], pendingFilters.serving, value => setPendingFilters(prev => ({ ...prev, serving: value }))))}
+      {renderFilterSection('Rating', renderButtonGroup([
+        { value: 'any', label: 'Any Rating' },
+        { value: 'rated_only', label: 'Rated Only' }
+      ], pendingFilters.ratingFilter, value => setPendingFilters(prev => ({ ...prev, ratingFilter: value }))))}
+    </ScrollArea>
   );
-
-  const renderFilterBadges = () => {
-    const badges = [
-      ...sortFields.map(s => ({ 
-        label: `Sort: ${nutrientLabels[s.field] || s.field} ${s.order === 'desc' ? 'Highest to Lowest' : 'Lowest to Highest'}`, 
-        onRemove: () => removeSort(s.field) 
-      })),
-      diningHall ? { label: `Dining Hall: ${diningHall.toUpperCase()}`, onRemove: () => setDiningHall('') } : null,
-      mealType ? { label: `Meal Type: ${mealType.toUpperCase()}`, onRemove: () => setMealType('') } : null,
-      dateServed ? { label: `Date: ${dateServed}`, onRemove: () => setDateServed('') } : null,
-      ...allergens.map(allergen => ({ label: `Allergen: ${allergen.toUpperCase()}`, onRemove: () => setAllergens(allergens.filter(a => a !== allergen)) })),
-      preferences ? { label: `Restriction: ${preferences.toUpperCase()}`, onRemove: () => setPreferences('') } : null,
-      serving ? { label: `Serving: ${(servingOptions.find(o => o.value === serving)?.label || serving).toUpperCase()}`, onRemove: () => setServing('') } : null,
-      ratingFilter && ratingFilter !== 'any' ? { label: `Rating: ${ratingFilter === 'rated_only' ? 'Rated Only' : 'Any'}`, onRemove: () => setRatingFilter('any') } : null,
-    ];
-
-    return badges.filter((badge): badge is NonNullable<typeof badge> => badge !== null).map((badge, index) => (
-      <Badge key={index} variant="info" className="mr-2 mb-2">
-        {badge.label}
-        <Button variant="ghost" size="sm" className="ml-2 h-auto p-0" onClick={badge.onRemove}>
-          <FaTimes className="h-3 w-4" />
-        </Button>
-      </Badge>
-    ));
-  };
 
   return (
     <div className="mb-4">
-      <div className="flex flex-wrap items-center mb-2">
-        {renderSortPopover()}
-        {renderFilterPopover('Dining Hall', diningOptions, diningHall, (value) => handleFilterChange('diningHall', value))}
-        {renderFilterPopover('Meal Type', mealTypeOptions, mealType, (value) => handleFilterChange('mealType', value))}
-        {renderFilterPopover('Serving', servingOptions, serving, (value) => handleFilterChange('serving', value))}
-        {renderFilterPopover('Allergens', allergenOptions, allergens, (value) => handleFilterChange('allergens', value), true)}
-        {renderFilterPopover('Restrictions', preferenceOptions, preferences, (value) => handleFilterChange('preferences', value))}
-        {renderRatingPopover()}
-        <Button variant="secondary" className="mb-2" onClick={() => {
-          setSortFields([]);
-          setDiningHall('');
-          setMealType('');
-          setDateServed('');
-          setAllergens([]);
-          setPreferences('');
-          setServing('');
-          setRatingFilter('any');
-        }}>
-          Clear All
-        </Button>
-      </div>
-      <div className="flex flex-wrap">
-        {renderFilterBadges()}
-      </div>
+      {isMobile ? (
+        <Drawer open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+          <DrawerTrigger asChild>
+            {renderButton ? renderButton(() => setIsFilterOpen(true)) : (
+              <Button onClick={() => setIsFilterOpen(true)}>Filters</Button>
+            )}
+          </DrawerTrigger>
+          <DrawerContent className="h-[85vh] flex flex-col">
+            <DrawerHeader className="flex-shrink-0">
+              <DrawerTitle>Filters</DrawerTitle>
+            </DrawerHeader>
+            <div className="flex-grow overflow-auto px-4">
+              {filterContent}
+            </div>
+            <div className="flex-shrink-0 p-4 border-t">
+              <div className="flex justify-between">
+                <Button onClick={clearAllFilters} variant="outline">Clear All</Button>
+                <Button onClick={applyFilters} disabled={!hasChanges}>Apply Filters</Button>
+              </div>
+            </div>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <>
+          {renderButton ? renderButton(() => setIsFilterOpen(true)) : (
+            <Button onClick={() => setIsFilterOpen(true)}>Filters</Button>
+          )}
+          <Dialog open={isFilterOpen} onOpenChange={closeFilters}>
+            <DialogContent className="max-w-3xl w-full max-h-[80vh] flex flex-col">
+              <DialogHeader className="flex-shrink-0">
+                <DialogTitle>Filters</DialogTitle>
+              </DialogHeader>
+              <div className="flex-grow overflow-auto px-6">
+                {filterContent}
+              </div>
+              <div className="flex-shrink-0 p-6 border-t">
+                <div className="flex justify-between">
+                  <Button onClick={clearAllFilters} variant="outline">Clear All</Button>
+                  <Button onClick={applyFilters} disabled={!hasChanges}>Apply Filters</Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </>
+      )}
     </div>
   );
 }

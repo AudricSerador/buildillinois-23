@@ -49,7 +49,6 @@ async function getFoodItemsForDate(date: string, user: User) {
     }
   };
 
-  // Handle locations
   if (user.locations) {
     const userLocations = user.locations.split(',').map(l => l.trim());
     const fullDiningHallNames = userLocations.flatMap(loc => {
@@ -61,16 +60,11 @@ async function getFoodItemsForDate(date: string, user: User) {
     };
   }
 
-  console.log('Food query:', JSON.stringify(foodQuery, null, 2));
-
   let foodItems = await prisma.foodInfo.findMany(foodQuery);
-
-  console.log('Found food items:', foodItems.length);
 
   return foodItems;
 }
 
-// Update the type for food items
 type ExtendedFoodInfo = FoodInfo & {
   mealEntries: mealDetails[];
   Review: Review[];
@@ -79,90 +73,54 @@ type ExtendedFoodInfo = FoodInfo & {
 };
 
 async function generateRecommendations(userId: string) {
-  console.log('Starting recommendation generation for userId:', userId);
-
   const user = await prisma.user.findUnique({
     where: { id: userId },
   });
 
   if (!user) {
-    console.log('User not found');
     throw new Error('User not found');
   }
-
-  console.log('User data:', JSON.stringify(user, null, 2));
 
   const currentTime = getCurrentCSTTime();
   let today = format(currentTime, 'EEEE, MMMM d, yyyy');
   let tomorrow = format(addDays(currentTime, 1), 'EEEE, MMMM d, yyyy');
 
-  console.log('Fetching food items for today:', today);
   let todayFoodItems = await getFoodItemsForDate(today, user);
-
-  console.log('Total food items for today:', todayFoodItems.length);
 
   let foodItems = todayFoodItems;
 
-  // If we don't have enough items for today, fetch tomorrow's items
   if (foodItems.length < 20) {
-    console.log('Not enough items for today. Fetching items for tomorrow:', tomorrow);
     let tomorrowFoodItems = await getFoodItemsForDate(tomorrow, user);
-    console.log('Total food items for tomorrow:', tomorrowFoodItems.length);
-    
     foodItems = [...foodItems, ...tomorrowFoodItems];
   }
 
-  console.log('Total food items before filtering:', foodItems.length);
-
-  // Apply filters
   let filteredItems = foodItems.filter(item => {
-    console.log(`Filtering item: ${item.name}`);
-    console.log(`Item allergens: ${item.allergens}`);
-    console.log(`Item preferences: ${item.preferences}`);
-
-    // Filter out items with user's allergies
     if (user.allergies) {
       const userAllergens = user.allergies.split(',').map(a => a.trim().toLowerCase());
-      console.log(`User allergens: ${userAllergens.join(', ')}`);
       if (userAllergens.some(allergen => item.allergens.toLowerCase().includes(allergen))) {
-        console.log(`Item excluded due to allergens`);
         return false;
       }
     }
 
-    // Filter for user's preferences
     if (user.preferences) {
       const userPreferences = user.preferences.split(',').map(p => p.trim().toLowerCase());
-      console.log(`User preferences: ${userPreferences.join(', ')}`);
       if (!userPreferences.some(pref => item.preferences.toLowerCase().includes(pref))) {
-        console.log(`Item excluded due to preferences`);
         return false;
       }
     }
 
-    console.log(`Item included in filtered list`);
     return true;
   });
-
-  console.log('Filtered food items:', filteredItems.length);
 
   const scoredFoodItems = (filteredItems as ExtendedFoodInfo[]).map((food) => ({
     ...food,
     finalScore: calculateFinalScore(food, user),
   }));
 
-  // Sort and get top 20 recommendations
   const recommendations = scoredFoodItems
     .sort((a, b) => b.finalScore - a.finalScore)
     .slice(0, 20);
 
-  console.log('Final recommendations:', recommendations.length);
-  console.log('Recommendation details:');
-  recommendations.forEach((rec, index) => {
-    console.log(`${index + 1}. ${rec.name} - Score: ${rec.finalScore}`);
-  });
-
-  // Update the type annotation here
   const processedRecommendations = recommendations.map((item: ExtendedFoodInfo) => {
     const futureDates = item.mealEntries
       .filter(entry => isAfter(new Date(entry.dateServed), new Date()))
@@ -208,20 +166,16 @@ function determineServingStatus(mealEntries: mealDetails[]): string {
   return mealEntries.length > 0 ? 'future' : 'not_available';
 }
 
-// Update the type annotation for the calculateFinalScore function
 function calculateFinalScore(food: ExtendedFoodInfo, user: User): number {
   let score = 0;
 
-  // Nutritional score based on user's goal
   const nutritionalScore = calculateNutritionalScore(food, user);
-  score += nutritionalScore * 0.5; // 50% weight to nutritional score
+  score += nutritionalScore * 0.5;
 
-  // Preference score
   const userPreferences = user.preferences.split(',').map(p => p.trim().toLowerCase());
   const preferenceScore = userPreferences.filter(pref => food.preferences.toLowerCase().includes(pref)).length / userPreferences.length;
-  score += preferenceScore * 0.3; // 30% weight to preference score
+  score += preferenceScore * 0.3;
 
-  // Location score
   const userLocations = user.locations.split(',').map(l => l.trim().toLowerCase());
   const locationScore = food.mealEntries.some((entry: any) => 
     userLocations.some(userLoc => 
@@ -229,7 +183,7 @@ function calculateFinalScore(food: ExtendedFoodInfo, user: User): number {
       userLoc.includes(entry.diningHall.toLowerCase())
     )
   ) ? 1 : 0;
-  score += locationScore * 0.2; // 20% weight to location score
+  score += locationScore * 0.2;
 
   return score;
 }
@@ -258,7 +212,7 @@ function calculateNutritionalScore(food: FoodInfo, user: User): number {
         (Math.max(0, (30 - food.saturatedFat) / 30) * 0.15)
       );
     default:
-      return 0.5; // Neutral score for unknown goals
+      return 0.5;
   }
 }
 
@@ -279,20 +233,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     try {
-      console.log('Generating recommendations for userId:', userId);
       const recommendations = await generateRecommendations(userId);
-      console.log('Generated recommendations:', recommendations.length);
 
-      // Format response similar to get_allfood.ts
       const response = {
         foodItems: recommendations,
         availableDates: Array.from(new Set(recommendations.flatMap(item => item.futureDates)))
       };
 
-      console.log("Sending response:", JSON.stringify(response, null, 2));
       res.status(200).json(response);
     } catch (error) {
-      console.error('Error generating recommendations:', error);
       res.status(500).json({ error: 'Failed to generate recommendations' });
     }
   } else {

@@ -89,9 +89,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser({ ...res.data });
           sessionStorage.setItem('user', JSON.stringify(res.data));
           console.log('User session restored from server.');
-          if (res.data.isNew) {
-            router.push("/user/onboarding");
-          }
         }
       } else {
         console.log("No session found.");
@@ -184,12 +181,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!user && isProtectedRoute(router.pathname)) {
         console.log('Redirecting to login...');
         router.push('/login'); 
-      } else if (user && user.isNew && router.pathname !== '/user/onboarding') {
-        console.log('Redirecting to onboarding...');
-        router.push('/user/onboarding'); 
       }
     }
-  }, [user, router, initialized]); // Add `initialized` to the dependency array
+  }, [user, router, initialized]);
 
   return (
     <AuthContext.Provider value={{ user, signIn, signOut, handleUserSignedIn }}>

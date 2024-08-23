@@ -2,7 +2,6 @@ import { useRouter } from "next/router";
 import { useEffect, useState, useRef, useCallback, Suspense, useMemo } from "react";
 import NutritionFacts from "@/components/nutrition_facts";
 import { EntriesDisplay } from "@/components/entries_display";
-import LoadingSpinner from "@/components/loading_spinner";
 import { useAuth } from "@/components/layout/auth.service";
 import FavoriteBtn from "@/components/favorites/favorite_btn";
 import ReviewSection from "@/components/review_section";
@@ -18,7 +17,7 @@ import { Separator } from "@/components/ui/separator"
 import { Input } from "@/components/ui/input"
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { IngredientsSection } from "@/components/IngredientsSection";
 
 export interface FoodItem {
@@ -81,10 +80,13 @@ export default function FoodItemPage() {
   const [isBannerSticky, setIsBannerSticky] = useState(false);
   const [searchIngredient, setSearchIngredient] = useState("");
   const [ingredientsDialogOpen, setIngredientsDialogOpen] = useState(false);
+  const [showLoginDialog, setShowLoginDialog] = useState(false);
 
   const navRef = useRef<HTMLDivElement>(null);
   const bannerRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+
+  const [isScrolling, setIsScrolling] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (foodId && typeof foodId === 'string') {
@@ -113,20 +115,33 @@ export default function FoodItemPage() {
   }, [fetchData]);
 
   const handleScroll = useCallback(() => {
-    if (titleRef.current && bannerRef.current) {
-      const titleBottom = titleRef.current.getBoundingClientRect().bottom;
-      setIsBannerSticky(titleBottom <= 0);
+    if (!isScrolling) {
+      setIsScrolling(true);
+      requestAnimationFrame(() => {
+        if (titleRef.current && bannerRef.current) {
+          const titleBottom = titleRef.current.getBoundingClientRect().bottom;
+          setIsBannerSticky(titleBottom <= 0);
+        }
+        if (navRef.current) {
+          const navTop = navRef.current.getBoundingClientRect().top;
+          setIsNavSticky(navTop <= (isBannerSticky ? 64 : 0));
+        }
+        setIsScrolling(false);
+      });
     }
-    if (navRef.current) {
-      const navTop = navRef.current.getBoundingClientRect().top;
-      setIsNavSticky(navTop <= (isBannerSticky ? 64 : 0));
-    }
-  }, [isBannerSticky]);
+  }, [isBannerSticky, isScrolling]);
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
+    let scrollTimeout: number;
+    const throttledHandleScroll = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = window.setTimeout(handleScroll, 10);
+    };
+
+    window.addEventListener('scroll', throttledHandleScroll, { passive: true });
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('scroll', throttledHandleScroll);
+      clearTimeout(scrollTimeout);
     };
   }, [handleScroll]);
 
@@ -180,14 +195,22 @@ export default function FoodItemPage() {
     return foodItem?.allergens ? foodItem.allergens.split(', ').filter(a => a.trim() !== '' && a.toLowerCase() !== 'n/a') : [];
   }, [foodItem?.allergens]);
 
+  const handleAddPhotoClick = () => {
+    if (user) {
+      setShowUploadModal(true);
+    } else {
+      setShowLoginDialog(true);
+    }
+  };
+
   if (isLoading) {
-    return <LoadingSpinner text="Loading food data" />;
+    return <FoodItemSkeleton />;
   }
 
   const topImages = images.slice(0, 3);
 
   return (
-    <Suspense fallback={<LoadingSpinner text="Loading food data" />}>
+    <Suspense fallback={<FoodItemSkeleton />}>
       <div className="font-custom">
         <div ref={bannerRef} className="relative h-64 w-full flex flex-col justify-end">
           {isLoading ? (
@@ -277,6 +300,12 @@ export default function FoodItemPage() {
             className={`bg-custombg transition-all duration-300 ${
               isNavSticky ? 'fixed top-16 left-0 right-0 z-40 px-4 sm:px-8 md:px-16 lg:px-64' : ''
             }`}
+            style={{
+              position: isNavSticky ? 'fixed' : 'static',
+              top: isNavSticky ? '64px' : 'auto',
+              transform: isNavSticky ? 'translateZ(0)' : 'none',
+              willChange: 'transform',
+            }}
           >
             <div className="flex justify-start space-x-2 sm:pt-4 pt-2 overflow-x-auto">
               <button
@@ -339,12 +368,12 @@ export default function FoodItemPage() {
               <h2 className="text-4xl font-custombold">Photos</h2>
               <button 
                 className="btn btn-primary"
-                onClick={() => setShowUploadModal(true)}
+                onClick={handleAddPhotoClick}
               >
                 <FaCamera className="mr-2" /> Add a Photo
               </button>
             </div>
-            <ImageCarousel images={images} />
+            <ImageCarousel images={images} loading={isLoading} />
             {user && (
               <UploadImageModal
                 isOpen={showUploadModal}
@@ -367,6 +396,25 @@ export default function FoodItemPage() {
             )}
           </div>
         </div>
+
+        <Dialog open={showLoginDialog} onOpenChange={setShowLoginDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Login Required</DialogTitle>
+              <DialogDescription>
+                You need to be logged in to add a photo. Please log in or create an account to continue.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setShowLoginDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={() => router.push('/login')}>
+                Go to Login
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </Suspense>
   );
@@ -407,4 +455,42 @@ async function fetchFavoriteStatus(userId: string, foodId: string) {
     console.error('Error fetching favorite status:', error);
     return false;
   }
+}
+
+function FoodItemSkeleton() {
+  return (
+    <div className="font-custom">
+      <div className="relative h-64 w-full">
+        <Skeleton className="h-full w-full" />
+      </div>
+      <div className="container mx-auto px-4 sm:px-8 md:px-16 lg:px-64 mt-4">
+        <Skeleton className="h-12 w-full max-w-md mb-4" />
+        
+        <div className="flex justify-start space-x-2 sm:pt-4 pt-2 overflow-x-auto">
+          {[...Array(4)].map((_, index) => (
+            <Skeleton key={index} className="h-8 w-24" />
+          ))}
+        </div>
+        
+        <div className="divider m-0 p-0"></div>
+        
+        <div className="mt-8">
+          <Skeleton className="h-10 w-40 mb-4" />
+          <div className="flex flex-col lg:flex-row lg:gap-4">
+            <Skeleton className="w-full sm:w-auto lg:max-w-xs h-96 mb-4 sm:mb-0" />
+            <div className="w-full lg:flex-1">
+              <Skeleton className="h-96 w-full" />
+            </div>
+          </div>
+        </div>
+        
+        {['Reviews', 'Photos', 'Servings'].map((section, index) => (
+          <div key={section} className="mt-8">
+            <Skeleton className="h-10 w-40 mb-4" />
+            <Skeleton className="h-64 w-full" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }

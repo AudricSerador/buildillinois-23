@@ -9,8 +9,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { foodIds } = req.query;
 
-  console.log('API: Received foodIds:', foodIds);
-
   if (!foodIds) {
     return res.status(400).json({ success: false, message: 'foodIds is required for this GET request' });
   }
@@ -18,7 +16,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Split the comma-separated string into an array of foodIds
     const idArray = (foodIds as string).split(',');
-    console.log('API: Searching for images with foodIds:', idArray);
 
     const images = await prisma.foodImage.findMany({
       where: {
@@ -29,8 +26,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
     });
 
-    console.log('API: Found images:', images);
-
     const groupedImages = images.reduce((acc, img) => {
       if (!acc[img.foodId]) {
         acc[img.foodId] = [];
@@ -38,8 +33,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       acc[img.foodId].push(img);
       return acc;
     }, {} as Record<string, any[]>);
-
-    console.log('API: Grouped images:', groupedImages);
 
     // Respond to the GET request with the grouped images
     res.status(200).json({ success: true, images: groupedImages });

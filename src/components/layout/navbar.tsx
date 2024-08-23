@@ -113,11 +113,11 @@ export const Navbar: React.FC<NavbarProps> = ({ className }) => {
                   Dining Halls
                 </Link>
                 <Link
-                  href="/user/favorites"
+                  href="/user/profile"
                   className="mt-4 text-white hover:uiucorange"
                   onClick={closeMenu}
                 >
-                  My Favorites
+                  Profile
                 </Link>
                 <hr className="my-4 border-t-4 border-uiucorange" />
 
@@ -183,13 +183,13 @@ export const Navbar: React.FC<NavbarProps> = ({ className }) => {
                 </Link>
               </li>
               <li>
-                <Link href="/user/favorites" className="hover:text-uiucorange">
-                  My Favorites
+                <Link href="/dininghalls" className="hover:text-uiucorange">
+                  Dining Halls
                 </Link>
               </li>
               <li>
-                <Link href="/dininghalls" className="hover:text-uiucorange">
-                  Dining Halls
+                <Link href="/user/dashboard" className="hover:text-uiucorange">
+                  Profile
                 </Link>
               </li>
             </ul>
@@ -225,18 +225,10 @@ export const Navbar: React.FC<NavbarProps> = ({ className }) => {
                           onClick={closeMenu}
                           className="block px-4 py-2 w-full text-left text-sm text-gray-700 hover:bg-gray-100"
                         >
-                          Dashboard
+                          Profile
                         </Link>
                       </li>
-                      <li>
-                        <Link
-                          href="#"
-                          onClick={closeMenu}
-                          className="block px-4 py-2 w-full text-left text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          Settings
-                        </Link>
-                      </li>
+
                       <li>
                         <button
                           onClick={() => {

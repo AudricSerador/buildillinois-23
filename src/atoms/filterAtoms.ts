@@ -1,14 +1,25 @@
 import { atom } from 'jotai';
 
-export const sortFieldsAtom = atom<{field: string, order: 'asc' | 'desc'}[]>([]);
-export const sortOrderAtom = atom('');
-export const diningHallAtom = atom('');
-export const mealTypeAtom = atom('');
+export interface Filter {
+  sortFields: { field: string; order: 'asc' | 'desc' }[];
+  diningHall: string;
+  mealType: string;
+  dateServed: string;
+  allergens: string[];
+  preferences: string;
+  serving: string;
+  ratingFilter: string;
+}
+
+export const filterAtom = atom<Filter>({
+  sortFields: [],
+  diningHall: '',
+  mealType: '',
+  dateServed: '',
+  allergens: [],
+  preferences: '',
+  serving: '',
+  ratingFilter: 'any'
+});
+
 export const searchTermAtom = atom('');
-export const dateServedAtom = atom('');
-export const allergensAtom = atom<string[]>([]);
-export const preferencesAtom = atom('');
-export const datesAtom = atom<string[]>([]);
-export const servingAtom = atom('');
-export const availableDatesAtom = atom<string[]>([]);
-export const ratingFilterAtom = atom<'any' | 'rated_only'>('any');

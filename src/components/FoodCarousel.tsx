@@ -18,30 +18,49 @@ export function FoodCarousel({ title, filters, recommendedItems, isLoading: exte
   const [isLoading, setIsLoading] = useState(externalLoading !== undefined ? externalLoading : true);
 
   useEffect(() => {
+    const fetchFoodItems = async () => {
+      setIsLoading(true);
+      try {
+        let queryParams = new URLSearchParams({
+          pageSize: '20',
+          ...filters,
+        });
+
+        if (!recommendedItems && (!filters || Object.keys(filters).length === 0)) {
+          const today = new Date().toISOString().split('T')[0];
+          queryParams = new URLSearchParams({
+            pageSize: '20',
+            date: today,
+            sortBy: 'protein',
+            sortOrder: 'desc',
+          });
+        }
+
+        const response = await fetch(`/api/get_allfood?${queryParams.toString()}`);
+        if (!response.ok) throw new Error('Failed to fetch food items');
+
+        const data = await response.json();
+        
+        // If no results, make a default call to get all food items
+        if (data.foodItems.length === 0) {
+          const defaultResponse = await fetch('/api/get_allfood?pageSize=20');
+          if (!defaultResponse.ok) throw new Error('Failed to fetch default food items');
+          const defaultData = await defaultResponse.json();
+          setFoodItems(defaultData.foodItems);
+        } else {
+          setFoodItems(data.foodItems);
+        }
+      } catch (error) {
+        console.error('Error fetching food items:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     if (recommendedItems) {
       setFoodItems(recommendedItems);
       setIsLoading(false);
     } else {
-      const fetchFoodItems = async () => {
-        setIsLoading(true);
-        try {
-          const queryParams = new URLSearchParams({
-            pageSize: '20',
-            ...filters,
-          });
-
-          const response = await fetch(`/api/get_allfood?${queryParams.toString()}`);
-          if (!response.ok) throw new Error('Failed to fetch food items');
-
-          const data = await response.json();
-          setFoodItems(data.foodItems);
-        } catch (error) {
-          console.error('Error fetching food items:', error);
-        } finally {
-          setIsLoading(false);
-        }
-      };
-
       fetchFoodItems();
     }
   }, [filters, recommendedItems, externalLoading]);
