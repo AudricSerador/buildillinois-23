@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { dietaryPreferences, allergens, locationPreferences, dietaryGoalOptions } from "@/components/icon_legend";
+import { dietaryPreferences, allergens, locationPreferences } from "@/components/icon_legend";
 import Image from 'next/image';
 
 type Option = { value: string; label: string };
@@ -122,7 +122,7 @@ export default function Dashboard(): JSX.Element {
       case 'locations':
         return locationPreferences.map(({ label }) => ({ value: label, label }));
       case 'goal':
-        return dietaryGoalOptions;
+        return [];
       default:
         return [];
     }
@@ -155,7 +155,7 @@ export default function Dashboard(): JSX.Element {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p>You haven&apos;t uploaded any photos yet.</p>
+            <p>You haven&apos;t uploaded any photos yet.</p>    
             <Button className="mt-4">Upload a Photo</Button>
           </CardContent>
         </Card>

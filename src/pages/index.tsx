@@ -3,146 +3,84 @@ import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@/components/layout/auth.service";
 import { FoodCarousel } from "@/components/FoodCarousel";
-
-function urlBase64ToUint8Array(base64String: string) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding)
-    .replace(/\-/g, '+')
-    .replace(/_/g, '/');
-  
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  
-  for (let i = 0; i < rawData.length; ++i) {
-    outputArray[i] = rawData.charCodeAt(i);
-  }
-  return outputArray;
-}
-
-const subscribeToNotifications = async (userId: string | undefined) => {
-  console.log('VAPID public key:', process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    console.log("Push notifications are not supported in this browser.");
-    alert("Push notifications are not supported in your browser.");
-    return;
-  }
-
-  try {
-    console.log('Requesting notification permission');
-    const permission = await Notification.requestPermission();
-    console.log('Permission status:', permission);
-    if (permission !== 'granted') {
-      console.log('Notification permission denied');
-      alert("Notification permission denied. You won't receive push notifications.");
-      return;
-    }
-
-    console.log('Checking service worker registration');
-    const registrations = await navigator.serviceWorker.getRegistrations();
-    console.log('Service worker registrations:', registrations);
-
-    if (registrations.length === 0) {
-      console.log('No service worker registered, attempting to register');
-      const newRegistration = await navigator.serviceWorker.register('/service-worker.js');
-      console.log('New service worker registered:', newRegistration);
-    }
-
-    console.log('Waiting for service worker to be ready');
-    const registration = await navigator.serviceWorker.ready;
-    console.log('Service worker ready:', registration);
-
-    const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-    if (!vapidPublicKey) {
-      throw new Error('VAPID public key is not set');
-    }
-    
-    const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
-    
-    console.log('Subscribing to push notifications');
-    const subscription = await registration.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: convertedVapidKey
-    });
-    console.log('Push subscription:', subscription);
-
-    console.log('Sending subscription to server');
-    const response = await fetch('/api/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId, subscription }),
-    });
-    const responseData = await response.json();
-    console.log('Server response:', responseData);
-
-    alert("Successfully subscribed to push notifications!");
-  } catch (error) {
-    console.error('Failed to subscribe to push notifications:', error);
-    alert("Failed to subscribe to push notifications. Please try again later.");
-  }
-};
+import { FaSync } from 'react-icons/fa';
 
 export default function Home(): JSX.Element {
   const [isVisible, setIsVisible] = useState(false);
   const { user } = useAuth();
-  const [recommendations, setRecommendations] = useState([]);
+  const [recommendations, setRecommendations] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     setIsVisible(true);
     if (user) {
-      checkAndFetchRecommendations();
+      fetchRecommendations();
     }
   }, [user]);
 
-  const checkAndFetchRecommendations = () => {
-    const cachedRecommendations = localStorage.getItem('cachedRecommendations');
-    const cachedTimestamp = localStorage.getItem('recommendationsTimestamp');
-
-    if (cachedRecommendations && cachedTimestamp) {
-      const parsedRecommendations = JSON.parse(cachedRecommendations);
-      const timestamp = new Date(cachedTimestamp);
-      const now = new Date();
-
-      if (isSameMealTime(timestamp, now) && isSameDate(timestamp, now)) {
-        setRecommendations(parsedRecommendations);
-        return;
-      }
-    }
-
-    fetchRecommendations();
-  };
-
   const fetchRecommendations = async () => {
+    if (!user) return;
+    setIsLoading(true);
     try {
       const response = await fetch(`/api/recommendation/get_recommendations?userId=${user.id}`);
       if (!response.ok) throw new Error('Failed to fetch recommendations');
       const data = await response.json();
-      if (data.recommendations && Array.isArray(data.recommendations)) {
-        setRecommendations(data.recommendations);
-        localStorage.setItem('cachedRecommendations', JSON.stringify(data.recommendations));
-        localStorage.setItem('recommendationsTimestamp', new Date().toISOString());
+      console.log("Fetched recommendations data:", data);
+      if (Array.isArray(data.foodItems) && data.foodItems.length > 0) {
+        setRecommendations(data.foodItems);
+        console.log("Set recommendations:", data.foodItems);
       } else {
-        console.error('Invalid recommendations data:', data);
+        console.log("No recommendations in response");
         setRecommendations([]);
       }
     } catch (error) {
       console.error('Error fetching recommendations:', error);
       setRecommendations([]);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const isSameMealTime = (time1: Date, time2: Date) => {
-    const getMealTime = (date: Date) => {
-      const hours = date.getHours();
-      if (hours < 11) return 'breakfast';
-      if (hours < 15) return 'lunch';
-      return 'dinner';
-    };
-    return getMealTime(time1) === getMealTime(time2);
+  const handleRefresh = () => {
+    fetchRecommendations();
   };
 
-  const isSameDate = (date1: Date, date2: Date) => {
-    return date1.toDateString() === date2.toDateString();
+  const subscribeToNotifications = async (userId: string) => {
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        console.log('Notification permission denied');
+        return;
+      }
+
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+      });
+
+      const response = await fetch('/api/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          subscription: subscription,
+          userId: userId,
+        }),
+      });
+
+      if (response.ok) {
+        console.log('Subscription successful');
+      } else {
+        console.error('Subscription failed');
+      }
+    } catch (error) {
+      console.error('Error subscribing to notifications:', error);
+    }
   };
+
+  console.log("Rendering Home component, recommendations:", recommendations);
 
   return (
     <div className="flex flex-col items-stretch">
@@ -204,15 +142,30 @@ export default function Home(): JSX.Element {
       </div>
 
       <div className="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32">
-        {user && recommendations.length > 0 && (
+        {user && (
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-2xl font-bold">Recommended for You</h2>
+            <button
+              className="btn btn-sm btn-outline"
+              onClick={handleRefresh}
+              disabled={isLoading}
+              aria-label="Refresh recommendations"
+            >
+              <FaSync className={`mr-2 ${isLoading ? 'animate-spin' : ''}`} /> 
+              {isLoading ? 'Loading...' : 'Refresh'}
+            </button>
+          </div>
+        )}
+        {user && (
           <FoodCarousel 
-            title="Recommended for You" 
-            foodItems={recommendations}
+            title="Recommended for You"
+            recommendedItems={recommendations}
+            isLoading={isLoading}
           />
         )}
         <FoodCarousel 
           title="Most Popular" 
-          filters={{ ratingFilter: 'rated_only' }} 
+          filters={{ ratingFilter: 'rated_only' }}
         />
       </div>
     </div>

@@ -84,7 +84,7 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({
   loading, 
   futureDates,
   sortFields,
-  disableVerticalLayout = false // Default to false
+  disableVerticalLayout = false
 }) => {
   const renderRating = () => {
     if (!foodItem.reviewSummary) {
@@ -185,15 +185,9 @@ export const FoodItemCard: React.FC<FoodItemCardProps> = ({
       return <Badge variant="success">Serving Now</Badge>;
     } else if (isServingLater) {
       return <Badge variant="warning">Serving Later Today</Badge>;
-    } else if (foodItem.mealEntries && foodItem.mealEntries.length > 0) {
-      const futureDates = foodItem.mealEntries
-        .map(entry => entry.dateServed)
-        .filter(date => new Date(date) > new Date())
-        .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
-      
-      if (futureDates.length > 0) {
-        return <Badge variant="info">Serving on {new Date(futureDates[0]).toLocaleDateString()}</Badge>;
-      }
+    } else if (futureDates && futureDates.length > 0) {
+      const nextDate = new Date(futureDates[0]);
+      return <Badge variant="info">Serving on {nextDate.toLocaleDateString()}</Badge>;
     }
     return <Badge variant="destructive">Not Available</Badge>;
   };

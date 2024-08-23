@@ -5,42 +5,49 @@ import { FoodItem } from '@/utils/constants';
 
 interface FoodCarouselProps {
   title: string;
-  filters: {
+  filters?: {
     ratingFilter?: string;
     // Add other filters as needed
   };
+  recommendedItems?: FoodItem[];
+  isLoading?: boolean;
 }
 
-export function FoodCarousel({ title, filters }: FoodCarouselProps) {
+export function FoodCarousel({ title, filters, recommendedItems, isLoading: externalLoading }: FoodCarouselProps) {
   const [foodItems, setFoodItems] = useState<FoodItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(externalLoading !== undefined ? externalLoading : true);
 
   useEffect(() => {
-    const fetchFoodItems = async () => {
-      setIsLoading(true);
-      try {
-        const queryParams = new URLSearchParams({
-          pageSize: '20',
-          ...filters,
-        });
+    if (recommendedItems) {
+      setFoodItems(recommendedItems);
+      setIsLoading(false);
+    } else {
+      const fetchFoodItems = async () => {
+        setIsLoading(true);
+        try {
+          const queryParams = new URLSearchParams({
+            pageSize: '20',
+            ...filters,
+          });
 
-        const response = await fetch(`/api/get_allfood?${queryParams.toString()}`);
-        if (!response.ok) throw new Error('Failed to fetch food items');
+          const response = await fetch(`/api/get_allfood?${queryParams.toString()}`);
+          if (!response.ok) throw new Error('Failed to fetch food items');
 
-        const data = await response.json();
-        setFoodItems(data.foodItems);
-      } catch (error) {
-        console.error('Error fetching food items:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+          const data = await response.json();
+          setFoodItems(data.foodItems);
+        } catch (error) {
+          console.error('Error fetching food items:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      };
 
-    fetchFoodItems();
-  }, [filters]);
+      fetchFoodItems();
+    }
+  }, [filters, recommendedItems, externalLoading]);
 
   return (
-    <div className="my-8 px-4 sm:px-0">
+    <div className="my-8">
       <h2 className="text-2xl font-custombold mb-4">{title}</h2>
       <div className="relative">
         <Carousel className="w-full">
@@ -59,9 +66,9 @@ export function FoodCarousel({ title, filters }: FoodCarouselProps) {
               : foodItems.map((foodItem) => (
                   <CarouselItem key={foodItem.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
                     <FoodItemCard 
-                      foodItem={foodItem} 
+                      foodItem={foodItem}
                       loading={false} 
-                      futureDates={[]} 
+                      futureDates={foodItem.mealEntries?.map(entry => entry.dateServed) || []}
                       sortFields={[]}
                       disableVerticalLayout={true}
                     />
