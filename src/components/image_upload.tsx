@@ -34,6 +34,12 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, fo
     }
   };
 
+  const handleClose = () => {
+    if (!isUploading) {
+      onClose();
+    }
+  };
+
   const handleUpload = () => {
     if (!image) {
       toast.error('Please select an image to upload.');
@@ -95,7 +101,6 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, fo
             <input
               type="file"
               accept="image/*"
-              capture="environment"
               onChange={handleImageChange}
               className="hidden"
               id="file-upload"
@@ -103,7 +108,7 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, fo
             <label htmlFor="file-upload" className="cursor-pointer">
               <div className="border-dashed border-4 border-gray-200 rounded-lg p-4 text-center">
                 <Image height={100} width={100} src="/images/upload.png" alt="Upload" className="mx-auto mb-2" />
-                <p>Take a photo or select from gallery</p>
+                <p>Select an image from your device</p>
               </div>
             </label>
           </div>
@@ -127,15 +132,20 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({ isOpen, onClose, fo
           </span>
         </div>
         <div className="modal-action">
-          <button 
-            className={`btn btn-primary ${isUploading ? 'btn-disabled' : ''}`} 
-            onClick={handleUpload}
+          <button
+            className="btn btn-ghost"
+            onClick={handleClose}
             disabled={isUploading}
           >
-            {isUploading && <span className="loading loading-spinner loading-sm mr-2"></span>}
+            Close
+          </button>
+          <button
+            className={`btn btn-primary ${isUploading ? 'loading' : ''}`}
+            onClick={handleUpload}
+            disabled={!image || isUploading}
+          >
             {isUploading ? 'Uploading...' : 'Upload'}
           </button>
-          <button className="btn" onClick={onClose}>Close</button>
         </div>
       </div>
     </div>
