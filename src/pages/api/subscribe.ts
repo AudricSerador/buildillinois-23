@@ -27,7 +27,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Create or update the push subscription
-      await prisma.pushSubscription.upsert({
+      const pushSubscription = await prisma.pushSubscription.upsert({
         where: {
           userId_endpoint: {
             userId: userId,
@@ -63,9 +63,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
       });
     } catch (error) {
-      console.error('Error handling subscription:', error);
+      console.error('Detailed error:', error);
+      if (error instanceof Error) {
+        console.error('Error message:', error.message);
+        console.error('Error stack:', error.stack);
+      }
       res.status(500).json({ 
         error: 'Failed to process subscription',
+        details: error instanceof Error ? error.message : String(error),
         toast: {
           type: 'error',
           message: 'Failed to subscribe to push notifications. Please try again.'

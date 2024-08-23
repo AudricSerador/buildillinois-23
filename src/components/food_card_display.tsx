@@ -12,7 +12,7 @@ import Image from 'next/image';
 interface FoodItemCardProps {
   foodItem: FoodItem;
   loading: boolean;
-  futureDates: string[];
+  futureDates?: string[];
   sortFields?: { field: string; order: 'asc' | 'desc' }[];
   disableVerticalLayout?: boolean;
 }
@@ -82,7 +82,7 @@ const nutrientLabels: { [key: string]: string } = {
 export const FoodItemCard: React.FC<FoodItemCardProps> = ({ 
   foodItem, 
   loading, 
-  futureDates, 
+  futureDates,
   sortFields,
   disableVerticalLayout = false // Default to false
 }) => {

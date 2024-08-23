@@ -4,8 +4,23 @@ import Image from "next/image";
 import { useAuth } from "@/components/layout/auth.service";
 import { FoodCarousel } from "@/components/FoodCarousel";
 
+function urlBase64ToUint8Array(base64String: string) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/\-/g, '+')
+    .replace(/_/g, '/');
+  
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
 const subscribeToNotifications = async (userId: string | undefined) => {
-  console.log('subscribeToNotifications called');
+  console.log('VAPID public key:', process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY);
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     console.log("Push notifications are not supported in this browser.");
     alert("Push notifications are not supported in your browser.");
@@ -22,14 +37,31 @@ const subscribeToNotifications = async (userId: string | undefined) => {
       return;
     }
 
-    console.log('Getting service worker registration');
-    const registration = await navigator.serviceWorker.ready;
-    console.log('Service worker registration:', registration);
+    console.log('Checking service worker registration');
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    console.log('Service worker registrations:', registrations);
 
+    if (registrations.length === 0) {
+      console.log('No service worker registered, attempting to register');
+      const newRegistration = await navigator.serviceWorker.register('/service-worker.js');
+      console.log('New service worker registered:', newRegistration);
+    }
+
+    console.log('Waiting for service worker to be ready');
+    const registration = await navigator.serviceWorker.ready;
+    console.log('Service worker ready:', registration);
+
+    const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+    if (!vapidPublicKey) {
+      throw new Error('VAPID public key is not set');
+    }
+    
+    const convertedVapidKey = urlBase64ToUint8Array(vapidPublicKey);
+    
     console.log('Subscribing to push notifications');
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
-      applicationServerKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+      applicationServerKey: convertedVapidKey
     });
     console.log('Push subscription:', subscription);
 
@@ -52,10 +84,65 @@ const subscribeToNotifications = async (userId: string | undefined) => {
 export default function Home(): JSX.Element {
   const [isVisible, setIsVisible] = useState(false);
   const { user } = useAuth();
+  const [recommendations, setRecommendations] = useState([]);
 
   useEffect(() => {
     setIsVisible(true);
-  }, []);
+    if (user) {
+      checkAndFetchRecommendations();
+    }
+  }, [user]);
+
+  const checkAndFetchRecommendations = () => {
+    const cachedRecommendations = localStorage.getItem('cachedRecommendations');
+    const cachedTimestamp = localStorage.getItem('recommendationsTimestamp');
+
+    if (cachedRecommendations && cachedTimestamp) {
+      const parsedRecommendations = JSON.parse(cachedRecommendations);
+      const timestamp = new Date(cachedTimestamp);
+      const now = new Date();
+
+      if (isSameMealTime(timestamp, now) && isSameDate(timestamp, now)) {
+        setRecommendations(parsedRecommendations);
+        return;
+      }
+    }
+
+    fetchRecommendations();
+  };
+
+  const fetchRecommendations = async () => {
+    try {
+      const response = await fetch(`/api/recommendation/get_recommendations?userId=${user.id}`);
+      if (!response.ok) throw new Error('Failed to fetch recommendations');
+      const data = await response.json();
+      if (data.recommendations && Array.isArray(data.recommendations)) {
+        setRecommendations(data.recommendations);
+        localStorage.setItem('cachedRecommendations', JSON.stringify(data.recommendations));
+        localStorage.setItem('recommendationsTimestamp', new Date().toISOString());
+      } else {
+        console.error('Invalid recommendations data:', data);
+        setRecommendations([]);
+      }
+    } catch (error) {
+      console.error('Error fetching recommendations:', error);
+      setRecommendations([]);
+    }
+  };
+
+  const isSameMealTime = (time1: Date, time2: Date) => {
+    const getMealTime = (date: Date) => {
+      const hours = date.getHours();
+      if (hours < 11) return 'breakfast';
+      if (hours < 15) return 'lunch';
+      return 'dinner';
+    };
+    return getMealTime(time1) === getMealTime(time2);
+  };
+
+  const isSameDate = (date1: Date, date2: Date) => {
+    return date1.toDateString() === date2.toDateString();
+  };
 
   return (
     <div className="flex flex-col items-stretch">
@@ -117,6 +204,12 @@ export default function Home(): JSX.Element {
       </div>
 
       <div className="px-4 sm:px-8 md:px-16 lg:px-24 xl:px-32">
+        {user && recommendations.length > 0 && (
+          <FoodCarousel 
+            title="Recommended for You" 
+            foodItems={recommendations}
+          />
+        )}
         <FoodCarousel 
           title="Most Popular" 
           filters={{ ratingFilter: 'rated_only' }} 

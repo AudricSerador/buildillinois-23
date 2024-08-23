@@ -14,7 +14,7 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-ALLOWED_ORIGINS = ['http://localhost:3000', 'https://illineats.com']
+ALLOWED_ORIGINS = ['http://localhost:8080', 'https://illineats.com']
 
 def generate_recommendations(user_id):
     # Fetch user data
